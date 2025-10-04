@@ -1,5 +1,7 @@
 notes/
 .claude/
 .vscode/
+noctalia-shell-main/
+
 CLAUDE.md
 .env
