@@ -2,14 +2,31 @@ import QtQuick
 import Quickshell
 
 import "Commons"
+import "Services"
 import "Modules/Bar"
 
 ShellRoot {
   id: root
 
   Component.onCompleted: {
-    Logger.log("Shell", "Minimalist Hyprland Shell started")
-    Logger.log("Shell", "Bar launched")
+    Logger.log("Shell", "Shell started successfully")
+
+    // Test CompositorService connection
+    CompositorService.workspaceChanged.connect(() => {
+      Logger.log("Shell", `Workspaces updated: ${CompositorService.workspaces.count} total`)
+
+      // Log workspace details
+      for (var i = 0; i < CompositorService.workspaces.count; i++) {
+        const ws = CompositorService.workspaces.get(i)
+        Logger.log("Shell", `  WS ${ws.idx}: "${ws.name}" on ${ws.output} - focused=${ws.isFocused} occupied=${ws.isOccupied}`)
+      }
+
+      // Log focused window title
+      const focusedTitle = CompositorService.getFocusedWindowTitle()
+      if (focusedTitle) {
+        Logger.log("Shell", `  Focused window: "${focusedTitle}"`)
+      }
+    })
   }
 
   // Floating top bar on all monitors

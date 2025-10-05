@@ -1,0 +1,289 @@
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+
+import "../../../Commons"
+import "../../../Services"
+
+Item {
+    id: root
+
+    // ===== Properties from Bar =====
+    required property var screen      // ShellScreen object
+    required property real scaling    // DPI scaling
+
+    // ===== Local state =====
+    property ListModel localWorkspaces: ListModel {}  // Filtered for this monitor
+    property bool effectsActive: false
+    property real masterProgress: 0.0
+    property color effectColor: Theme.accent
+
+    // Wheel scroll state
+    property int wheelAccumulatedDelta: 0
+    property bool wheelCooldown: false
+
+    // ===== Sizing =====
+    readonly property int pillSize: Math.round(12 * scaling)  // Compact pill size
+    readonly property int pillSpacing: Math.round(Theme.spacing_xs * scaling)
+
+    implicitWidth: computeWidth()
+    implicitHeight: Math.round(Theme.bar_height * scaling)
+
+    // ===== Computed dimensions =====
+    function getPillWidth(ws) {
+        const base = pillSize
+        return ws.isFocused ? (base * 2.2) : base  // 2.2x wider when focused
+    }
+
+    function computeWidth() {
+        let total = 0
+        for (var i = 0; i < localWorkspaces.count; i++) {
+            total += getPillWidth(localWorkspaces.get(i))
+        }
+        total += Math.max(localWorkspaces.count - 1, 0) * pillSpacing
+        return Math.round(total)
+    }
+
+    // ===== Initialisation =====
+    Component.onCompleted: {
+        refreshWorkspaces()
+    }
+
+    onScreenChanged: refreshWorkspaces()
+
+    // ===== Watch for workspace changes =====
+    Connections {
+        target: CompositorService
+        function onWorkspaceChanged() {
+            refreshWorkspaces()
+            updateWorkspaceFocus()
+        }
+    }
+
+    // ===== Per-monitor workspace filtering =====
+    function refreshWorkspaces() {
+        localWorkspaces.clear()
+
+        if (!screen) return
+
+        // Collect all active/occupied workspaces for this monitor
+        const activeWorkspaces = []
+        for (var i = 0; i < CompositorService.workspaces.count; i++) {
+            const ws = CompositorService.workspaces.get(i)
+            if (ws.output.toLowerCase() === screen.name.toLowerCase()) {
+                if (ws.isOccupied || ws.isFocused) {
+                    activeWorkspaces.push(ws)
+                }
+            }
+        }
+
+        // Sort by workspace index (ascending order: 1, 2, 3, 7, 9, etc.)
+        activeWorkspaces.sort(function(a, b) {
+            return a.idx - b.idx
+        })
+
+        // Always show at least 4 slots, but expand if more active workspaces exist
+        const minSlots = 4
+        const totalSlots = Math.max(minSlots, activeWorkspaces.length)
+
+        for (var slot = 0; slot < totalSlots; slot++) {
+            if (slot < activeWorkspaces.length) {
+                // Fill slot with active workspace
+                localWorkspaces.append(activeWorkspaces[slot])
+            } else {
+                // Empty placeholder for unused slot (only when < 4 active workspaces)
+                localWorkspaces.append({
+                    "id": -1,
+                    "idx": -1,  // No workspace number (will show as empty circle)
+                    "name": "",
+                    "output": screen.name,
+                    "isActive": false,
+                    "isFocused": false,
+                    "isUrgent": false,
+                    "isOccupied": false
+                })
+            }
+        }
+    }
+
+    // ===== Focus change animation =====
+    function updateWorkspaceFocus() {
+        for (var i = 0; i < localWorkspaces.count; i++) {
+            const ws = localWorkspaces.get(i)
+            if (ws.isFocused) {
+                triggerBurstEffect()
+                break
+            }
+        }
+    }
+
+    function triggerBurstEffect() {
+        effectColor = Theme.accent
+        burstAnimation.restart()
+    }
+
+    SequentialAnimation {
+        id: burstAnimation
+        PropertyAction { target: root; property: "effectsActive"; value: true }
+        NumberAnimation {
+            target: root
+            property: "masterProgress"
+            from: 0.0
+            to: 1.0
+            duration: Theme.duration_slow * 2
+            easing.type: Easing.OutQuint
+        }
+        PropertyAction { target: root; property: "effectsActive"; value: false }
+        PropertyAction { target: root; property: "masterProgress"; value: 0.0 }
+    }
+
+    // ===== Workspace switching helpers =====
+    function getFocusedLocalIndex() {
+        for (var i = 0; i < localWorkspaces.count; i++) {
+            if (localWorkspaces.get(i).isFocused) {
+                return i
+            }
+        }
+        return -1
+    }
+
+    function switchByOffset(offset) {
+        if (localWorkspaces.count === 0) return
+
+        var current = getFocusedLocalIndex()
+        if (current < 0) current = 0
+
+        var next = (current + offset) % localWorkspaces.count
+        if (next < 0) next = localWorkspaces.count - 1
+
+        const ws = localWorkspaces.get(next)
+        if (ws && ws.idx !== undefined) {
+            CompositorService.switchToWorkspace(ws.idx)
+        }
+    }
+
+    // ===== Wheel scroll support =====
+    Timer {
+        id: wheelDebounce
+        interval: 150
+        repeat: false
+        onTriggered: {
+            root.wheelCooldown = false
+            root.wheelAccumulatedDelta = 0
+        }
+    }
+
+    WheelHandler {
+        target: root
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        onWheel: function(event) {
+            if (root.wheelCooldown) return
+
+            var delta = event.angleDelta.y
+            root.wheelAccumulatedDelta += delta
+
+            if (Math.abs(root.wheelAccumulatedDelta) >= 120) {  // One notch
+                var direction = root.wheelAccumulatedDelta > 0 ? -1 : 1
+                root.switchByOffset(direction)
+                root.wheelCooldown = true
+                wheelDebounce.restart()
+                root.wheelAccumulatedDelta = 0
+                event.accepted = true
+            }
+        }
+    }
+
+    // ===== UI: Pill-style workspace indicators =====
+    Row {
+        anchors.verticalCenter: parent.verticalCenter
+        spacing: pillSpacing
+
+        Repeater {
+            model: localWorkspaces
+
+            Item {
+                id: pillContainer
+                width: root.getPillWidth(model)
+                height: root.pillSize
+
+                Rectangle {
+                    id: pill
+                    anchors.fill: parent
+                    radius: width * 0.5  // Fully rounded
+
+                    color: {
+                        if (model.isUrgent) return Theme.urgent
+                        if (model.isFocused) return Theme.accent
+                        if (model.isOccupied) return Theme.fg
+                        return Qt.alpha(Theme.fg_dim, 0.3)
+                    }
+
+                    scale: model.isFocused ? 1.0 : 0.9
+
+                    // Show workspace number on focused pill
+                    Text {
+                        visible: model.isFocused
+                        anchors.centerIn: parent
+                        text: model.idx
+                        font.family: Theme.font_family
+                        font.pixelSize: Math.round(pillContainer.height * 0.6)
+                        font.weight: Font.DemiBold
+                        color: Theme.bg  // Contrasting colour
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            CompositorService.switchToWorkspace(model.idx)
+                        }
+                    }
+
+                    // Smooth animations
+                    Behavior on width {
+                        NumberAnimation {
+                            duration: Theme.duration_normal
+                            easing.type: Easing.OutBack
+                        }
+                    }
+
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: Theme.duration_fast
+                            easing.type: Easing.InOutCubic
+                        }
+                    }
+
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: Theme.duration_normal
+                            easing.type: Easing.OutBack
+                        }
+                    }
+                }
+
+                // Burst effect (animated ring on focus)
+                Rectangle {
+                    id: burst
+                    anchors.centerIn: pillContainer
+                    width: pillContainer.width + 12 * root.masterProgress
+                    height: pillContainer.height + 12 * root.masterProgress
+                    radius: width * 0.5
+                    color: "transparent"
+                    border.color: root.effectColor
+                    border.width: Math.max(1, Math.round((2 + 4 * (1.0 - root.masterProgress)) * scaling))
+                    opacity: root.effectsActive && model.isFocused ? (1.0 - root.masterProgress) * 0.7 : 0
+                    visible: root.effectsActive && model.isFocused
+                }
+
+                // Smooth container resize
+                Behavior on width {
+                    NumberAnimation {
+                        duration: Theme.duration_normal
+                        easing.type: Easing.OutBack
+                    }
+                }
+            }
+        }
+    }
+}
