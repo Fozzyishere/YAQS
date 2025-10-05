@@ -31,22 +31,22 @@ Item {
 
     // ===== Computed dimensions =====
     function getPillWidth(ws) {
-        const base = pillSize
-        return ws.isFocused ? (base * 2.2) : base  // 2.2x wider when focused
+        const base = pillSize;
+        return ws.isFocused ? (base * 2.2) : base;  // 2.2x wider when focused
     }
 
     function computeWidth() {
-        let total = 0
+        let total = 0;
         for (var i = 0; i < localWorkspaces.count; i++) {
-            total += getPillWidth(localWorkspaces.get(i))
+            total += getPillWidth(localWorkspaces.get(i));
         }
-        total += Math.max(localWorkspaces.count - 1, 0) * pillSpacing
-        return Math.round(total)
+        total += Math.max(localWorkspaces.count - 1, 0) * pillSpacing;
+        return Math.round(total);
     }
 
     // ===== Initialisation =====
     Component.onCompleted: {
-        refreshWorkspaces()
+        refreshWorkspaces();
     }
 
     onScreenChanged: refreshWorkspaces()
@@ -55,53 +55,55 @@ Item {
     Connections {
         target: CompositorService
         function onWorkspaceChanged() {
-            refreshWorkspaces()
-            updateWorkspaceFocus()
+            refreshWorkspaces();
+            updateWorkspaceFocus();
         }
     }
 
     // ===== Per-monitor workspace filtering =====
     function refreshWorkspaces() {
-        localWorkspaces.clear()
+        localWorkspaces.clear();
 
-        if (!screen) return
+        if (!screen)
+            return;
 
         // Collect all active/occupied workspaces for this monitor
-        const activeWorkspaces = []
+        const activeWorkspaces = [];
         for (var i = 0; i < CompositorService.workspaces.count; i++) {
-            const ws = CompositorService.workspaces.get(i)
+            const ws = CompositorService.workspaces.get(i);
             if (ws.output.toLowerCase() === screen.name.toLowerCase()) {
                 if (ws.isOccupied || ws.isFocused) {
-                    activeWorkspaces.push(ws)
+                    activeWorkspaces.push(ws);
                 }
             }
         }
 
         // Sort by workspace index (ascending order: 1, 2, 3, 7, 9, etc.)
-        activeWorkspaces.sort(function(a, b) {
-            return a.idx - b.idx
-        })
+        activeWorkspaces.sort(function (a, b) {
+            return a.idx - b.idx;
+        });
 
         // Always show at least 4 slots, but expand if more active workspaces exist
-        const minSlots = 4
-        const totalSlots = Math.max(minSlots, activeWorkspaces.length)
+        const minSlots = 4;
+        const totalSlots = Math.max(minSlots, activeWorkspaces.length);
 
         for (var slot = 0; slot < totalSlots; slot++) {
             if (slot < activeWorkspaces.length) {
                 // Fill slot with active workspace
-                localWorkspaces.append(activeWorkspaces[slot])
+                localWorkspaces.append(activeWorkspaces[slot]);
             } else {
                 // Empty placeholder for unused slot (only when < 4 active workspaces)
                 localWorkspaces.append({
                     "id": -1,
-                    "idx": -1,  // No workspace number (will show as empty circle)
+                    "idx": -1  // No workspace number (will show as empty circle)
+                    ,
                     "name": "",
                     "output": screen.name,
                     "isActive": false,
                     "isFocused": false,
                     "isUrgent": false,
                     "isOccupied": false
-                })
+                });
             }
         }
     }
@@ -109,22 +111,26 @@ Item {
     // ===== Focus change animation =====
     function updateWorkspaceFocus() {
         for (var i = 0; i < localWorkspaces.count; i++) {
-            const ws = localWorkspaces.get(i)
+            const ws = localWorkspaces.get(i);
             if (ws.isFocused) {
-                triggerBurstEffect()
-                break
+                triggerBurstEffect();
+                break;
             }
         }
     }
 
     function triggerBurstEffect() {
-        effectColor = Theme.accent
-        burstAnimation.restart()
+        effectColor = Theme.accent;
+        burstAnimation.restart();
     }
 
     SequentialAnimation {
         id: burstAnimation
-        PropertyAction { target: root; property: "effectsActive"; value: true }
+        PropertyAction {
+            target: root
+            property: "effectsActive"
+            value: true
+        }
         NumberAnimation {
             target: root
             property: "masterProgress"
@@ -133,32 +139,42 @@ Item {
             duration: Theme.duration_slow * 2
             easing.type: Easing.OutQuint
         }
-        PropertyAction { target: root; property: "effectsActive"; value: false }
-        PropertyAction { target: root; property: "masterProgress"; value: 0.0 }
+        PropertyAction {
+            target: root
+            property: "effectsActive"
+            value: false
+        }
+        PropertyAction {
+            target: root
+            property: "masterProgress"
+            value: 0.0
+        }
     }
 
     // ===== Workspace switching helpers =====
     function getFocusedLocalIndex() {
         for (var i = 0; i < localWorkspaces.count; i++) {
             if (localWorkspaces.get(i).isFocused) {
-                return i
+                return i;
             }
         }
-        return -1
+        return -1;
     }
 
     function switchByOffset(offset) {
-        if (localWorkspaces.count === 0) return
+        if (localWorkspaces.count === 0)
+            return;
+        var current = getFocusedLocalIndex();
+        if (current < 0)
+            current = 0;
 
-        var current = getFocusedLocalIndex()
-        if (current < 0) current = 0
+        var next = (current + offset) % localWorkspaces.count;
+        if (next < 0)
+            next = localWorkspaces.count - 1;
 
-        var next = (current + offset) % localWorkspaces.count
-        if (next < 0) next = localWorkspaces.count - 1
-
-        const ws = localWorkspaces.get(next)
+        const ws = localWorkspaces.get(next);
         if (ws && ws.idx !== undefined) {
-            CompositorService.switchToWorkspace(ws.idx)
+            CompositorService.switchToWorkspace(ws.idx);
         }
     }
 
@@ -168,27 +184,28 @@ Item {
         interval: 150
         repeat: false
         onTriggered: {
-            root.wheelCooldown = false
-            root.wheelAccumulatedDelta = 0
+            root.wheelCooldown = false;
+            root.wheelAccumulatedDelta = 0;
         }
     }
 
     WheelHandler {
         target: root
         acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-        onWheel: function(event) {
-            if (root.wheelCooldown) return
+        onWheel: function (event) {
+            if (root.wheelCooldown)
+                return;
+            var delta = event.angleDelta.y;
+            root.wheelAccumulatedDelta += delta;
 
-            var delta = event.angleDelta.y
-            root.wheelAccumulatedDelta += delta
-
-            if (Math.abs(root.wheelAccumulatedDelta) >= 120) {  // One notch
-                var direction = root.wheelAccumulatedDelta > 0 ? -1 : 1
-                root.switchByOffset(direction)
-                root.wheelCooldown = true
-                wheelDebounce.restart()
-                root.wheelAccumulatedDelta = 0
-                event.accepted = true
+            if (Math.abs(root.wheelAccumulatedDelta) >= 120) {
+                // One notch
+                var direction = root.wheelAccumulatedDelta > 0 ? -1 : 1;
+                root.switchByOffset(direction);
+                root.wheelCooldown = true;
+                wheelDebounce.restart();
+                root.wheelAccumulatedDelta = 0;
+                event.accepted = true;
             }
         }
     }
@@ -212,10 +229,13 @@ Item {
                     radius: width * 0.5  // Fully rounded
 
                     color: {
-                        if (model.isUrgent) return Theme.urgent
-                        if (model.isFocused) return Theme.accent
-                        if (model.isOccupied) return Theme.fg
-                        return Qt.alpha(Theme.fg_dim, 0.3)
+                        if (model.isUrgent)
+                            return Theme.urgent;
+                        if (model.isFocused)
+                            return Theme.accent;
+                        if (model.isOccupied)
+                            return Theme.fg;
+                        return Qt.alpha(Theme.fg_dim, 0.3);
                     }
 
                     scale: model.isFocused ? 1.0 : 0.9
@@ -235,7 +255,7 @@ Item {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            CompositorService.switchToWorkspace(model.idx)
+                            CompositorService.switchToWorkspace(model.idx);
                         }
                     }
 
