@@ -4,6 +4,8 @@ import Quickshell
 import Quickshell.Wayland
 
 import "../../Commons"
+import "../../Widgets"
+import "Widgets"
 
 Variants {
   model: Quickshell.screens
@@ -69,6 +71,35 @@ Variants {
             id: leftSection
             Layout.alignment: Qt.AlignLeft
             spacing: Math.round(Theme.spacing_s * scaling)
+
+            // App launcher
+            AppLauncher {
+              scaling: panel.scaling
+            }
+
+            // Clock
+            Clock {
+              scaling: panel.scaling
+            }
+
+            // Separator
+            Rectangle {
+              width: 1
+              height: Math.round(Theme.bar_height * 0.5 * scaling)
+              color: Theme.fg_dim
+              opacity: 0.3
+            }
+
+            // WindowTitle placeholder
+            Text {
+              text: "Desktop"
+              font.family: Theme.font_family
+              font.pixelSize: Math.round(Theme.font_size * scaling)
+              color: Theme.fg_dim
+              elide: Text.ElideRight
+              Layout.maximumWidth: 400
+            }
+
           }
 
           Item { Layout.fillWidth: true }
@@ -85,6 +116,11 @@ Variants {
             id: rightSection
             Layout.alignment: Qt.AlignRight
             spacing: Math.round(Theme.spacing_s * scaling)
+
+            // Power menu
+            PowerMenu {
+              scaling: panel.scaling
+            }
           }
         }
       }
