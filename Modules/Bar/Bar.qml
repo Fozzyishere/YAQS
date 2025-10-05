@@ -1,0 +1,94 @@
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import Quickshell.Wayland
+
+import "../../Commons"
+
+Variants {
+  model: Quickshell.screens
+
+  delegate: Component {
+    PanelWindow {
+      id: panel
+
+      required property var modelData
+
+      property real scaling: Scaling.getScreenScale(modelData)
+
+      Connections {
+        target: Scaling
+        function onScaleChanged(screenName, scale) {
+          if (modelData && screenName === modelData.name) {
+            scaling = scale
+          }
+        }
+      }
+
+      screen: modelData
+      visible: true
+      color: "transparent"
+
+      anchors {
+        top: true
+        left: true
+        right: true
+      }
+
+      margins {
+        top: Math.round(Theme.bar_margin_top * scaling)
+        left: Math.round(Theme.bar_margin_side * scaling)
+        right: Math.round(Theme.bar_margin_side * scaling)
+        bottom: Math.round(Theme.bar_margin_bottom * scaling)
+      }
+
+      implicitHeight: Math.round(Theme.bar_height * scaling)
+
+      WlrLayershell.namespace: "minimalist-bar"
+
+      Component.onCompleted: {
+        Logger.log("Bar", `Created on "${modelData.name}" (${modelData.width}x${modelData.height}, scale=${scaling})`)
+      }
+
+      Item {
+        anchors.fill: parent
+        clip: true
+
+        Rectangle {
+          anchors.fill: parent
+          color: Theme.bg
+          radius: Theme.radius_m
+
+        RowLayout {
+          anchors.fill: parent
+          anchors.leftMargin: Math.round(Theme.spacing_m * scaling)
+          anchors.rightMargin: Math.round(Theme.spacing_m * scaling)
+          spacing: Math.round(Theme.spacing_m * scaling)
+
+          RowLayout {
+            id: leftSection
+            Layout.alignment: Qt.AlignLeft
+            spacing: Math.round(Theme.spacing_s * scaling)
+          }
+
+          Item { Layout.fillWidth: true }
+
+          RowLayout {
+            id: centerSection
+            Layout.alignment: Qt.AlignHCenter
+            spacing: Math.round(Theme.spacing_xs * scaling)
+          }
+
+          Item { Layout.fillWidth: true }
+
+          RowLayout {
+            id: rightSection
+            Layout.alignment: Qt.AlignRight
+            spacing: Math.round(Theme.spacing_s * scaling)
+          }
+        }
+      }
+      }
+    }
+  }
+}

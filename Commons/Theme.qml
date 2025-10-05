@@ -8,10 +8,10 @@ Singleton {
   id: root
 
   // ===== Spacing =====
-  readonly property int spacing_xs: 4
-  readonly property int spacing_s: 8
-  readonly property int spacing_m: 12
-  readonly property int spacing_l: 16
+  readonly property int spacing_xs: 2
+  readonly property int spacing_s: 4
+  readonly property int spacing_m: 6
+  readonly property int spacing_l: 8
 
   // ===== Radius =====
   readonly property int radius_s: 4
@@ -22,8 +22,13 @@ Singleton {
   readonly property int duration_normal: 200
 
   // ===== Bar Configuration =====
-  readonly property int bar_height: 32
+  readonly property int bar_height: 22
   readonly property string bar_position: "top"
+
+  // Bar margins
+  readonly property int bar_margin_top: spacing_s
+  readonly property int bar_margin_side: spacing_xs
+  readonly property int bar_margin_bottom: spacing_s
 
   // ===== Typography =====
   readonly property string font_family: "Inter"
