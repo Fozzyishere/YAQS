@@ -83,12 +83,32 @@ Item {
             return a.idx - b.idx;
         });
 
-        // Always show at least 4 slots, but expand if more active workspaces exist
+        // Slot limits: minimum 4, maximum 10
         const minSlots = 4;
-        const totalSlots = Math.max(minSlots, activeWorkspaces.length);
+        const maxSlots = 10;
+        const totalSlots = Math.min(Math.max(minSlots, activeWorkspaces.length), maxSlots);
 
+        // Build display list
         for (var slot = 0; slot < totalSlots; slot++) {
-            if (slot < activeWorkspaces.length) {
+            if (activeWorkspaces.length > maxSlots && slot === maxSlots - 1) {
+                // Special case: More than 10 workspaces, slot 10 needs smart selection
+                // Find if there's a focused workspace beyond the first 9
+                var focusedWorkspace = null;
+                for (var i = maxSlots - 1; i < activeWorkspaces.length; i++) {
+                    if (activeWorkspaces[i].isFocused) {
+                        focusedWorkspace = activeWorkspaces[i];
+                        break;
+                    }
+                }
+
+                // If there's a focused workspace in the overflow range (10+), show it
+                // Otherwise, show the highest workspace
+                if (focusedWorkspace) {
+                    localWorkspaces.append(focusedWorkspace);
+                } else {
+                    localWorkspaces.append(activeWorkspaces[activeWorkspaces.length - 1]);
+                }
+            } else if (slot < activeWorkspaces.length) {
                 // Fill slot with active workspace
                 localWorkspaces.append(activeWorkspaces[slot]);
             } else {
