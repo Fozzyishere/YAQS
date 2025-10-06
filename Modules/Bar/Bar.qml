@@ -110,6 +110,16 @@ Variants {
                             Layout.alignment: Qt.AlignRight
                             spacing: Math.round(Theme.spacing_s * scaling)
 
+                            // Audio widget
+                            Audio {
+                                scaling: panel.scaling
+                            }
+
+                            // Battery widget
+                            Battery {
+                                scaling: panel.scaling
+                            }
+
                             // Power menu
                             PowerMenu {
                                 scaling: panel.scaling

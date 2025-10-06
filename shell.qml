@@ -27,6 +27,29 @@ ShellRoot {
         Logger.log("Shell", `  Focused window: "${focusedTitle}"`)
       }
     })
+
+    // Test BatteryService connection
+    BatteryService.batteryChanged.connect(() => {
+      Logger.log("Shell", 
+                `Battery: ${BatteryService.batteryPercent}%, ` +
+                `charging=${BatteryService.isCharging}, ` +
+                `hasBattery=${BatteryService.hasBattery}, ` +
+                `icon=${BatteryService.getIcon()}`);
+    })
+
+    // Test AudioService connection
+    AudioService.volumeChanged.connect(() => {
+      Logger.log("Shell", 
+                `Audio volume: ${AudioService.volume}%, ` +
+                `muted=${AudioService.muted}, ` +
+                `ready=${AudioService.isReady}, ` +
+                `icon=${AudioService.getIcon()}`);
+    })
+
+    AudioService.mutedChanged.connect(() => {
+      Logger.log("Shell", 
+                `Audio muted changed: ${AudioService.muted}`);
+    })
   }
 
   // Floating top bar on all monitors
