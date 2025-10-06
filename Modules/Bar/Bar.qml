@@ -47,7 +47,7 @@ Variants {
 
             implicitHeight: Math.round(Theme.bar_height * scaling)
 
-            WlrLayershell.namespace: "minimalist-bar"
+            WlrLayershell.namespace: "YAQS"
 
             Component.onCompleted: {
                 Logger.log("Bar", `Created on "${modelData.name}" (${modelData.width}x${modelData.height}, scale=${scaling})`);
@@ -60,6 +60,8 @@ Variants {
                 Rectangle {
                     anchors.fill: parent
                     color: Theme.bg_alt
+                    border.color: Theme.fg_dim
+                    border.width: 2
                     radius: Theme.radius_m
 
                     // Left and right sections in RowLayout
