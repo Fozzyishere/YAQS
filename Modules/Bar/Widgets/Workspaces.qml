@@ -17,6 +17,7 @@ Item {
     property bool effectsActive: false
     property real masterProgress: 0.0
     property color effectColor: Theme.accent
+    property int lastFocusedWorkspaceId: -1  // Track last focused workspace to prevent unnecessary animations
 
     // Wheel scroll state
     property int wheelAccumulatedDelta: 0
@@ -133,7 +134,11 @@ Item {
         for (var i = 0; i < localWorkspaces.count; i++) {
             const ws = localWorkspaces.get(i);
             if (ws.isFocused) {
-                triggerBurstEffect();
+                // Only trigger burst effect if workspace actually changed
+                if (lastFocusedWorkspaceId !== ws.idx) {
+                    lastFocusedWorkspaceId = ws.idx;
+                    triggerBurstEffect();
+                }
                 break;
             }
         }
