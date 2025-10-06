@@ -17,11 +17,12 @@ Item {
     // ===== Computed properties =====
     readonly property string windowTitle: CompositorService.getFocusedWindowTitle()
     readonly property bool hasActiveWindow: windowTitle !== ""
-    readonly property real widgetWidth: Math.max(200, screen.width * scaling)
+    readonly property real widgetWidth: Math.max(200, screen.width * 0.06)
 
     // ===== Sizing =====
-    implicitWidth: widgetWidth * scaling
+    width: widgetWidth * scaling
     implicitHeight: Math.round(Theme.bar_height * scaling)
+    Layout.maximumWidth: widgetWidth * scaling
 
     // ===== Auto-hide when no window =====
     opacity: hasActiveWindow ? 1.0 : 0
