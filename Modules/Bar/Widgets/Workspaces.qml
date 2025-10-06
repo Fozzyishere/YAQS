@@ -18,6 +18,7 @@ Item {
     property real masterProgress: 0.0
     property color effectColor: Theme.accent
     property int lastFocusedWorkspaceId: -1  // Track last focused workspace to prevent unnecessary animations
+    property bool hideUnoccupied: true  // Hide empty workspaces
 
     // Wheel scroll state
     property int wheelAccumulatedDelta: 0
@@ -51,6 +52,7 @@ Item {
     }
 
     onScreenChanged: refreshWorkspaces()
+    onHideUnoccupiedChanged: refreshWorkspaces()
 
     // ===== Watch for workspace changes =====
     Connections {
@@ -68,63 +70,44 @@ Item {
         if (!screen)
             return;
 
-        // Collect all active/occupied workspaces for this monitor
+        // Collect all active workspaces for this monitor
         const activeWorkspaces = [];
         for (var i = 0; i < CompositorService.workspaces.count; i++) {
             const ws = CompositorService.workspaces.get(i);
             if (ws.output.toLowerCase() === screen.name.toLowerCase()) {
-                if (ws.isOccupied || ws.isFocused) {
-                    activeWorkspaces.push(ws);
+                if (hideUnoccupied && !ws.isOccupied && !ws.isFocused) {
+                    continue;
                 }
+                activeWorkspaces.push(ws);
             }
         }
 
-        // Sort by workspace index (ascending order: 1, 2, 3, 7, 9, etc.)
-        activeWorkspaces.sort(function (a, b) {
-            return a.idx - b.idx;
-        });
-
-        // Slot limits: minimum 4, maximum 10
-        const minSlots = 4;
+        // Limit to 10 slots maximum
         const maxSlots = 10;
-        const totalSlots = Math.min(Math.max(minSlots, activeWorkspaces.length), maxSlots);
+        if (activeWorkspaces.length <= maxSlots) {
+            // Show all workspaces
+            for (var j = 0; j < activeWorkspaces.length; j++) {
+                localWorkspaces.append(activeWorkspaces[j]);
+            }
+        } else {
+            // More than 10 workspaces: show first 9 + focused (if beyond 9) or highest
+            for (var k = 0; k < maxSlots - 1; k++) {
+                localWorkspaces.append(activeWorkspaces[k]);
+            }
 
-        // Build display list
-        for (var slot = 0; slot < totalSlots; slot++) {
-            if (activeWorkspaces.length > maxSlots && slot === maxSlots - 1) {
-                // Special case: More than 10 workspaces, slot 10 needs smart selection
-                // Find if there's a focused workspace beyond the first 9
-                var focusedWorkspace = null;
-                for (var i = maxSlots - 1; i < activeWorkspaces.length; i++) {
-                    if (activeWorkspaces[i].isFocused) {
-                        focusedWorkspace = activeWorkspaces[i];
-                        break;
-                    }
+            // Slot 10: show focused workspace if it's beyond slot 9, otherwise show highest
+            var focusedWorkspace = null;
+            for (var m = maxSlots - 1; m < activeWorkspaces.length; m++) {
+                if (activeWorkspaces[m].isFocused) {
+                    focusedWorkspace = activeWorkspaces[m];
+                    break;
                 }
+            }
 
-                // If there's a focused workspace in the overflow range (10+), show it
-                // Otherwise, show the highest workspace
-                if (focusedWorkspace) {
-                    localWorkspaces.append(focusedWorkspace);
-                } else {
-                    localWorkspaces.append(activeWorkspaces[activeWorkspaces.length - 1]);
-                }
-            } else if (slot < activeWorkspaces.length) {
-                // Fill slot with active workspace
-                localWorkspaces.append(activeWorkspaces[slot]);
+            if (focusedWorkspace) {
+                localWorkspaces.append(focusedWorkspace);
             } else {
-                // Empty placeholder for unused slot (only when < 4 active workspaces)
-                localWorkspaces.append({
-                    "id": -1,
-                    "idx": -1  // No workspace number (will show as empty circle)
-                    ,
-                    "name": "",
-                    "output": screen.name,
-                    "isActive": false,
-                    "isFocused": false,
-                    "isUrgent": false,
-                    "isOccupied": false
-                });
+                localWorkspaces.append(activeWorkspaces[activeWorkspaces.length - 1]);
             }
         }
     }
