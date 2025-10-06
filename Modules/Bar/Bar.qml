@@ -94,14 +94,10 @@ Variants {
                                 opacity: 0.3
                             }
 
-                            // WindowTitle placeholder
-                            Text {
-                                text: "idk window title go here soon tm"
-                                font.family: Theme.font_family
-                                font.pixelSize: Math.round(Theme.font_size * scaling)
-                                color: Theme.fg_dim
-                                elide: Text.ElideRight
-                                Layout.maximumWidth: 400 * scaling
+                            // Window title
+                            WindowTitle {
+                                screen: panel.modelData
+                                scaling: panel.scaling
                             }
                         }
 

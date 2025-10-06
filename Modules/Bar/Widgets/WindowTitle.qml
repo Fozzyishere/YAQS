@@ -1,0 +1,145 @@
+import QtQuick
+import QtQuick.Layouts
+
+import "../../../Commons"
+import "../../../Services"
+
+Item {
+    id: root
+
+    // ===== Properties from Bar =====
+    required property var screen
+    required property real scaling
+
+    // ===== Layout alignment =====
+    Layout.alignment: Qt.AlignVCenter
+
+    // ===== Computed properties =====
+    readonly property string windowTitle: CompositorService.getFocusedWindowTitle()
+    readonly property bool hasActiveWindow: windowTitle !== ""
+    readonly property real widgetWidth: Math.max(200, screen.width * scaling)
+
+    // ===== Sizing =====
+    implicitWidth: widgetWidth * scaling
+    implicitHeight: Math.round(Theme.bar_height * scaling)
+
+    // ===== Auto-hide when no window =====
+    opacity: hasActiveWindow ? 1.0 : 0
+
+    Behavior on opacity {
+        NumberAnimation {
+            duration: Theme.duration_normal
+            easing.type: Easing.OutCubic
+        }
+    }
+
+    // ===== Hidden text for measuring full title width =====
+    Text {
+        id: fullTitleMetrics
+        visible: false
+        text: windowTitle
+        font.family: Theme.font_family
+        font.pixelSize: Math.round(Theme.font_size * scaling)
+    }
+
+    // ===== Title container with clipping =====
+    Item {
+        id: titleContainer
+        anchors.fill: parent
+        clip: true
+
+        property real textWidth: fullTitleMetrics.contentWidth
+        property real containerWidth: width
+        property bool needsScrolling: textWidth > containerWidth
+        property bool isScrolling: false
+        property bool isResetting: false
+
+        // ===== Scrolling content with duplicate text =====
+        Item {
+            id: scrollContainer
+            height: parent.height
+            width: childrenRect.width
+
+            property real scrollX: 0
+            x: scrollX
+
+            Row {
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 50 * scaling
+
+                // Primary text
+                Text {
+                    id: titleText
+                    text: windowTitle
+                    font.family: Theme.font_family
+                    font.pixelSize: Math.round(Theme.font_size * scaling)
+                    color: Theme.fg_dim
+                    verticalAlignment: Text.AlignVCenter
+                }
+
+                // Duplicate text for seamless loop
+                Text {
+                    text: windowTitle
+                    font.family: Theme.font_family
+                    font.pixelSize: Math.round(Theme.font_size * scaling)
+                    color: Theme.fg_dim
+                    verticalAlignment: Text.AlignVCenter
+                    visible: titleContainer.needsScrolling
+                }
+            }
+
+            // ===== Scroll animation (on hover) =====
+            NumberAnimation on scrollX {
+                running: mouseArea.containsMouse && titleContainer.needsScrolling
+                from: 0
+                to: -(titleContainer.textWidth + 50 * scaling)
+                duration: Math.max(4000, windowTitle.length * 100)
+                loops: Animation.Infinite
+                easing.type: Easing.Linear
+            }
+
+            // ===== Reset animation (on exit) =====
+            NumberAnimation on scrollX {
+                running: titleContainer.isResetting
+                to: 0
+                duration: 300
+                easing.type: Easing.OutQuad
+                onFinished: {
+                    titleContainer.isResetting = false
+                }
+            }
+        }
+
+        // ===== State management function =====
+        function updateScrollingState() {
+            if (mouseArea.containsMouse && needsScrolling) {
+                isScrolling = true
+                isResetting = false
+            } else if (!mouseArea.containsMouse && needsScrolling && scrollContainer.scrollX !== 0) {
+                isScrolling = false
+                isResetting = true
+            } else {
+                isScrolling = false
+                isResetting = false
+            }
+        }
+
+        // React to hover changes
+        Connections {
+            target: mouseArea
+            function onContainsMouseChanged() {
+                titleContainer.updateScrollingState()
+            }
+        }
+
+        Component.onCompleted: updateScrollingState()
+    }
+
+    // ===== Mouse area for hover detection =====
+    MouseArea {
+        id: mouseArea
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+    }
+}
