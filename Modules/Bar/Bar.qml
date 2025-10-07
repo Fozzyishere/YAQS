@@ -5,8 +5,7 @@ import Quickshell.Wayland
 
 import "../../Commons"
 import "../../Services"
-import "../../Widgets"
-import "Widgets"
+import "." as BarComponents
 
 Variants {
     model: Quickshell.screens
@@ -18,6 +17,13 @@ Variants {
             required property var modelData
 
             property real scaling: Scaling.getScreenScale(modelData)
+
+            // Widget layout configuration. Edit to change widget order.
+            property var widgetLayout: ({
+                "left": ["AppLauncher", "Clock", "WindowTitle"],
+                "center": ["Workspaces"],
+                "right": ["Audio", "Battery", "PowerMenu"]
+            })
 
             Connections {
                 target: Scaling
@@ -51,6 +57,7 @@ Variants {
 
             Component.onCompleted: {
                 Logger.log("Bar", `Created on "${modelData.name}" (${modelData.width}x${modelData.height}, scale=${scaling})`);
+                Logger.log("Bar", "Widget layout:", JSON.stringify(widgetLayout, null, 2));
             }
 
             Item {
@@ -76,28 +83,19 @@ Variants {
                             Layout.alignment: Qt.AlignLeft
                             spacing: Math.round(Theme.spacing_s * scaling)
 
-                            // App launcher
-                            AppLauncher {
-                                scaling: panel.scaling
-                            }
+                            Repeater {
+                                model: panel.widgetLayout.left
 
-                            // Clock
-                            Clock {
-                                scaling: panel.scaling
-                            }
-
-                            // Separator
-                            Rectangle {
-                                width: 1
-                                height: Math.round(Theme.bar_height * 0.5 * scaling)
-                                color: Theme.fg_dim
-                                opacity: 0.3
-                            }
-
-                            // Window title
-                            WindowTitle {
-                                screen: panel.modelData
-                                scaling: panel.scaling
+                                delegate: BarComponents.BarWidgetLoader {
+                                    required property string modelData
+                                    required property int index
+                                    
+                                    widgetId: modelData
+                                    screen: panel.modelData
+                                    scaling: panel.scaling
+                                    section: "left"
+                                    sectionIndex: index
+                                }
                             }
                         }
 
@@ -110,19 +108,19 @@ Variants {
                             Layout.alignment: Qt.AlignRight
                             spacing: Math.round(Theme.spacing_s * scaling)
 
-                            // Audio widget
-                            Audio {
-                                scaling: panel.scaling
-                            }
+                            Repeater {
+                                model: panel.widgetLayout.right
 
-                            // Battery widget
-                            Battery {
-                                scaling: panel.scaling
-                            }
-
-                            // Power menu
-                            PowerMenu {
-                                scaling: panel.scaling
+                                delegate: BarComponents.BarWidgetLoader {
+                                    required property string modelData
+                                    required property int index
+                                    
+                                    widgetId: modelData
+                                    screen: panel.modelData
+                                    scaling: panel.scaling
+                                    section: "right"
+                                    sectionIndex: index
+                                }
                             }
                         }
                     }
@@ -134,10 +132,19 @@ Variants {
                         anchors.verticalCenter: parent.verticalCenter
                         spacing: Math.round(Theme.spacing_xs * scaling)
 
-                        // Workspaces
-                        Workspaces {
-                            screen: panel.modelData
-                            scaling: panel.scaling
+                        Repeater {
+                            model: panel.widgetLayout.center
+
+                            delegate: BarComponents.BarWidgetLoader {
+                                required property string modelData
+                                required property int index
+                                
+                                widgetId: modelData
+                                screen: panel.modelData
+                                scaling: panel.scaling
+                                section: "center"
+                                sectionIndex: index
+                            }
                         }
                     }
                 }

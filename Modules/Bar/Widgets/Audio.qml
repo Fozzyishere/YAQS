@@ -7,8 +7,9 @@ import "../../../Services"
 RowLayout {
     id: root
 
-    // ===== Required properties =====
-    required property real scaling
+    // ===== Properties =====
+    property var screen: null
+    property real scaling: 1.0
 
     // ===== State =====
     spacing: Math.round(Theme.spacing_xs * scaling)
