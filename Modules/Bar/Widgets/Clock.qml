@@ -6,6 +6,7 @@ import "../../../Commons"
 RowLayout {
     id: root
 
+    property var screen: null
     property real scaling: 1.0
 
     spacing: Math.round(Theme.spacing_s * scaling)

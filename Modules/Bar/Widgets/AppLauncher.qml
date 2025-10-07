@@ -6,6 +6,7 @@ import "../../../Widgets"
 IconButton {
     id: root
 
+    property var screen: null
     property real scaling: 1.0
 
     icon: ""  // Nerd Font: fa-bars (menu icon)

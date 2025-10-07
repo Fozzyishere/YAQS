@@ -8,8 +8,8 @@ Item {
     id: root
 
     // ===== Properties from Bar =====
-    required property var screen
-    required property real scaling
+    property var screen: null
+    property real scaling: 1.0
 
     // ===== Layout alignment =====
     Layout.alignment: Qt.AlignVCenter
@@ -17,7 +17,7 @@ Item {
     // ===== Computed properties =====
     readonly property string windowTitle: CompositorService.getFocusedWindowTitle()
     readonly property bool hasActiveWindow: windowTitle !== ""
-    readonly property real widgetWidth: Math.max(200, screen.width * 0.06)
+    readonly property real widgetWidth: screen ? Math.max(200, screen.width * 0.06) : 200
 
     // ===== Sizing =====
     width: widgetWidth * scaling

@@ -9,8 +9,8 @@ Item {
     id: root
 
     // ===== Properties from Bar =====
-    required property var screen      // ShellScreen object
-    required property real scaling    // DPI scaling
+    property var screen: null      // ShellScreen object
+    property real scaling: 1.0     // DPI scaling
 
     // ===== Local state =====
     property ListModel localWorkspaces: ListModel {}  // Filtered for this monitor
