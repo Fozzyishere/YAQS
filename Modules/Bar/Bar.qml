@@ -66,8 +66,8 @@ Variants {
 
                 Rectangle {
                     anchors.fill: parent
-                    color: Theme.bg_alt
-                    border.color: Theme.fg_dim
+                    color: Theme.bg0_hard
+                    border.color: Theme.fg3
                     border.width: 2
                     radius: Theme.radius_m
 

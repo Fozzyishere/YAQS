@@ -60,59 +60,85 @@ Singleton {
 
     // ===== Colors (loaded from JSON or defaults) =====
 
-    // Background colors
-    readonly property color bg: customColors.bg
-    readonly property color bg_hover: customColors.bg_hover
+    // Background core
+    readonly property color bg0_hard: customColors.bg0_hard
+    readonly property color bg0: customColors.bg0
+    readonly property color bg0_soft: customColors.bg0_soft
+    readonly property color bg1: customColors.bg1
+    readonly property color bg2: customColors.bg2
+    readonly property color bg3: customColors.bg3
+    readonly property color bg4: customColors.bg4
 
-    // Foreground colors
-    readonly property color fg: customColors.fg
-    readonly property color fg_dim: customColors.fg_dim
+    // Foreground core
+    readonly property color fg0: customColors.fg0
+    readonly property color fg1: customColors.fg1
+    readonly property color fg2: customColors.fg2
+    readonly property color fg3: customColors.fg3
+    readonly property color fg4: customColors.fg4
+    readonly property color gray: customColors.gray
+
+    // Semantic aliases for existing callers
+    readonly property color bg: bg0_hard
+    readonly property color bg_alt: bg0
+    readonly property color bg_hover: bg1
+    readonly property color bg_panel: bg0
+    readonly property color surface: bg0
+    readonly property color selection: bg1
+    readonly property color border: bg2
+    readonly property color gutter: bg0
+    readonly property color fg: fg1
+    readonly property color fg_dim: fg3
+    readonly property color comment: gray
 
     // Accent colors
-    readonly property color accent: customColors.accent
-    readonly property color urgent: customColors.urgent
-
-    // Additional colors
-    readonly property color blue: customColors.blue
+    readonly property color red: customColors.red
+    readonly property color red_dim: customColors.red_dim
     readonly property color green: customColors.green
+    readonly property color green_dim: customColors.green_dim
     readonly property color yellow: customColors.yellow
-    // Extended Ayu Dark palette
-    readonly property color surface: customColors.surface
-    readonly property color selection: customColors.selection
-    readonly property color border: customColors.border
-    readonly property color gutter: customColors.gutter
-    readonly property color comment: customColors.comment
+    readonly property color yellow_dim: customColors.yellow_dim
+    readonly property color blue: customColors.blue
+    readonly property color blue_dim: customColors.blue_dim
     readonly property color purple: customColors.purple
-    readonly property color magenta: customColors.magenta
-    readonly property color cyan: customColors.cyan
-    readonly property color teal: customColors.teal
-    readonly property color bg_panel: customColors.bg_panel
-    readonly property color bg_alt: customColors.bg_alt
+    readonly property color purple_dim: customColors.purple_dim
+    readonly property color aqua: customColors.aqua
+    readonly property color aqua_dim: customColors.aqua_dim
+    readonly property color orange: customColors.orange
+    readonly property color orange_dim: customColors.orange_dim
 
-    // ===== Default Colors (Ayu Dark) =====
+    // ===== Default Colors (Gruvbox Dark Hard) =====
     QtObject {
         id: defaultColors
 
-        property color bg: "#0A0E14"        // Dark navy/black background
-        property color bg_hover: "#151A1F"   // Slightly lighter for hover
-        property color fg: "#B3B1AD"         // Light gray text
-        property color fg_dim: "#626A73"     // Dimmed gray text
-        property color accent: "#FFB454"     // Orange accent
-        property color urgent: "#F07178"     // Red for urgent states
-        property color blue: "#39BAE6"       // Blue accent
-        property color green: "#7FD962"      // Green accent
-        property color yellow: "#FFD580"     // Yellow accent
-        property color surface: "#0F1318"    // Panels / elevated surfaces
-        property color selection: "#22303B"  // Selection / highlight background
-        property color border: "#1B2329"     // Borders / dividers
-        property color gutter: "#0D1116"     // Muted gutter / background lines
-        property color comment: "#626A73"    // Comments / secondary text
-        property color purple: "#C39DFF"    // Purple accent
-        property color magenta: "#FF7AC6"   // Magenta / pink accent
-        property color cyan: "#7FD6FF"      // Cyan / link
-        property color teal: "#39C5A6"      // Teal accent
-        property color bg_panel: "#0B0F14"   // Slightly different panel background
-        property color bg_alt: "#0D1116"     // Alternate background
+        property color bg0_hard: "#1D2021"
+        property color bg0: "#282828"
+        property color bg0_soft: "#32302F"
+        property color bg1: "#3C3836"
+        property color bg2: "#504945"
+        property color bg3: "#665C54"
+        property color bg4: "#7C6F64"
+        property color fg0: "#FBF1C7"
+        property color fg1: "#EBDBB2"
+        property color fg2: "#D5C4A1"
+        property color fg3: "#BDAE93"
+        property color fg4: "#A89984"
+        property color gray: "#928374"
+        property color red: "#FB4934"
+        property color red_dim: "#CC241D"
+        property color green: "#B8BB26"
+        property color green_dim: "#98971A"
+        property color yellow: "#FABD2F"
+        property color yellow_dim: "#D79921"
+        property color blue: "#83A598"
+        property color blue_dim: "#458588"
+        property color purple: "#D3869B"
+        property color purple_dim: "#B16286"
+        property color aqua: "#8EC07C"
+        property color aqua_dim: "#689D6A"
+        property color orange: "#FE8019"
+        property color orange_dim: "#D65D0E"
+        property color accent: "#FABD2F"
+        property color urgent: "#FB4934"
     }
 
     // ===== Custom Colors =====
@@ -142,27 +168,33 @@ Singleton {
         JsonAdapter {
             id: customColors
 
-            property color bg: defaultColors.bg
-            property color bg_hover: defaultColors.bg_hover
-            property color fg: defaultColors.fg
-            property color fg_dim: defaultColors.fg_dim
-            property color accent: defaultColors.accent
-            property color urgent: defaultColors.urgent
-            property color blue: defaultColors.blue
+            property color bg0_hard: defaultColors.bg0_hard
+            property color bg0: defaultColors.bg0
+            property color bg0_soft: defaultColors.bg0_soft
+            property color bg1: defaultColors.bg1
+            property color bg2: defaultColors.bg2
+            property color bg3: defaultColors.bg3
+            property color bg4: defaultColors.bg4
+            property color fg0: defaultColors.fg0
+            property color fg1: defaultColors.fg1
+            property color fg2: defaultColors.fg2
+            property color fg3: defaultColors.fg3
+            property color fg4: defaultColors.fg4
+            property color gray: defaultColors.gray
+            property color red: defaultColors.red
+            property color red_dim: defaultColors.red_dim
             property color green: defaultColors.green
+            property color green_dim: defaultColors.green_dim
             property color yellow: defaultColors.yellow
-            // Extended Ayu Dark palette (allow overrides via JSON)
-            property color surface: defaultColors.surface
-            property color selection: defaultColors.selection
-            property color border: defaultColors.border
-            property color gutter: defaultColors.gutter
-            property color comment: defaultColors.comment
+            property color yellow_dim: defaultColors.yellow_dim
+            property color blue: defaultColors.blue
+            property color blue_dim: defaultColors.blue_dim
             property color purple: defaultColors.purple
-            property color magenta: defaultColors.magenta
-            property color cyan: defaultColors.cyan
-            property color teal: defaultColors.teal
-            property color bg_panel: defaultColors.bg_panel
-            property color bg_alt: defaultColors.bg_alt
+            property color purple_dim: defaultColors.purple_dim
+            property color aqua: defaultColors.aqua
+            property color aqua_dim: defaultColors.aqua_dim
+            property color orange: defaultColors.orange
+            property color orange_dim: defaultColors.orange_dim
         }
     }
 }

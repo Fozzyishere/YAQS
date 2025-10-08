@@ -7,5 +7,5 @@ Text {
 
     font.family: Theme.font_family
     font.pixelSize: Math.round(Theme.font_size * scaling)
-    color: Theme.fg
+    color: Theme.fg1
 }

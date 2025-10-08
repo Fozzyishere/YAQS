@@ -16,7 +16,7 @@ Item {
     property ListModel localWorkspaces: ListModel {}  // Filtered for this monitor
     property bool effectsActive: false
     property real masterProgress: 0.0
-    property color effectColor: Theme.accent
+    property color effectColor: Theme.green
     property int lastFocusedWorkspaceId: -1  // Track last focused workspace to prevent unnecessary animations
     property bool hideUnoccupied: true  // Hide empty workspaces
 
@@ -128,7 +128,7 @@ Item {
     }
 
     function triggerBurstEffect() {
-        effectColor = Theme.accent;
+        effectColor = Theme.green;
         burstAnimation.restart();
     }
 
@@ -240,10 +240,10 @@ Item {
                         if (model.isUrgent)
                             return Theme.urgent;
                         if (model.isFocused)
-                            return Theme.accent;
+                            return Theme.green;
                         if (model.isOccupied)
-                            return Theme.fg;
-                        return Qt.alpha(Theme.fg_dim, 0.3);
+                            return Theme.fg1;
+                        return Qt.alpha(Theme.fg3, 0.3);
                     }
 
                     scale: model.isFocused ? 1.0 : 0.9
@@ -256,7 +256,7 @@ Item {
                         font.family: Theme.font_family
                         font.pixelSize: Math.round(pillContainer.height * 0.6)
                         font.weight: Font.DemiBold
-                        color: Theme.bg  // Contrasting colour
+                        color: Theme.bg0_hard  // Contrasting colour
                     }
 
                     MouseArea {

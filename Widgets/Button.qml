@@ -8,7 +8,7 @@ Rectangle {
     // Public properties
     property string text: ""
     property bool active: false
-    property color textColor: Theme.fg
+    property color textColor: Theme.fg1
     property real scaling: 1.0
 
     // Signals
@@ -28,8 +28,8 @@ Rectangle {
             return Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.2);
         }
         if (_hovered) {
-            // Hovered: bg_hover
-            return Theme.bg_hover;
+            // Hovered: bg1
+            return Theme.bg1;
         }
         // Normal: transparent
         return "transparent";

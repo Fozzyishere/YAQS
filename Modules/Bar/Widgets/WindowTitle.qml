@@ -74,7 +74,7 @@ Item {
                     text: windowTitle
                     font.family: Theme.font_family
                     font.pixelSize: Math.round(Theme.font_size * scaling)
-                    color: Theme.fg_dim
+                    color: Theme.fg3
                     verticalAlignment: Text.AlignVCenter
                 }
 
@@ -83,7 +83,7 @@ Item {
                     text: windowTitle
                     font.family: Theme.font_family
                     font.pixelSize: Math.round(Theme.font_size * scaling)
-                    color: Theme.fg_dim
+                    color: Theme.fg3
                     verticalAlignment: Text.AlignVCenter
                     visible: titleContainer.needsScrolling
                 }

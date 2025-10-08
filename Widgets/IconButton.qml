@@ -8,7 +8,7 @@ Rectangle {
     // Public properties
     property string icon: ""
     property int size: Theme.icon_size
-    property color iconColor: Theme.fg
+    property color iconColor: Theme.fg1
     property real scaling: 1.0
 
     // Signals
@@ -22,7 +22,7 @@ Rectangle {
     implicitHeight: Math.round((size + Theme.spacing_s * 2) * scaling)
 
     // Appearance
-    color: _hovered ? Theme.bg_hover : "transparent"
+    color: _hovered ? Theme.bg1 : "transparent"
     radius: Theme.radius_s
 
     // Icon

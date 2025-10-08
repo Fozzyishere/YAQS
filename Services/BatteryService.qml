@@ -168,7 +168,7 @@ Singleton {
     // ===== Helper: Get color based on state =====
     function getColor() {
         if (!hasBattery || !isReady) {
-            return Theme.fg_dim;
+            return Theme.fg3;
         }
 
         if (isCharging) {
@@ -179,6 +179,6 @@ Singleton {
         if (batteryPercent < 10) return Theme.urgent;    // Critical = red
         if (batteryPercent < 20) return Theme.urgent;    // Low = red
         if (batteryPercent < 40) return Theme.yellow;    // Medium = yellow
-        return Theme.fg;  // Normal = default foreground
+        return Theme.fg1;  // Normal = default foreground
     }
 }

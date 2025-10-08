@@ -16,14 +16,14 @@ RowLayout {
         text: Qt.formatTime(Time.current, "hh:mm AP")
         font.family: Theme.font_family
         font.pixelSize: Math.round(Theme.font_size * scaling)
-        color: Theme.fg
+        color: Theme.fg1
     }
 
     // Separator
     Rectangle {
         width: 1
         height: Math.round(Theme.bar_height * 0.5 * scaling)
-        color: Theme.fg_dim
+        color: Theme.fg3
         opacity: 0.3
     }
 
@@ -32,6 +32,6 @@ RowLayout {
         text: Qt.formatDate(Time.current, "dddd, MMM d yyyy")
         font.family: Theme.font_family
         font.pixelSize: Math.round(Theme.font_size * scaling)
-        color: Theme.fg
+        color: Theme.fg1
     }
 }

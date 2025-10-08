@@ -171,13 +171,13 @@ Singleton {
     // ===== Helper: Get color based on state =====
     function getColor() {
         if (!isReady) {
-            return Theme.fg_dim;
+            return Theme.fg3;
         }
 
         if (muted) {
-            return Theme.fg_dim;  // Dimmed when muted
+            return Theme.fg3;  // Dimmed when muted
         }
 
-        return Theme.blue;  // Blue accent when active
+        return Theme.blue;  // Gruvbox blue accent when active
     }
 }
