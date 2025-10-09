@@ -18,7 +18,10 @@ Singleton {
         "Workspaces": workspacesComponent,
         "Audio": audioComponent,
         "Battery": batteryComponent,
-        "PowerMenu": powerMenuComponent
+        "PowerMenu": powerMenuComponent,
+        "WiFi": wifiComponent,
+        "Brightness": brightnessComponent,
+        "MediaMini": mediaMiniComponent
     })
 
     // Component definitions (lazy loaded - only instantiated when needed)
@@ -48,6 +51,18 @@ Singleton {
 
     property Component powerMenuComponent: Component {
         PowerMenu {}
+    }
+
+    property Component wifiComponent: Component {
+        WiFi {}
+    }
+
+    property Component brightnessComponent: Component {
+        Brightness {}
+    }
+
+    property Component mediaMiniComponent: Component {
+        MediaMini {}
     }
 
     Component.onCompleted: {

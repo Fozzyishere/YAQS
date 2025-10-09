@@ -22,7 +22,7 @@ Variants {
             property var widgetLayout: ({
                 "left": ["AppLauncher", "Clock", "WindowTitle"],
                 "center": ["Workspaces"],
-                "right": ["Audio", "Battery", "PowerMenu"]
+                "right": ["MediaMini", "WiFi", "Brightness", "Audio", "Battery", "PowerMenu"]
             })
 
             Connections {
