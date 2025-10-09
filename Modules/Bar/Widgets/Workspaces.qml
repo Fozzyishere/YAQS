@@ -16,7 +16,7 @@ Item {
     property ListModel localWorkspaces: ListModel {}  // Filtered for this monitor
     property bool effectsActive: false
     property real masterProgress: 0.0
-    property color effectColor: Theme.green
+    property color effectColor: Theme.blue
     property int lastFocusedWorkspaceId: -1  // Track last focused workspace to prevent unnecessary animations
     property bool hideUnoccupied: true  // Hide empty workspaces
 
@@ -128,7 +128,7 @@ Item {
     }
 
     function triggerBurstEffect() {
-        effectColor = Theme.green;
+        effectColor = Theme.blue;
         burstAnimation.restart();
     }
 
@@ -240,7 +240,7 @@ Item {
                         if (model.isUrgent)
                             return Theme.urgent;
                         if (model.isFocused)
-                            return Theme.green;
+                            return Theme.blue;
                         if (model.isOccupied)
                             return Theme.fg1;
                         return Qt.alpha(Theme.fg3, 0.3);
