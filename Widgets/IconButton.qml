@@ -7,8 +7,8 @@ Rectangle {
 
     // Public properties
     property string icon: ""
-    property int size: Theme.icon_size
-    property color iconColor: Theme.fg1
+    property int size: Settings.data.ui.iconSize
+    property color iconColor: Settings.data.colors.mOnSurface
     property real scaling: 1.0
 
     // Signals
@@ -18,12 +18,12 @@ Rectangle {
     property bool _hovered: false
 
     // Dimensions
-    implicitWidth: Math.round((size + Theme.spacing_s * 2) * scaling)
-    implicitHeight: Math.round((size + Theme.spacing_s * 2) * scaling)
+    implicitWidth: Math.round((size + Settings.data.ui.spacingS * 2) * scaling)
+    implicitHeight: Math.round((size + Settings.data.ui.spacingS * 2) * scaling)
 
     // Appearance
-    color: _hovered ? Theme.bg1 : "transparent"
-    radius: Theme.radius_s
+    color: _hovered ? Settings.data.colors.mSurfaceVariant : "transparent"
+    radius: Settings.data.ui.radiusS
 
     // Icon
     Text {
@@ -48,7 +48,7 @@ Rectangle {
     // Color transition
     Behavior on color {
         ColorAnimation {
-            duration: Theme.duration_fast
+            duration: Settings.data.ui.durationFast
         }
     }
 }

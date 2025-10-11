@@ -10,8 +10,8 @@ IconButton {
     property real scaling: 1.0
 
     icon: ""  // Nerd Font: fa-bars (menu icon)
-    size: Math.round(Theme.icon_size * scaling)
-    iconColor: Theme.purple
+    size: Math.round(Settings.data.ui.iconSize * scaling)
+    iconColor: Settings.data.colors.mPrimary  // Primary color
 
     onClicked: {
         // TODO: Toggle launcher panel

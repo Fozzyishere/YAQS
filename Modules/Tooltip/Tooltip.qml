@@ -44,7 +44,7 @@ PopupWindow {
             property: "opacity"
             from: 0.0
             to: 1.0
-            duration: Theme.duration_fast
+            duration: Settings.data.ui.durationFast
             easing.type: Easing.OutCubic
         }
 
@@ -53,7 +53,7 @@ PopupWindow {
             property: "scale"
             from: 0.9
             to: 1.0
-            duration: Theme.duration_fast
+            duration: Settings.data.ui.durationFast
             easing.type: Easing.OutCubic
         }
     }
@@ -67,7 +67,7 @@ PopupWindow {
             property: "opacity"
             from: 1.0
             to: 0.0
-            duration: Theme.duration_fast
+            duration: Settings.data.ui.durationFast
             easing.type: Easing.InCubic
         }
 
@@ -76,7 +76,7 @@ PopupWindow {
             property: "scale"
             from: 1.0
             to: 0.9
-            duration: Theme.duration_fast
+            duration: Settings.data.ui.durationFast
             easing.type: Easing.InCubic
         }
 
@@ -189,19 +189,19 @@ PopupWindow {
 
         Rectangle {
             anchors.fill: parent
-            color: Theme.color_bg
-            border.color: Theme.color_border
+            color: Settings.data.colors.mSurfaceContainer
+            border.color: Settings.data.colors.mOutline
             border.width: 1
-            radius: Theme.radius
+            radius: Settings.data.ui.radiusM
 
             Text {
                 id: tooltipText
                 anchors.centerIn: parent
                 anchors.margins: root.padding
                 text: root.text
-                font.family: Theme.font_family
-                font.pixelSize: Theme.font_size
-                color: Theme.color_fg
+                font.family: Settings.data.ui.fontFamily
+                font.pixelSize: Settings.data.ui.fontSize
+                color: Settings.data.colors.mOnSurface
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
                 wrapMode: Text.WordWrap

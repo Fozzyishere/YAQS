@@ -225,15 +225,15 @@ Singleton {
         return "󰤯";  // wifi-strength-0
     }
 
-    // Get color based on state (using Theme colors)
+    // Get color based on state (using Settings colors)
     function getColor() {
-        if (!isEnabled) return Theme.fg_dim;
-        if (!isConnected) return Theme.urgent;
+        if (!isEnabled) return Settings.data.colors.mOutlineVariant;
+        if (!isConnected) return Settings.data.colors.mError;
 
         // Signal strength color
-        if (signalStrength >= 60) return Theme.blue;
-        if (signalStrength >= 30) return Theme.yellow;
-        return Theme.orange;
+        if (signalStrength >= 60) return Settings.data.colors.mPrimary;
+        if (signalStrength >= 30) return Settings.data.colors.mTertiary;
+        return Settings.data.colors.mWarning;
     }
 
     // Get status text for display

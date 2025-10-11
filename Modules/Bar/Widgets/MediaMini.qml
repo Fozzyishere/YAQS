@@ -13,19 +13,19 @@ RowLayout {
 
     // ===== Visibility =====
     visible: MediaService.currentPlayer !== null && MediaService.trackTitle !== ""
-    spacing: Math.round(Theme.spacing_xs * scaling)
+    spacing: Math.round(Settings.data.ui.spacingXs * scaling)
 
     // ===== Icon =====
     Text {
         text: MediaService.getIcon()
         font.family: "Symbols Nerd Font"
-        font.pixelSize: Math.round(Theme.icon_size * scaling)
+        font.pixelSize: Math.round(Settings.data.ui.iconSize * scaling)
         color: MediaService.getColor()
 
         // Smooth color transitions
         Behavior on color {
             ColorAnimation {
-                duration: Theme.duration_normal
+                duration: Settings.data.ui.durationNormal
                 easing.type: Easing.InOutCubic
             }
         }
@@ -41,14 +41,14 @@ RowLayout {
         Text {
             id: trackText
             text: MediaService.getTrackDisplay()
-            font.family: Theme.font_family
-            font.pixelSize: Math.round(Theme.font_size * scaling)
+            font.family: Settings.data.ui.fontFamily
+            font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
             color: MediaService.getColor()
 
             // Smooth color transitions
             Behavior on color {
                 ColorAnimation {
-                    duration: Theme.duration_normal
+                    duration: Settings.data.ui.durationNormal
                     easing.type: Easing.InOutCubic
                 }
             }
@@ -72,7 +72,7 @@ RowLayout {
             Behavior on xOffset {
                 enabled: !scrollAnimation.running
                 NumberAnimation {
-                    duration: Theme.duration_normal
+                    duration: Settings.data.ui.durationNormal
                     easing.type: Easing.OutCubic
                 }
             }

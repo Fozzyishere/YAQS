@@ -16,7 +16,7 @@ Item {
     property ListModel localWorkspaces: ListModel {}  // Filtered for this monitor
     property bool effectsActive: false
     property real masterProgress: 0.0
-    property color effectColor: Theme.blue
+    property color effectColor: Settings.data.colors.mPrimary
     property int lastFocusedWorkspaceId: -1  // Track last focused workspace to prevent unnecessary animations
     property bool hideUnoccupied: true  // Hide empty workspaces
 
@@ -26,10 +26,10 @@ Item {
 
     // ===== Sizing =====
     readonly property int pillSize: Math.round(12 * scaling)  // Compact pill size
-    readonly property int pillSpacing: Math.round(Theme.spacing_xs * scaling)
+    readonly property int pillSpacing: Math.round(Settings.data.ui.spacingXs * scaling)
 
     implicitWidth: computeWidth()
-    implicitHeight: Math.round(Theme.bar_height * scaling)
+    implicitHeight: Math.round(Settings.data.bar.height * scaling)
 
     // ===== Computed dimensions =====
     function getPillWidth(ws) {
@@ -128,7 +128,7 @@ Item {
     }
 
     function triggerBurstEffect() {
-        effectColor = Theme.blue;
+        effectColor = Settings.data.colors.mPrimary;
         burstAnimation.restart();
     }
 
@@ -144,7 +144,7 @@ Item {
             property: "masterProgress"
             from: 0.0
             to: 1.0
-            duration: Theme.duration_slow * 2
+            duration: Settings.data.ui.durationSlow * 2
             easing.type: Easing.OutQuint
         }
         PropertyAction {
@@ -238,12 +238,12 @@ Item {
 
                     color: {
                         if (model.isUrgent)
-                            return Theme.urgent;
+                            return Settings.data.colors.mError;
                         if (model.isFocused)
-                            return Theme.blue;
+                            return Settings.data.colors.mPrimary;
                         if (model.isOccupied)
-                            return Theme.fg1;
-                        return Qt.alpha(Theme.fg3, 0.3);
+                            return Settings.data.colors.mOnSurface;
+                        return Qt.alpha(Settings.data.colors.mOutlineVariant, 0.3);
                     }
 
                     scale: model.isFocused ? 1.0 : 0.9
@@ -253,10 +253,10 @@ Item {
                         visible: model.isFocused
                         anchors.centerIn: parent
                         text: model.idx
-                        font.family: Theme.font_family
+                        font.family: Settings.data.ui.fontFamily
                         font.pixelSize: Math.round(pillContainer.height * 0.6)
                         font.weight: Font.DemiBold
-                        color: Theme.bg0_hard  // Contrasting colour
+                        color: Settings.data.colors.mSurface  // Contrasting colour
                     }
 
                     MouseArea {
@@ -270,21 +270,21 @@ Item {
                     // Smooth animations
                     Behavior on width {
                         NumberAnimation {
-                            duration: Theme.duration_normal
+                            duration: Settings.data.ui.durationNormal
                             easing.type: Easing.OutBack
                         }
                     }
 
                     Behavior on color {
                         ColorAnimation {
-                            duration: Theme.duration_fast
+                            duration: Settings.data.ui.durationFast
                             easing.type: Easing.InOutCubic
                         }
                     }
 
                     Behavior on scale {
                         NumberAnimation {
-                            duration: Theme.duration_normal
+                            duration: Settings.data.ui.durationNormal
                             easing.type: Easing.OutBack
                         }
                     }
@@ -307,7 +307,7 @@ Item {
                 // Smooth container resize
                 Behavior on width {
                     NumberAnimation {
-                        duration: Theme.duration_normal
+                        duration: Settings.data.ui.durationNormal
                         easing.type: Easing.OutBack
                     }
                 }

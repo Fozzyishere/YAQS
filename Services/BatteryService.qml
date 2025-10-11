@@ -168,17 +168,17 @@ Singleton {
     // ===== Helper: Get color based on state =====
     function getColor() {
         if (!hasBattery || !isReady) {
-            return Theme.fg3;
+            return Settings.data.colors.mOutlineVariant;
         }
 
         if (isCharging) {
-            return Theme.green;  // Charging = green
+            return Settings.data.colors.mSuccess;  // Charging = green
         }
 
         // Color based on charge level
-        if (batteryPercent < 10) return Theme.urgent;    // Critical = red
-        if (batteryPercent < 20) return Theme.urgent;    // Low = red
-        if (batteryPercent < 40) return Theme.yellow;    // Medium = yellow
-        return Theme.fg1;  // Normal = default foreground
+        if (batteryPercent < 10) return Settings.data.colors.mError;    // Critical = red
+        if (batteryPercent < 20) return Settings.data.colors.mError;    // Low = red
+        if (batteryPercent < 40) return Settings.data.colors.mTertiary;    // Medium = yellow
+        return Settings.data.colors.mOnSurface;  // Normal = default foreground
     }
 }

@@ -18,13 +18,6 @@ Variants {
 
             property real scaling: Scaling.getScreenScale(modelData)
 
-            // Widget layout configuration. Edit to change widget order.
-            property var widgetLayout: ({
-                "left": ["AppLauncher", "Clock", "WindowTitle"],
-                "center": ["Workspaces"],
-                "right": ["MediaMini", "WiFi", "Brightness", "Audio", "Battery", "PowerMenu"]
-            })
-
             Connections {
                 target: Scaling
                 function onScaleChanged(screenName, scale) {
@@ -45,19 +38,22 @@ Variants {
             }
 
             margins {
-                top: Math.round(Theme.bar_margin_top * scaling)
-                left: Math.round(Theme.bar_margin_side * scaling)
-                right: Math.round(Theme.bar_margin_side * scaling)
-                bottom: Math.round(Theme.bar_margin_bottom * scaling)
+                top: Math.round(Settings.data.bar.marginTop * scaling)
+                left: Math.round(Settings.data.bar.marginSide * scaling)
+                right: Math.round(Settings.data.bar.marginSide * scaling)
+                bottom: Math.round(Settings.data.bar.marginBottom * scaling)
             }
 
-            implicitHeight: Math.round(Theme.bar_height * scaling)
+            implicitHeight: Math.round(Settings.data.bar.height * scaling)
 
             WlrLayershell.namespace: "YAQS"
 
             Component.onCompleted: {
                 Logger.log("Bar", `Created on "${modelData.name}" (${modelData.width}x${modelData.height}, scale=${scaling})`);
-                Logger.log("Bar", "Widget layout:", JSON.stringify(widgetLayout, null, 2));
+                Logger.log("Bar", "Loaded with",
+                    Settings.data.bar.widgets.left.length, "left,",
+                    Settings.data.bar.widgets.center.length, "center,",
+                    Settings.data.bar.widgets.right.length, "right widgets");
             }
 
             Item {
@@ -66,31 +62,31 @@ Variants {
 
                 Rectangle {
                     anchors.fill: parent
-                    color: Theme.bg0_hard
-                    border.color: Theme.fg3
+                    color: Settings.data.colors.mSurfaceContainer
+                    border.color: Settings.data.colors.mOutlineVariant
                     border.width: 2
-                    radius: Theme.radius_m
+                    radius: Settings.data.ui.radiusM
 
                     // Left and right sections in RowLayout
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: Math.round(Theme.spacing_m * scaling)
-                        anchors.rightMargin: Math.round(Theme.spacing_m * scaling)
-                        spacing: Math.round(Theme.spacing_m * scaling)
+                        anchors.leftMargin: Math.round(Settings.data.ui.spacingM * scaling)
+                        anchors.rightMargin: Math.round(Settings.data.ui.spacingM * scaling)
+                        spacing: Math.round(Settings.data.ui.spacingM * scaling)
 
                         RowLayout {
                             id: leftSection
                             Layout.alignment: Qt.AlignLeft
-                            spacing: Math.round(Theme.spacing_s * scaling)
+                            spacing: Math.round(Settings.data.ui.spacingS * scaling)
 
                             Repeater {
-                                model: panel.widgetLayout.left
+                                model: Settings.data.bar.widgets.left
 
                                 delegate: BarComponents.BarWidgetLoader {
-                                    required property string modelData
+                                    required property var modelData
                                     required property int index
-                                    
-                                    widgetId: modelData
+
+                                    widgetId: modelData.id || ""
                                     screen: panel.modelData
                                     scaling: panel.scaling
                                     section: "left"
@@ -106,16 +102,16 @@ Variants {
                         RowLayout {
                             id: rightSection
                             Layout.alignment: Qt.AlignRight
-                            spacing: Math.round(Theme.spacing_s * scaling)
+                            spacing: Math.round(Settings.data.ui.spacingS * scaling)
 
                             Repeater {
-                                model: panel.widgetLayout.right
+                                model: Settings.data.bar.widgets.right
 
                                 delegate: BarComponents.BarWidgetLoader {
-                                    required property string modelData
+                                    required property var modelData
                                     required property int index
-                                    
-                                    widgetId: modelData
+
+                                    widgetId: modelData.id || ""
                                     screen: panel.modelData
                                     scaling: panel.scaling
                                     section: "right"
@@ -130,16 +126,16 @@ Variants {
                         id: centerSection
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: Math.round(Theme.spacing_xs * scaling)
+                        spacing: Math.round(Settings.data.ui.spacingXs * scaling)
 
                         Repeater {
-                            model: panel.widgetLayout.center
+                            model: Settings.data.bar.widgets.center
 
                             delegate: BarComponents.BarWidgetLoader {
-                                required property string modelData
+                                required property var modelData
                                 required property int index
-                                
-                                widgetId: modelData
+
+                                widgetId: modelData.id || ""
                                 screen: panel.modelData
                                 scaling: panel.scaling
                                 section: "center"

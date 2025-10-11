@@ -13,19 +13,19 @@ RowLayout {
 
     // ===== Visibility =====
     visible: NetworkService.isEnabled || NetworkService.isConnected
-    spacing: Math.round(Theme.spacing_xs * scaling)
+    spacing: Math.round(Settings.data.ui.spacingXs * scaling)
 
     // ===== Icon =====
     Text {
         text: NetworkService.getIcon()
         font.family: "Symbols Nerd Font"
-        font.pixelSize: Math.round(Theme.icon_size * scaling)
+        font.pixelSize: Math.round(Settings.data.ui.iconSize * scaling)
         color: NetworkService.getColor()
 
         // Smooth color transitions
         Behavior on color {
             ColorAnimation {
-                duration: Theme.duration_normal
+                duration: Settings.data.ui.durationNormal
                 easing.type: Easing.InOutCubic
             }
         }
@@ -34,14 +34,14 @@ RowLayout {
     // ===== Status Text =====
     Text {
         text: NetworkService.getStatusText()
-        font.family: Theme.font_family
-        font.pixelSize: Math.round(Theme.font_size * scaling)
+        font.family: Settings.data.ui.fontFamily
+        font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
         color: NetworkService.getColor()
 
         // Smooth color transitions
         Behavior on color {
             ColorAnimation {
-                duration: Theme.duration_normal
+                duration: Settings.data.ui.durationNormal
                 easing.type: Easing.InOutCubic
             }
         }

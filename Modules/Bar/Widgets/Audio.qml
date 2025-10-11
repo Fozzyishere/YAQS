@@ -12,7 +12,7 @@ RowLayout {
     property real scaling: 1.0
 
     // ===== State =====
-    spacing: Math.round(Theme.spacing_xs * scaling)
+    spacing: Math.round(Settings.data.ui.spacingXs * scaling)
 
     // Wheel scroll accumulator
     property int wheelAccumulator: 0
@@ -22,13 +22,13 @@ RowLayout {
         id: iconText
         text: AudioService.getIcon()
         font.family: "Symbols Nerd Font"
-        font.pixelSize: Math.round(Theme.icon_size * scaling)
+        font.pixelSize: Math.round(Settings.data.ui.iconSize * scaling)
         color: AudioService.getColor()
 
         // Smooth color transitions
         Behavior on color {
             ColorAnimation {
-                duration: Theme.duration_normal
+                duration: Settings.data.ui.durationNormal
                 easing.type: Easing.InOutCubic
             }
         }
@@ -37,14 +37,14 @@ RowLayout {
     // ===== Volume percentage =====
     Text {
         text: AudioService.volume + "%"
-        font.family: Theme.font_family
-        font.pixelSize: Math.round(Theme.font_size * scaling)
+        font.family: Settings.data.ui.fontFamily
+        font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
         color: AudioService.getColor()
 
         // Smooth color transitions
         Behavior on color {
             ColorAnimation {
-                duration: Theme.duration_normal
+                duration: Settings.data.ui.durationNormal
                 easing.type: Easing.InOutCubic
             }
         }

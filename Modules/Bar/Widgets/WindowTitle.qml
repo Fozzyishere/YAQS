@@ -21,7 +21,7 @@ Item {
 
     // ===== Sizing =====
     width: widgetWidth * scaling
-    implicitHeight: Math.round(Theme.bar_height * scaling)
+    implicitHeight: Math.round(Settings.data.bar.height * scaling)
     Layout.maximumWidth: widgetWidth * scaling
 
     // ===== Auto-hide when no window =====
@@ -29,7 +29,7 @@ Item {
 
     Behavior on opacity {
         NumberAnimation {
-            duration: Theme.duration_normal
+            duration: Settings.data.ui.durationNormal
             easing.type: Easing.OutCubic
         }
     }
@@ -39,8 +39,8 @@ Item {
         id: fullTitleMetrics
         visible: false
         text: windowTitle
-        font.family: Theme.font_family
-        font.pixelSize: Math.round(Theme.font_size * scaling)
+        font.family: Settings.data.ui.fontFamily
+        font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
     }
 
     // ===== Title container with clipping =====
@@ -72,18 +72,18 @@ Item {
                 Text {
                     id: titleText
                     text: windowTitle
-                    font.family: Theme.font_family
-                    font.pixelSize: Math.round(Theme.font_size * scaling)
-                    color: Theme.fg3
+                    font.family: Settings.data.ui.fontFamily
+                    font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
+                    color: Settings.data.colors.mOutlineVariant
                     verticalAlignment: Text.AlignVCenter
                 }
 
                 // Duplicate text for seamless loop
                 Text {
                     text: windowTitle
-                    font.family: Theme.font_family
-                    font.pixelSize: Math.round(Theme.font_size * scaling)
-                    color: Theme.fg3
+                    font.family: Settings.data.ui.fontFamily
+                    font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
+                    color: Settings.data.colors.mOutlineVariant
                     verticalAlignment: Text.AlignVCenter
                     visible: titleContainer.needsScrolling
                 }

@@ -8,7 +8,7 @@ Rectangle {
     // Public properties
     property string text: ""
     property bool active: false
-    property color textColor: Theme.fg1
+    property color textColor: Settings.data.colors.mOnSurface
     property real scaling: 1.0
 
     // Signals
@@ -18,8 +18,8 @@ Rectangle {
     property bool _hovered: false
 
     // Dimensions
-    implicitWidth: Math.round((label.implicitWidth + Theme.spacing_m * 2) * scaling)
-    implicitHeight: Math.round((Theme.bar_height - Theme.spacing_s) * scaling)
+    implicitWidth: Math.round((label.implicitWidth + Settings.data.ui.spacingM * 2) * scaling)
+    implicitHeight: Math.round((Settings.data.bar.height - Settings.data.ui.spacingS) * scaling)
 
     // Background color
     color: {
@@ -29,13 +29,13 @@ Rectangle {
         }
         if (_hovered) {
             // Hovered: bg1
-            return Theme.bg1;
+            return Settings.data.colors.mSurfaceVariant;
         }
         // Normal: transparent
         return "transparent";
     }
 
-    radius: Theme.radius_s
+    radius: Settings.data.ui.radiusS
 
     // Label
     Text {
@@ -43,8 +43,8 @@ Rectangle {
         anchors.centerIn: parent
         text: root.text
         color: root.textColor
-        font.family: Theme.font_family
-        font.pixelSize: Math.round(Theme.font_size * scaling)
+        font.family: Settings.data.ui.fontFamily
+        font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
         font.weight: root.active ? Font.Medium : Font.Normal
     }
 
@@ -62,7 +62,7 @@ Rectangle {
     // Color transition
     Behavior on color {
         ColorAnimation {
-            duration: Theme.duration_normal
+            duration: Settings.data.ui.durationNormal
         }
     }
 }

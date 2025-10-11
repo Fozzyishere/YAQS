@@ -340,6 +340,6 @@ Singleton {
 
     // Get color based on availability
     function getColor() {
-        return isAvailable ? Theme.yellow : Theme.fg_dim;
+        return isAvailable ? Settings.data.colors.mTertiary : Settings.data.colors.mOutlineVariant;
     }
 }

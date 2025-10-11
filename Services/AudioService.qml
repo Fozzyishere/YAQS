@@ -171,13 +171,13 @@ Singleton {
     // ===== Helper: Get color based on state =====
     function getColor() {
         if (!isReady) {
-            return Theme.fg3;
+            return Settings.data.colors.mOutlineVariant;
         }
 
         if (muted) {
-            return Theme.fg3;  // Dimmed when muted
+            return Settings.data.colors.mOutlineVariant;  // Dimmed when muted
         }
 
-        return Theme.blue;  // Gruvbox blue accent when active
+        return Settings.data.colors.mPrimary;  // Primary color when active
     }
 }

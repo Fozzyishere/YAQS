@@ -5,7 +5,7 @@ import "../Commons"
 Text {
     property real scaling: 1.0
 
-    font.family: Theme.font_family
-    font.pixelSize: Math.round(Theme.font_size * scaling)
-    color: Theme.fg1
+    font.family: Settings.data.ui.fontFamily
+    font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
+    color: Settings.data.colors.mOnSurface
 }
