@@ -1,6 +1,7 @@
 import QtQuick
 
 import "../../../Commons"
+import "../../../Services"
 import "../../../Widgets"
 
 IconButton {
@@ -13,7 +14,11 @@ IconButton {
     size: Math.round(Settings.data.ui.iconSize * scaling)
     iconColor: Settings.data.colors.mPrimary
     onClicked: {
-        // TODO: Toggle power menu panel (shutdown, restart, logout, lock)
-        Logger.log("PowerMenu", "Clicked");
+        const sessionMenu = PanelService.getPanel("sessionMenuPanel");
+        if (sessionMenu) {
+            sessionMenu.toggle(root);
+        } else {
+            Logger.warn("PowerMenu", "Session menu panel not registered");
+        }
     }
 }

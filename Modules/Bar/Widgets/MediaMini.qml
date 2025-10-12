@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import "../../../Commons"
 import "../../../Services"
 
-RowLayout {
+Item {
     id: root
 
     // ===== Properties =====
@@ -13,36 +13,22 @@ RowLayout {
 
     // ===== Visibility =====
     visible: MediaService.currentPlayer !== null && MediaService.trackTitle !== ""
-    spacing: Math.round(Settings.data.ui.spacingXs * scaling)
 
-    // ===== Icon =====
-    Text {
-        text: MediaService.getIcon()
-        font.family: "Symbols Nerd Font"
-        font.pixelSize: Math.round(Settings.data.ui.iconSize * scaling)
-        color: MediaService.getColor()
+    // Auto-size to content
+    implicitWidth: layout.implicitWidth
+    implicitHeight: layout.implicitHeight
 
-        // Smooth color transitions
-        Behavior on color {
-            ColorAnimation {
-                duration: Settings.data.ui.durationNormal
-                easing.type: Easing.InOutCubic
-            }
-        }
-    }
+    // ===== Layout =====
+    RowLayout {
+        id: layout
+        anchors.fill: parent
+        spacing: Math.round(Settings.data.ui.spacingXs * scaling)
 
-    // ===== Scrolling Track Info =====
-    Item {
-        Layout.preferredWidth: Math.round(150 * scaling)  // Fixed width for scrolling
-        Layout.preferredHeight: trackText.height
-        clip: true
-
-        // Scrolling text container
+        // ===== Icon =====
         Text {
-            id: trackText
-            text: MediaService.getTrackDisplay()
-            font.family: Settings.data.ui.fontFamily
-            font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
+            text: MediaService.getIcon()
+            font.family: "Symbols Nerd Font"
+            font.pixelSize: Math.round(Settings.data.ui.iconSize * scaling)
             color: MediaService.getColor()
 
             // Smooth color transitions
@@ -52,35 +38,59 @@ RowLayout {
                     easing.type: Easing.InOutCubic
                 }
             }
+        }
 
-            // Horizontal offset for scrolling
-            property real xOffset: 0
-            x: xOffset
+        // ===== Scrolling Track Info =====
+        Item {
+            Layout.preferredWidth: Math.round(150 * scaling)  // Fixed width for scrolling
+            Layout.preferredHeight: trackText.height
+            clip: true
 
-            // Scroll animation when text is too wide
-            NumberAnimation on xOffset {
-                id: scrollAnimation
-                running: trackText.width > trackText.parent.width && mouseArea.containsMouse
-                from: 0
-                to: -(trackText.width - trackText.parent.width + 10)  // +10 for padding
-                duration: Math.max(3000, trackText.text.length * 100)
-                loops: Animation.Infinite
-                easing.type: Easing.Linear
-            }
+            // Scrolling text container
+            Text {
+                id: trackText
+                text: MediaService.getTrackDisplay()
+                font.family: Settings.data.ui.fontFamily
+                font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
+                color: MediaService.getColor()
 
-            // Reset to start when not hovering
-            Behavior on xOffset {
-                enabled: !scrollAnimation.running
-                NumberAnimation {
-                    duration: Settings.data.ui.durationNormal
-                    easing.type: Easing.OutCubic
+                // Smooth color transitions
+                Behavior on color {
+                    ColorAnimation {
+                        duration: Settings.data.ui.durationNormal
+                        easing.type: Easing.InOutCubic
+                    }
                 }
-            }
 
-            // Reset offset when not hovering
-            Component.onCompleted: {
-                if (!mouseArea.containsMouse) {
-                    xOffset = 0;
+                // Horizontal offset for scrolling
+                property real xOffset: 0
+                x: xOffset
+
+                // Scroll animation when text is too wide
+                NumberAnimation on xOffset {
+                    id: scrollAnimation
+                    running: trackText.width > trackText.parent.width && mouseArea.containsMouse
+                    from: 0
+                    to: -(trackText.width - trackText.parent.width + 10)  // +10 for padding
+                    duration: Math.max(3000, trackText.text.length * 100)
+                    loops: Animation.Infinite
+                    easing.type: Easing.Linear
+                }
+
+                // Reset to start when not hovering
+                Behavior on xOffset {
+                    enabled: !scrollAnimation.running
+                    NumberAnimation {
+                        duration: Settings.data.ui.durationNormal
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                // Reset offset when not hovering
+                Component.onCompleted: {
+                    if (!mouseArea.containsMouse) {
+                        xOffset = 0;
+                    }
                 }
             }
         }

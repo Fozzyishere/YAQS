@@ -4,48 +4,58 @@ import QtQuick.Layouts
 import "../../../Commons"
 import "../../../Services"
 
-RowLayout {
+Item {
     id: root
 
     // ===== Properties =====
     property var screen: null
     property real scaling: 1.0
 
-    // ===== Visibility =====
-    visible: BrightnessService.isAvailable
-    spacing: Math.round(Settings.data.ui.spacingXs * scaling)
-
     // Wheel scroll accumulator
     property int wheelAccumulator: 0
 
-    // ===== Icon =====
-    Text {
-        text: BrightnessService.getIcon()
-        font.family: "Symbols Nerd Font"
-        font.pixelSize: Math.round(Settings.data.ui.iconSize * scaling)
-        color: BrightnessService.getColor()
+    // ===== Visibility =====
+    visible: BrightnessService.isAvailable
 
-        // Smooth color transitions
-        Behavior on color {
-            ColorAnimation {
-                duration: Settings.data.ui.durationNormal
-                easing.type: Easing.InOutCubic
+    // Auto-size to content
+    implicitWidth: layout.implicitWidth
+    implicitHeight: layout.implicitHeight
+
+    // ===== Layout =====
+    RowLayout {
+        id: layout
+        anchors.fill: parent
+        spacing: Math.round(Settings.data.ui.spacingXs * scaling)
+
+        // ===== Icon =====
+        Text {
+            text: BrightnessService.getIcon()
+            font.family: "Symbols Nerd Font"
+            font.pixelSize: Math.round(Settings.data.ui.iconSize * scaling)
+            color: BrightnessService.getColor()
+
+            // Smooth color transitions
+            Behavior on color {
+                ColorAnimation {
+                    duration: Settings.data.ui.durationNormal
+                    easing.type: Easing.InOutCubic
+                }
             }
         }
-    }
 
-    // ===== Brightness Percentage =====
-    Text {
-        text: BrightnessService.brightness + "%"
-        font.family: Settings.data.ui.fontFamily
-        font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
-        color: BrightnessService.getColor()
+        // ===== Brightness Percentage =====
+        Text {
+            text: BrightnessService.brightness + "%"
+            font.family: Settings.data.ui.fontFamily
+            font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
+            color: BrightnessService.getColor()
 
-        // Smooth color transitions
-        Behavior on color {
-            ColorAnimation {
-                duration: Settings.data.ui.durationNormal
-                easing.type: Easing.InOutCubic
+            // Smooth color transitions
+            Behavior on color {
+                ColorAnimation {
+                    duration: Settings.data.ui.durationNormal
+                    easing.type: Easing.InOutCubic
+                }
             }
         }
     }

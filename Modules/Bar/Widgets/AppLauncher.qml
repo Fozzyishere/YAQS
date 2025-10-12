@@ -1,6 +1,7 @@
 import QtQuick
 
 import "../../../Commons"
+import "../../../Services"
 import "../../../Widgets"
 
 IconButton {
@@ -14,7 +15,11 @@ IconButton {
     iconColor: Settings.data.colors.mPrimary  // Primary color
 
     onClicked: {
-        // TODO: Toggle launcher panel
-        Logger.log("AppLauncher", "Clicked");
+        const launcher = PanelService.getPanel("launcherPanel");
+        if (launcher) {
+            launcher.toggle(root);
+        } else {
+            Logger.warn("AppLauncher", "Launcher panel not registered");
+        }
     }
 }

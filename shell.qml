@@ -4,6 +4,8 @@ import Quickshell
 import "Commons"
 import "Services"
 import "Modules/Bar"
+import "Modules/Launcher"
+import "Modules/SessionMenu"
 
 ShellRoot {
     id: root
@@ -19,4 +21,14 @@ ShellRoot {
 
     // Floating top bar on all monitors
     Bar {}
+
+    // Launcher panel
+    Launcher {
+        screen: Quickshell.screens[0] || null
+    }
+
+    // Session menu panel
+    SessionMenu {
+        screen: Quickshell.screens[0] || null
+    }
 }

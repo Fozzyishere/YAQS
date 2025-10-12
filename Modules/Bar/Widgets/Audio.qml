@@ -4,48 +4,56 @@ import QtQuick.Layouts
 import "../../../Commons"
 import "../../../Services"
 
-RowLayout {
+Item {
     id: root
 
     // ===== Properties =====
     property var screen: null
     property real scaling: 1.0
 
-    // ===== State =====
-    spacing: Math.round(Settings.data.ui.spacingXs * scaling)
-
     // Wheel scroll accumulator
     property int wheelAccumulator: 0
 
-    // ===== Icon =====
-    Text {
-        id: iconText
-        text: AudioService.getIcon()
-        font.family: "Symbols Nerd Font"
-        font.pixelSize: Math.round(Settings.data.ui.iconSize * scaling)
-        color: AudioService.getColor()
+    // Auto-size to content
+    implicitWidth: layout.implicitWidth
+    implicitHeight: layout.implicitHeight
 
-        // Smooth color transitions
-        Behavior on color {
-            ColorAnimation {
-                duration: Settings.data.ui.durationNormal
-                easing.type: Easing.InOutCubic
+    // ===== Layout =====
+    RowLayout {
+        id: layout
+        anchors.fill: parent
+        spacing: Math.round(Settings.data.ui.spacingXs * scaling)
+
+        // ===== Icon =====
+        Text {
+            id: iconText
+            text: AudioService.getIcon()
+            font.family: "Symbols Nerd Font"
+            font.pixelSize: Math.round(Settings.data.ui.iconSize * scaling)
+            color: AudioService.getColor()
+
+            // Smooth color transitions
+            Behavior on color {
+                ColorAnimation {
+                    duration: Settings.data.ui.durationNormal
+                    easing.type: Easing.InOutCubic
+                }
             }
         }
-    }
 
-    // ===== Volume percentage =====
-    Text {
-        text: AudioService.volume + "%"
-        font.family: Settings.data.ui.fontFamily
-        font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
-        color: AudioService.getColor()
+        // ===== Volume percentage =====
+        Text {
+            text: AudioService.volume + "%"
+            font.family: Settings.data.ui.fontFamily
+            font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
+            color: AudioService.getColor()
 
-        // Smooth color transitions
-        Behavior on color {
-            ColorAnimation {
-                duration: Settings.data.ui.durationNormal
-                easing.type: Easing.InOutCubic
+            // Smooth color transitions
+            Behavior on color {
+                ColorAnimation {
+                    duration: Settings.data.ui.durationNormal
+                    easing.type: Easing.InOutCubic
+                }
             }
         }
     }

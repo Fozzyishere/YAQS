@@ -26,13 +26,6 @@ Singleton {
         updateBattery();
     }
 
-    // ===== Watch for device changes =====
-    Connections {
-        target: UPower
-        function onDisplayDeviceChanged() {
-            root.updateBattery();
-        }
-    }
 
     // ===== Watch for battery property changes =====
     Connections {

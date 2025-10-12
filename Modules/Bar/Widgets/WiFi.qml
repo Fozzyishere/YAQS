@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import "../../../Commons"
 import "../../../Services"
 
-RowLayout {
+Item {
     id: root
 
     // ===== Properties =====
@@ -13,36 +13,46 @@ RowLayout {
 
     // ===== Visibility =====
     visible: NetworkService.isEnabled || NetworkService.isConnected
-    spacing: Math.round(Settings.data.ui.spacingXs * scaling)
 
-    // ===== Icon =====
-    Text {
-        text: NetworkService.getIcon()
-        font.family: "Symbols Nerd Font"
-        font.pixelSize: Math.round(Settings.data.ui.iconSize * scaling)
-        color: NetworkService.getColor()
+    // Auto-size to content
+    implicitWidth: layout.implicitWidth
+    implicitHeight: layout.implicitHeight
 
-        // Smooth color transitions
-        Behavior on color {
-            ColorAnimation {
-                duration: Settings.data.ui.durationNormal
-                easing.type: Easing.InOutCubic
+    // ===== Layout =====
+    RowLayout {
+        id: layout
+        anchors.fill: parent
+        spacing: Math.round(Settings.data.ui.spacingXs * scaling)
+
+        // ===== Icon =====
+        Text {
+            text: NetworkService.getIcon()
+            font.family: "Symbols Nerd Font"
+            font.pixelSize: Math.round(Settings.data.ui.iconSize * scaling)
+            color: NetworkService.getColor()
+
+            // Smooth color transitions
+            Behavior on color {
+                ColorAnimation {
+                    duration: Settings.data.ui.durationNormal
+                    easing.type: Easing.InOutCubic
+                }
             }
         }
-    }
 
-    // ===== Status Text =====
-    Text {
-        text: NetworkService.getStatusText()
-        font.family: Settings.data.ui.fontFamily
-        font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
-        color: NetworkService.getColor()
+        // ===== Status Text =====
+        Text {
+            text: NetworkService.getStatusText()
+            font.family: Settings.data.ui.fontFamily
+            font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
+            color: NetworkService.getColor()
 
-        // Smooth color transitions
-        Behavior on color {
-            ColorAnimation {
-                duration: Settings.data.ui.durationNormal
-                easing.type: Easing.InOutCubic
+            // Smooth color transitions
+            Behavior on color {
+                ColorAnimation {
+                    duration: Settings.data.ui.durationNormal
+                    easing.type: Easing.InOutCubic
+                }
             }
         }
     }

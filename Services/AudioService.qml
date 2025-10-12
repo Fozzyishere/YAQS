@@ -21,6 +21,10 @@ Singleton {
     // ===== Audio sink reference =====
     readonly property var sink: Pipewire.defaultAudioSink
 
+    PwObjectTracker {
+        objects: [root.sink]
+    }
+
     // ===== Initialisation =====
     Component.onCompleted: {
         Logger.log("AudioService", "Initialised");
@@ -38,7 +42,7 @@ Singleton {
 
     // ===== Watch for audio property changes =====
     Connections {
-        target: root.sink?.audio
+        target: root.sink !== null ? root.sink.audio : null
         enabled: root.sink !== null
 
         function onVolumeChanged() {
@@ -61,9 +65,10 @@ Singleton {
                 return;
             }
 
-            _isReady = sink.ready === true;
+            _isReady = true;
             safeUpdateVolume();
             safeUpdateMuted();
+            Logger.log("AudioService", "Audio ready - Volume:", _volume, "Muted:", _muted);
         } catch (e) {
             Logger.error("AudioService", "Failed to update audio:", e);
             _isReady = false;

@@ -116,9 +116,9 @@ PopupWindow {
 
         // Calculate tooltip dimensions
         const tipWidth = Math.min(tooltipText.implicitWidth + (padding * 2), maxWidth);
-        root.width = tipWidth;
+        root.implicitWidth = tipWidth;
         const tipHeight = tooltipText.implicitHeight + (padding * 2);
-        root.height = tipHeight;
+        root.implicitHeight = tipHeight;
 
         // Get target position
         const targetGlobal = targetItem.mapToGlobal(0, 0);
