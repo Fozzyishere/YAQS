@@ -15,6 +15,7 @@ Singleton {
     // Configuration paths
     property string shellName: "quickshell"
     property string configDir: Quickshell.env("HOME") + "/.config/" + shellName + "/"
+    property string cacheDir: (Quickshell.env("XDG_CACHE_HOME") || Quickshell.env("HOME") + "/.cache") + "/" + shellName + "/"
     property string settingsFile: configDir + "settings.json"
 
     // Signal emitted when settings are loaded
@@ -23,6 +24,7 @@ Singleton {
     Component.onCompleted: {
         // Ensure config directory exists
         Quickshell.execDetached(["mkdir", "-p", configDir])
+        Quickshell.execDetached(["mkdir", "-p", cacheDir])
         directoriesCreated = true
 
         Logger.log("Settings", "Initializing settings system...")
@@ -240,6 +242,24 @@ Singleton {
         property JsonObject audio: JsonObject {
             property int volumeStep: 5
             property bool volumeOverdrive: false
+        }
+
+        // ==================== Launcher Configuration ====================
+        property JsonObject launcher: JsonObject {
+            // Launch behavior
+            property bool useApp2Unit: false
+            property string terminalCommand: "xterm -e"
+            
+            // Display and sorting
+            property bool sortByMostUsed: true
+            property list<string> favoriteApps: []
+            property int maxResults: 50
+            
+            // Position and appearance
+            property string position: "top_left"  // "top_left", "top_center", "top_right", "center", "bottom_left", "bottom_center", "bottom_right"
+            property real backgroundOpacity: 0.95
+            property int width: 350
+            property int height: 450
         }
     }
 

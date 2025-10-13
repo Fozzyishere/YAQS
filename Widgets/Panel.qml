@@ -175,11 +175,16 @@ Loader {
 
             // ===== Lifecycle =====
             Component.onCompleted: {
+                root.scaling = scaling;
                 Logger.log("Panel", "Opened", root.objectName);
                 dimmingOpacity = Settings.data.ui.opacityHeavy;
             }
 
             // ===== Scaling Updates =====
+            onScalingChanged: {
+                root.scaling = scaling;
+            }
+
             Connections {
                 target: Scaling
                 function onScaleChanged(screenName, scale) {

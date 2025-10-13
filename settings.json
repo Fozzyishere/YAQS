@@ -93,6 +93,18 @@
         "mWarning": "#fe8019",
         "mWarningContainer": "#d65d0e"
     },
+    "launcher": {
+        "backgroundOpacity": 1,
+        "favoriteApps": [
+        ],
+        "height": 450,
+        "maxResults": 50,
+        "position": "top_left",
+        "sortByMostUsed": true,
+        "terminalCommand": "kitty -e",
+        "useApp2Unit": true,
+        "width": 350
+    },
     "network": {
         "wifiEnabled": true
     },
@@ -100,7 +112,7 @@
         "screenScales": {
         }
     },
-    "settingsVersion": 1,
+    "settingsVersion": -147289728,
     "ui": {
         "durationFast": 100,
         "durationInstant": 0,
