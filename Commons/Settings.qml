@@ -33,7 +33,11 @@ Singleton {
 
         Logger.log("Settings", "Initializing settings system...")
 
-        // Trigger file loading
+        if (adapter.settingsVersion === undefined || adapter.settingsVersion < 1) {
+            adapter.settingsVersion = 1
+        }
+
+        // Set adapter connection
         settingsFileView.adapter = adapter
     }
 
