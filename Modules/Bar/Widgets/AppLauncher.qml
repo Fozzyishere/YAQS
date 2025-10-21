@@ -17,7 +17,11 @@ IconButton {
     onClicked: {
         const launcher = PanelService.getPanel("launcherPanel");
         if (launcher) {
-            launcher.toggle(root);
+            if (launcher.active && !launcher.isClosing) {
+                launcher.close();
+            } else {
+                PanelService.openPanelFromWidget(launcher, root);
+            }
         } else {
             Logger.warn("AppLauncher", "Launcher panel not registered");
         }

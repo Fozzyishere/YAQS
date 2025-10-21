@@ -24,11 +24,13 @@ ShellRoot {
 
     // Launcher panel
     Launcher {
-        screen: Quickshell.screens[0] || null
+        id: launcherPanel
+        objectName: "launcherPanel"
     }
 
     // Session menu panel
     SessionMenu {
-        screen: Quickshell.screens[0] || null
+        id: sessionMenuPanel
+        objectName: "sessionMenuPanel"
     }
 }

@@ -162,4 +162,70 @@ Singleton {
     function getPanelCount() {
         return Object.keys(registeredPanels).length;
     }
+
+    /**
+     * Open a panel on a specific screen
+     * @param panel - Panel object (or panel name string)
+     * @param screen - ShellScreen to open on
+     * @param buttonItem - Optional button widget for positioning
+     */
+    function openPanelOnScreen(panel, screen, buttonItem) {
+        // Allow passing panel name or panel object
+        const panelObj = typeof panel === 'string' ? getPanel(panel) : panel;
+
+        if (!panelObj) {
+            Logger.warn("PanelService", "Panel not found:", panel);
+            return;
+        }
+
+        // Set the screen before opening
+        if (screen) {
+            panelObj.screen = screen;
+            Logger.log("PanelService", "Opening", panelObj.objectName, "on screen", screen.name);
+        } else {
+            // Fallback to first screen if no screen provided
+            panelObj.screen = Quickshell.screens[0] || null;
+            Logger.warn("PanelService", "No screen provided, using first screen");
+        }
+
+        // Open the panel with optional button positioning
+        if (buttonItem !== undefined && buttonItem !== null) {
+            panelObj.open(buttonItem);
+        } else {
+            panelObj.open();
+        }
+    }
+
+    /**
+     * Helper: Get screen from a widget by traversing parent hierarchy
+     * @param widget - Widget to find screen for
+     * @return ShellScreen or null
+     */
+    function getScreenFromWidget(widget) {
+        if (!widget) return null;
+
+        // Try to find screen in widget's parent hierarchy
+        let current = widget;
+        while (current) {
+            if (current.screen) {
+                Logger.log("PanelService", "Found screen:", current.screen.name);
+                return current.screen;
+            }
+            current = current.parent;
+        }
+
+        // Fallback to first screen
+        Logger.warn("PanelService", "Could not find screen in widget hierarchy, using first screen");
+        return Quickshell.screens[0] || null;
+    }
+
+    /**
+     * Convenience: Open panel on widget's screen (auto-detect)
+     * @param panel - Panel object or name
+     * @param buttonItem - Widget that triggered the panel (will auto-detect screen)
+     */
+    function openPanelFromWidget(panel, buttonItem) {
+        const screen = getScreenFromWidget(buttonItem);
+        openPanelOnScreen(panel, screen, buttonItem);
+    }
 }

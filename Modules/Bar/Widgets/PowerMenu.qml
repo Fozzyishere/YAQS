@@ -16,7 +16,11 @@ IconButton {
     onClicked: {
         const sessionMenu = PanelService.getPanel("sessionMenuPanel");
         if (sessionMenu) {
-            sessionMenu.toggle(root);
+            if (sessionMenu.active && !sessionMenu.isClosing) {
+                sessionMenu.close();
+            } else {
+                PanelService.openPanelFromWidget(sessionMenu, root);
+            }
         } else {
             Logger.warn("PowerMenu", "Session menu panel not registered");
         }
