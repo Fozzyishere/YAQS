@@ -7,10 +7,14 @@ import Quickshell.Io
 Singleton {
     id: root
 
+    // Settings version - increment when schema changes
+    readonly property int currentSettingsVersion: 2
+
     // Access pattern: Settings.data.bar.height, Settings.data.colors.mPrimary
     readonly property alias data: adapter
     property bool isLoaded: false
     property bool directoriesCreated: false
+    property bool allowSave: false  // Prevent saves during initialization
 
     // Configuration paths
     property string shellName: "quickshell"
@@ -51,7 +55,11 @@ Singleton {
         watchChanges: true
 
         onFileChanged: reload()
-        onAdapterUpdated: saveTimer.start()
+        onAdapterUpdated: {
+            if (allowSave) {
+                saveTimer.start()
+            }
+        }
 
         onPathChanged: {
             if (path !== undefined) {
@@ -62,7 +70,12 @@ Singleton {
         onLoaded: function() {
             if (!isLoaded) {
                 Logger.log("Settings", "Settings loaded from: " + settingsFile)
+
+                upgradeSettings()
+                validateSettings()
+
                 isLoaded = true
+                allowSave = true  // Enable auto-save after initial load complete
                 settingsLoaded()
             }
         }
@@ -71,7 +84,9 @@ Singleton {
             if (error.toString().includes("No such file") || error === 2) {
                 // File doesn't exist, create with defaults
                 Logger.log("Settings", "No settings file found, creating with defaults")
+                adapter.settingsVersion = currentSettingsVersion
                 writeAdapter()
+                allowSave = true  // Enable auto-save for new installs
             } else {
                 Logger.error("Settings", "Failed to load settings:", error)
             }
@@ -324,5 +339,102 @@ Singleton {
         saveTimer.start()
 
         Logger.log("Settings", `Removed widget at index ${index} from ${section} section`)
+    }
+
+    // ==================== Settings Management Functions ====================
+
+    /**
+     * Save settings to disk
+     * Helper function to centralize save logic
+     */
+    function saveSettings() {
+        settingsFileView.writeAdapter()
+    }
+
+    /**
+     * Upgrade settings from older versions to current schema
+     * Runs automatically when settings are loaded
+     */
+    function upgradeSettings() {
+        // Check if upgrade is needed
+        if (adapter.settingsVersion >= currentSettingsVersion) {
+            return
+        }
+
+        Logger.log("Settings", "Upgrading settings from v" + adapter.settingsVersion + " to v" + currentSettingsVersion)
+
+        // Version 1 -> 2: Currently no new fields needed
+        // This structure is in place for future migrations
+        if (adapter.settingsVersion < 2) {
+            // Example: Add new settings if they don't exist
+            // if (!adapter.sessionMenu) {
+            //     adapter.sessionMenu = {
+            //         "confirmationDelay": 9000,
+            //         "enableConfirmation": true
+            //     }
+            // }
+
+            adapter.settingsVersion = 2
+            saveSettings()
+            Logger.log("Settings", "Upgraded to v2")
+        }
+
+        // Future migrations go here
+        // if (adapter.settingsVersion < 3) { ... }
+    }
+
+    /**
+     * Validate settings and fix invalid values
+     * Ensures data integrity and prevents crashes from corrupted settings
+     */
+    function validateSettings() {
+        var needsSave = false
+
+        // Validate UI settings
+        if (adapter.ui.fontSize < 1 || adapter.ui.fontSize > 72) {
+            Logger.warn("Settings", "Invalid fontSize (" + adapter.ui.fontSize + "), resetting to 7")
+            adapter.ui.fontSize = 7
+            needsSave = true
+        }
+
+        if (adapter.ui.iconSize < 1 || adapter.ui.iconSize > 100) {
+            Logger.warn("Settings", "Invalid iconSize (" + adapter.ui.iconSize + "), resetting to 9")
+            adapter.ui.iconSize = 9
+            needsSave = true
+        }
+
+        // Validate bar settings
+        if (adapter.bar.height < 10 || adapter.bar.height > 200) {
+            Logger.warn("Settings", "Invalid bar height (" + adapter.bar.height + "), resetting to 22")
+            adapter.bar.height = 22
+            needsSave = true
+        }
+
+        var validPositions = ["top", "bottom", "left", "right"]
+        if (!validPositions.includes(adapter.bar.position)) {
+            Logger.warn("Settings", "Invalid bar position (" + adapter.bar.position + "), resetting to 'top'")
+            adapter.bar.position = "top"
+            needsSave = true
+        }
+
+        // Validate launcher settings
+        if (adapter.launcher.maxResults < 1 || adapter.launcher.maxResults > 500) {
+            Logger.warn("Settings", "Invalid launcher maxResults (" + adapter.launcher.maxResults + "), resetting to 50")
+            adapter.launcher.maxResults = 50
+            needsSave = true
+        }
+
+        // Validate audio settings
+        if (adapter.audio.volumeStep < 1 || adapter.audio.volumeStep > 50) {
+            Logger.warn("Settings", "Invalid audio volumeStep (" + adapter.audio.volumeStep + "), resetting to 5")
+            adapter.audio.volumeStep = 5
+            needsSave = true
+        }
+
+        // Save if any corrections were made
+        if (needsSave) {
+            Logger.log("Settings", "Validation complete, saving corrected settings")
+            saveSettings()
+        }
     }
 }
