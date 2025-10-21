@@ -207,7 +207,7 @@ Singleton {
 
     Timer {
         id: pollTimer
-        interval: 500  // Poll every 500ms
+        interval: Settings.data.brightness?.pollInterval ?? 500
         running: false
         repeat: true
 
@@ -313,7 +313,7 @@ Singleton {
     function increaseBrightness(step) {
         if (!isAvailable) return;
 
-        const targetStep = step || 5;
+        const targetStep = step || (Settings.data.brightness?.step ?? 5);
         const targetValue = _queuedBrightness >= 0 ? _queuedBrightness : brightness;
         setBrightness(targetValue + targetStep);
     }
@@ -321,7 +321,7 @@ Singleton {
     function decreaseBrightness(step) {
         if (!isAvailable) return;
 
-        const targetStep = step || 5;
+        const targetStep = step || (Settings.data.brightness?.step ?? 5);
         const targetValue = _queuedBrightness >= 0 ? _queuedBrightness : brightness;
         setBrightness(targetValue - targetStep);
     }

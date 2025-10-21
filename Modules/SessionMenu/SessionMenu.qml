@@ -11,14 +11,14 @@ Panel {
 
     // ===== Panel Configuration =====
     objectName: "sessionMenuPanel"
-    preferredWidth: 280
-    preferredHeight: 380
+    preferredWidth: Settings.data.sessionMenu?.width ?? 280
+    preferredHeight: Settings.data.sessionMenu?.height ?? 380
     panelAnchorRight: true
     panelAnchorTop: true
     panelKeyboardFocus: true
 
     // ===== Timer Properties =====
-    property int timerDuration: 9000  // 9 seconds
+    property int timerDuration: Settings.data.sessionMenu?.confirmationDelay ?? 9000
     property string pendingAction: ""
     property bool timerActive: false
     property int timeRemaining: 0

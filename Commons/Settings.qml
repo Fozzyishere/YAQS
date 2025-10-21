@@ -8,7 +8,7 @@ Singleton {
     id: root
 
     // Settings version - increment when schema changes
-    readonly property int currentSettingsVersion: 2
+    readonly property int currentSettingsVersion: 3
 
     // Access pattern: Settings.data.bar.height, Settings.data.colors.mPrimary
     readonly property alias data: adapter
@@ -255,6 +255,7 @@ Singleton {
         // ==================== Network Configuration ====================
         property JsonObject network: JsonObject {
             property bool wifiEnabled: true
+            property int updateInterval: 30000  // WiFi state polling interval (ms)
         }
 
         // ==================== Audio Configuration ====================
@@ -263,22 +264,36 @@ Singleton {
             property bool volumeOverdrive: false
         }
 
+        // ==================== Brightness Configuration ====================
+        property JsonObject brightness: JsonObject {
+            property int pollInterval: 500  // Polling interval for light backend (ms)
+            property int step: 5            // Brightness adjustment step size
+        }
+
         // ==================== Launcher Configuration ====================
         property JsonObject launcher: JsonObject {
             // Launch behavior
             property bool useApp2Unit: false
             property string terminalCommand: "xterm -e"
-            
+
             // Display and sorting
             property bool sortByMostUsed: true
             property list<string> favoriteApps: []
             property int maxResults: 50
-            
+
             // Position and appearance
             property string position: "top_left"  // "top_left", "top_center", "top_right", "center", "bottom_left", "bottom_center", "bottom_right"
             property real backgroundOpacity: 0.95
             property int width: 350
             property int height: 450
+        }
+
+        // ==================== Session Menu Configuration ====================
+        property JsonObject sessionMenu: JsonObject {
+            property int confirmationDelay: 9000  // Countdown duration (ms)
+            property bool enableConfirmation: true
+            property int width: 280
+            property int height: 380
         }
     }
 
@@ -367,24 +382,48 @@ Singleton {
 
         Logger.log("Settings", "Upgrading settings from v" + adapter.settingsVersion + " to v" + currentSettingsVersion)
 
-        // Version 1 -> 2: Currently no new fields needed
-        // This structure is in place for future migrations
+        // Version 1 -> 2: No schema changes (validation improvements only)
         if (adapter.settingsVersion < 2) {
-            // Example: Add new settings if they don't exist
-            // if (!adapter.sessionMenu) {
-            //     adapter.sessionMenu = {
-            //         "confirmationDelay": 9000,
-            //         "enableConfirmation": true
-            //     }
-            // }
-
             adapter.settingsVersion = 2
             saveSettings()
             Logger.log("Settings", "Upgraded to v2")
         }
 
+        // Version 2 -> 3: Add brightness, sessionMenu, network.updateInterval
+        if (adapter.settingsVersion < 3) {
+            // Add brightness settings if missing
+            if (!adapter.brightness) {
+                adapter.brightness = {
+                    "pollInterval": 500,
+                    "step": 5
+                }
+                Logger.log("Settings", "Added brightness settings")
+            }
+
+            // Add sessionMenu settings if missing
+            if (!adapter.sessionMenu) {
+                adapter.sessionMenu = {
+                    "confirmationDelay": 9000,
+                    "enableConfirmation": true,
+                    "width": 280,
+                    "height": 380
+                }
+                Logger.log("Settings", "Added sessionMenu settings")
+            }
+
+            // Add network.updateInterval if missing
+            if (!adapter.network.updateInterval) {
+                adapter.network.updateInterval = 30000
+                Logger.log("Settings", "Added network.updateInterval")
+            }
+
+            adapter.settingsVersion = 3
+            saveSettings()
+            Logger.log("Settings", "Upgraded to v3")
+        }
+
         // Future migrations go here
-        // if (adapter.settingsVersion < 3) { ... }
+        // if (adapter.settingsVersion < 4) { ... }
     }
 
     /**
@@ -432,6 +471,45 @@ Singleton {
         if (adapter.audio.volumeStep < 1 || adapter.audio.volumeStep > 50) {
             Logger.warn("Settings", "Invalid audio volumeStep (" + adapter.audio.volumeStep + "), resetting to 5")
             adapter.audio.volumeStep = 5
+            needsSave = true
+        }
+
+        // Validate brightness settings
+        if (adapter.brightness.pollInterval < 100 || adapter.brightness.pollInterval > 5000) {
+            Logger.warn("Settings", "Invalid brightness pollInterval (" + adapter.brightness.pollInterval + "), resetting to 500")
+            adapter.brightness.pollInterval = 500
+            needsSave = true
+        }
+
+        if (adapter.brightness.step < 1 || adapter.brightness.step > 50) {
+            Logger.warn("Settings", "Invalid brightness step (" + adapter.brightness.step + "), resetting to 5")
+            adapter.brightness.step = 5
+            needsSave = true
+        }
+
+        // Validate network settings
+        if (adapter.network.updateInterval < 5000 || adapter.network.updateInterval > 300000) {
+            Logger.warn("Settings", "Invalid network updateInterval (" + adapter.network.updateInterval + "), resetting to 30000")
+            adapter.network.updateInterval = 30000
+            needsSave = true
+        }
+
+        // Validate sessionMenu settings
+        if (adapter.sessionMenu.confirmationDelay < 1000 || adapter.sessionMenu.confirmationDelay > 60000) {
+            Logger.warn("Settings", "Invalid sessionMenu confirmationDelay (" + adapter.sessionMenu.confirmationDelay + "), resetting to 9000")
+            adapter.sessionMenu.confirmationDelay = 9000
+            needsSave = true
+        }
+
+        if (adapter.sessionMenu.width < 200 || adapter.sessionMenu.width > 600) {
+            Logger.warn("Settings", "Invalid sessionMenu width (" + adapter.sessionMenu.width + "), resetting to 280")
+            adapter.sessionMenu.width = 280
+            needsSave = true
+        }
+
+        if (adapter.sessionMenu.height < 200 || adapter.sessionMenu.height > 800) {
+            Logger.warn("Settings", "Invalid sessionMenu height (" + adapter.sessionMenu.height + "), resetting to 380")
+            adapter.sessionMenu.height = 380
             needsSave = true
         }
 

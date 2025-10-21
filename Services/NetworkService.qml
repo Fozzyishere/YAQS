@@ -204,7 +204,7 @@ Singleton {
     // ===== Auto-update Timer =====
     Timer {
         id: updateTimer
-        interval: 30000  // Update every 30 seconds
+        interval: Settings.data.network?.updateInterval ?? 30000
         running: false
         repeat: true
         onTriggered: updateWifiState()
