@@ -13,7 +13,10 @@ ShellRoot {
     Component.onCompleted: {
         Logger.log("Shell", "Shell started successfully");
 
-        // Initialize new services for testing
+        // Initialize core services
+        MatugenService.init();  // Initialize theme service
+
+        // Initialize hardware services
         NetworkService.checkAvailability();
         BrightnessService.detectBackend();
         MediaService.updateCurrentPlayer();  // Initialize media player tracking

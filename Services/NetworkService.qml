@@ -231,9 +231,9 @@ Singleton {
         if (!isConnected) return Color.mError;
 
         // Signal strength color
-        if (signalStrength >= 60) return Color.mPrimary;
-        if (signalStrength >= 30) return Color.mTertiary;
-        return Color.mWarning;
+        if (signalStrength >= 60) return Color.mPrimary;    // Good signal
+        if (signalStrength >= 30) return Color.mTertiary;   // Medium signal
+        return Color.mSecondary;  // Low signal = caution
     }
 
     // Get status text for display

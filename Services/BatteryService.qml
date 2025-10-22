@@ -165,13 +165,13 @@ Singleton {
         }
 
         if (isCharging) {
-            return Color.mSuccess;  // Charging = green
+            return Color.mTertiary;  // Charging = positive state
         }
 
         // Color based on charge level
         if (batteryPercent < 10) return Color.mError;    // Critical = red
         if (batteryPercent < 20) return Color.mError;    // Low = red
-        if (batteryPercent < 40) return Color.mTertiary;    // Medium = yellow
+        if (batteryPercent < 40) return Color.mSecondary;    // Medium = caution
         return Color.mOnSurface;  // Normal = default foreground
     }
 }

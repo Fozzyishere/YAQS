@@ -86,7 +86,15 @@
         "height": 380,
         "width": 280
     },
-    "settingsVersion": 3,
+    "settingsVersion": 4,
+    "theme": {
+        "autoRegenerationInterval": 3600000,
+        "autoReload": true,
+        "colorMode": "dark",
+        "enableNotifications": true,
+        "regenerationMode": "auto",
+        "schemeType": "scheme-tonal-spot"
+    },
     "ui": {
         "fontSize": 7,
         "iconSize": 9

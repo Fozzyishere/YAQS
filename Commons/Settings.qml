@@ -8,7 +8,7 @@ Singleton {
     id: root
 
     // Settings version - increment when schema changes
-    readonly property int currentSettingsVersion: 3
+    readonly property int currentSettingsVersion: 4
 
     // Access pattern: Settings.data.bar.height, Settings.data.colors.mPrimary
     readonly property alias data: adapter
@@ -200,6 +200,16 @@ Singleton {
             property int width: 280
             property int height: 380
         }
+
+        // ==================== Theme Configuration ====================
+        property JsonObject theme: JsonObject {
+            property bool autoReload: true
+            property bool enableNotifications: true
+            property string regenerationMode: "auto"  // "auto", "manual", "scheduled"
+            property int autoRegenerationInterval: 3600000  // 1 hour in ms
+            property string colorMode: "dark"  // "dark", "light"
+            property string schemeType: "scheme-tonal-spot"  // Matugen scheme variant
+        }
     }
 
     // ==================== Utility Functions ====================
@@ -327,8 +337,28 @@ Singleton {
             Logger.log("Settings", "Upgraded to v3")
         }
 
+        // Version 3 -> 4: Add theme settings
+        if (adapter.settingsVersion < 4) {
+            // Add theme settings if missing
+            if (!adapter.theme) {
+                adapter.theme = {
+                    "autoReload": true,
+                    "enableNotifications": true,
+                    "regenerationMode": "auto",
+                    "autoRegenerationInterval": 3600000,
+                    "colorMode": "dark",
+                    "schemeType": "scheme-tonal-spot"
+                }
+                Logger.log("Settings", "Added theme settings")
+            }
+
+            adapter.settingsVersion = 4
+            saveSettings()
+            Logger.log("Settings", "Upgraded to v4")
+        }
+
         // Future migrations go here
-        // if (adapter.settingsVersion < 4) { ... }
+        // if (adapter.settingsVersion < 5) { ... }
     }
 
     /**
@@ -423,6 +453,27 @@ Singleton {
         if (adapter.sessionMenu.height < 200 || adapter.sessionMenu.height > 800) {
             Logger.warn("Settings", "Invalid sessionMenu height (" + adapter.sessionMenu.height + "), resetting to 380")
             adapter.sessionMenu.height = 380
+            needsSave = true
+        }
+
+        // Validate theme settings
+        if (adapter.theme.autoRegenerationInterval < 60000 || adapter.theme.autoRegenerationInterval > 86400000) {
+            Logger.warn("Settings", "Invalid theme autoRegenerationInterval (" + adapter.theme.autoRegenerationInterval + "), resetting to 3600000")
+            adapter.theme.autoRegenerationInterval = 3600000
+            needsSave = true
+        }
+
+        var validRegenerationModes = ["auto", "manual", "scheduled"]
+        if (adapter.theme.regenerationMode && !validRegenerationModes.includes(adapter.theme.regenerationMode)) {
+            Logger.warn("Settings", "Invalid theme regenerationMode (" + adapter.theme.regenerationMode + "), resetting to auto")
+            adapter.theme.regenerationMode = "auto"
+            needsSave = true
+        }
+
+        var validColorModes = ["dark", "light"]
+        if (adapter.theme.colorMode && !validColorModes.includes(adapter.theme.colorMode)) {
+            Logger.warn("Settings", "Invalid theme colorMode (" + adapter.theme.colorMode + "), resetting to dark")
+            adapter.theme.colorMode = "dark"
             needsSave = true
         }
 
