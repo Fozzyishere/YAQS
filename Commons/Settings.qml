@@ -144,6 +144,12 @@ Singleton {
             }
         }
 
+        // ==================== UI Configuration ====================
+        property JsonObject ui: JsonObject {
+            property int fontSize: 7
+            property int iconSize: 9
+        }
+
         // ==================== Scaling Configuration ====================
         property JsonObject scaling: JsonObject {
             // Per-screen DPI scale overrides
@@ -332,14 +338,22 @@ Singleton {
     function validateSettings() {
         var needsSave = false
 
+        if (!adapter.ui) {
+            adapter.ui = {
+                "fontSize": 7,
+                "iconSize": 9
+            }
+            needsSave = true
+        }
+
         // Validate UI settings
-        if (adapter.ui.fontSize < 1 || adapter.ui.fontSize > 72) {
+        if (adapter.ui.fontSize === undefined || adapter.ui.fontSize < 1 || adapter.ui.fontSize > 72) {
             Logger.warn("Settings", "Invalid fontSize (" + adapter.ui.fontSize + "), resetting to 7")
             adapter.ui.fontSize = 7
             needsSave = true
         }
 
-        if (adapter.ui.iconSize < 1 || adapter.ui.iconSize > 100) {
+        if (adapter.ui.iconSize === undefined || adapter.ui.iconSize < 1 || adapter.ui.iconSize > 100) {
             Logger.warn("Settings", "Invalid iconSize (" + adapter.ui.iconSize + "), resetting to 9")
             adapter.ui.iconSize = 9
             needsSave = true

@@ -86,5 +86,9 @@
         "height": 380,
         "width": 280
     },
-    "settingsVersion": 3
+    "settingsVersion": 3,
+    "ui": {
+        "fontSize": 7,
+        "iconSize": 9
+    }
 }
