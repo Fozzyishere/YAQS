@@ -227,13 +227,13 @@ Singleton {
 
     // Get color based on state (using Settings colors)
     function getColor() {
-        if (!isEnabled) return Settings.data.colors.mOutlineVariant;
-        if (!isConnected) return Settings.data.colors.mError;
+        if (!isEnabled) return Color.mOutlineVariant;
+        if (!isConnected) return Color.mError;
 
         // Signal strength color
-        if (signalStrength >= 60) return Settings.data.colors.mPrimary;
-        if (signalStrength >= 30) return Settings.data.colors.mTertiary;
-        return Settings.data.colors.mWarning;
+        if (signalStrength >= 60) return Color.mPrimary;
+        if (signalStrength >= 30) return Color.mTertiary;
+        return Color.mWarning;
     }
 
     // Get status text for display

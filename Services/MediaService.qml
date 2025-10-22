@@ -342,9 +342,9 @@ Singleton {
 
     // Get color based on state
     function getColor() {
-        if (!currentPlayer) return Settings.data.colors.mOutlineVariant;
-        if (isPlaying) return Settings.data.colors.mPrimary;
-        return Settings.data.colors.mOnSurface;
+        if (!currentPlayer) return Color.mOutlineVariant;
+        if (isPlaying) return Color.mPrimary;
+        return Color.mOnSurface;
     }
 
     // Get formatted track display

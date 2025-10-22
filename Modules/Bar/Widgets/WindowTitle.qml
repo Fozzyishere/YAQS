@@ -29,7 +29,7 @@ Item {
 
     Behavior on opacity {
         NumberAnimation {
-            duration: Settings.data.ui.durationNormal
+            duration: Style.durationNormal
             easing.type: Easing.OutCubic
         }
     }
@@ -39,8 +39,8 @@ Item {
         id: fullTitleMetrics
         visible: false
         text: windowTitle
-        font.family: Settings.data.ui.fontFamily
-        font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
+        font.family: Style.fontFamily
+        font.pixelSize: Math.round(Style.fontSize * scaling)
     }
 
     // ===== Title container with clipping =====
@@ -72,18 +72,18 @@ Item {
                 Text {
                     id: titleText
                     text: windowTitle
-                    font.family: Settings.data.ui.fontFamily
-                    font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
-                    color: Settings.data.colors.mOutlineVariant
+                    font.family: Style.fontFamily
+                    font.pixelSize: Math.round(Style.fontSize * scaling)
+                    color: Color.mOutlineVariant
                     verticalAlignment: Text.AlignVCenter
                 }
 
                 // Duplicate text for seamless loop
                 Text {
                     text: windowTitle
-                    font.family: Settings.data.ui.fontFamily
-                    font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
-                    color: Settings.data.colors.mOutlineVariant
+                    font.family: Style.fontFamily
+                    font.pixelSize: Math.round(Style.fontSize * scaling)
+                    color: Color.mOutlineVariant
                     verticalAlignment: Text.AlignVCenter
                     visible: titleContainer.needsScrolling
                 }

@@ -176,13 +176,13 @@ Singleton {
     // ===== Helper: Get color based on state =====
     function getColor() {
         if (!isReady) {
-            return Settings.data.colors.mOutlineVariant;
+            return Color.mOutlineVariant;
         }
 
         if (muted) {
-            return Settings.data.colors.mOutlineVariant;  // Dimmed when muted
+            return Color.mOutlineVariant;  // Dimmed when muted
         }
 
-        return Settings.data.colors.mPrimary;  // Primary color when active
+        return Color.mPrimary;  // Primary color when active
     }
 }

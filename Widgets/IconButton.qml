@@ -7,8 +7,8 @@ Rectangle {
 
     // Public properties
     property string icon: ""
-    property int size: Settings.data.ui.iconSize
-    property color iconColor: Settings.data.colors.mOnSurface
+    property int size: Style.iconSize
+    property color iconColor: Color.mOnSurface
     property real scaling: 1.0
 
     // Signals
@@ -18,18 +18,18 @@ Rectangle {
     property bool _hovered: false
 
     // Dimensions
-    implicitWidth: Math.round((size + Settings.data.ui.spacingS * 2) * scaling)
-    implicitHeight: Math.round((size + Settings.data.ui.spacingS * 2) * scaling)
+    implicitWidth: Math.round((size + Style.spacingS * 2) * scaling)
+    implicitHeight: Math.round((size + Style.spacingS * 2) * scaling)
 
     // Appearance
-    color: _hovered ? Settings.data.colors.mSurfaceVariant : "transparent"
-    radius: Settings.data.ui.radiusS
+    color: _hovered ? Color.mSurfaceVariant : Color.transparent
+    radius: Style.radiusS
 
     // Icon
     Text {
         anchors.centerIn: parent
         text: root.icon
-        font.family: "JetBrainsMono Nerd Font"
+        font.family: Style.fontFamily
         font.pixelSize: Math.round(root.size * root.scaling)
         color: root.iconColor
     }
@@ -48,7 +48,7 @@ Rectangle {
     // Color transition
     Behavior on color {
         ColorAnimation {
-            duration: Settings.data.ui.durationFast
+            duration: Style.durationFast
         }
     }
 }

@@ -21,7 +21,7 @@ Loader {
     property real preferredHeightRatio: 0.0  // If > 0, uses ratio of screen height
 
     // ===== Appearance =====
-    property color panelBackgroundColor: Settings.data.colors.mSurface
+    property color panelBackgroundColor: Color.mSurface
     property bool draggable: false
 
     // ===== Positioning Anchors =====
@@ -153,7 +153,7 @@ Loader {
     // ===== Close Timer =====
     Timer {
         id: hideTimer
-        interval: Settings.data.ui.durationSlow
+        interval: Style.durationSlow
         repeat: false
         onTriggered: closeCompleted()
     }
@@ -177,7 +177,7 @@ Loader {
             Component.onCompleted: {
                 root.scaling = scaling;
                 Logger.log("Panel", "Opened", root.objectName);
-                dimmingOpacity = Settings.data.ui.opacityHeavy;
+                dimmingOpacity = Style.opacityHeavy;
             }
 
             // ===== Scaling Updates =====
@@ -210,8 +210,8 @@ Loader {
             // ===== Window Configuration =====
             visible: true
             color: Settings.data.general && Settings.data.general.dimDesktop && !root.isMasked
-                ? Qt.alpha(Settings.data.colors.mShadow, dimmingOpacity)
-                : "transparent"
+                ? Qt.alpha(Color.mShadow, dimmingOpacity)
+                : Color.transparent
 
             WlrLayershell.exclusionMode: ExclusionMode.Ignore
             WlrLayershell.namespace: "yaqs-panel"
@@ -227,7 +227,7 @@ Loader {
 
             Behavior on color {
                 ColorAnimation {
-                    duration: Settings.data.ui.durationSlow
+                    duration: Style.durationSlow
                 }
             }
 
@@ -256,8 +256,8 @@ Loader {
             Rectangle {
                 id: panelBackground
                 color: panelBackgroundColor
-                radius: Settings.data.ui.radiusL * scaling
-                border.color: Settings.data.colors.mOutline
+                radius: Style.radiusL * scaling
+                border.color: Color.mOutline
                 border.width: Math.max(1, 2 * scaling)
 
                 // ===== Dragging Support =====
@@ -275,7 +275,7 @@ Loader {
                         w = preferredWidth * scaling;
                     }
                     // Clamp to screen bounds
-                    return Math.min(w, (screen?.width || 1920) - Settings.data.ui.spacingL * 2);
+                    return Math.min(w, (screen?.width || 1920) - Style.spacingL * 2);
                 }
 
                 height: {
@@ -287,7 +287,7 @@ Loader {
                     }
                     // Clamp to screen bounds
                     const barHeight = Settings.data.bar.height * scaling;
-                    return Math.min(h, (screen?.height || 1080) - barHeight - Settings.data.ui.spacingL * 2);
+                    return Math.min(h, (screen?.height || 1080) - barHeight - Style.spacingL * 2);
                 }
 
                 // ===== Animation =====
@@ -298,14 +298,14 @@ Loader {
 
                 // ===== Margin Calculations (Bar-aware) =====
                 property real marginTop: {
-                    if (!barIsVisible) return Settings.data.ui.spacingS * scaling;
+                    if (!barIsVisible) return Style.spacingS * scaling;
                     if (panelAnchorVerticalCenter) return 0;
 
                     if (barPosition === "top") {
                         const barMargin = (Settings.data.bar.height + Settings.data.bar.marginTop) * scaling;
-                        return barMargin + Settings.data.ui.spacingS * scaling;
+                        return barMargin + Style.spacingS * scaling;
                     }
-                    return Settings.data.ui.spacingS * scaling;
+                    return Style.spacingS * scaling;
                 }
 
                 property real marginBottom: {
@@ -313,9 +313,9 @@ Loader {
 
                     if (barPosition === "bottom") {
                         const barMargin = (Settings.data.bar.height + Settings.data.bar.marginBottom) * scaling;
-                        return barMargin + Settings.data.ui.spacingS * scaling;
+                        return barMargin + Style.spacingS * scaling;
                     }
-                    return Settings.data.ui.spacingS * scaling;
+                    return Style.spacingS * scaling;
                 }
 
                 property real marginLeft: {
@@ -323,9 +323,9 @@ Loader {
 
                     if (barPosition === "left") {
                         const barMargin = (Settings.data.bar.height + Settings.data.bar.marginSide) * scaling;
-                        return barMargin + Settings.data.ui.spacingS * scaling;
+                        return barMargin + Style.spacingS * scaling;
                     }
-                    return Settings.data.ui.spacingS * scaling;
+                    return Style.spacingS * scaling;
                 }
 
                 property real marginRight: {
@@ -333,9 +333,9 @@ Loader {
 
                     if (barPosition === "right") {
                         const barMargin = (Settings.data.bar.height + Settings.data.bar.marginSide) * scaling;
-                        return barMargin + Settings.data.ui.spacingS * scaling;
+                        return barMargin + Style.spacingS * scaling;
                     }
-                    return Settings.data.ui.spacingS * scaling;
+                    return Style.spacingS * scaling;
                 }
 
                 // ===== Position Calculation =====
@@ -409,14 +409,14 @@ Loader {
                 // ===== Animation Behaviors =====
                 Behavior on scale {
                     NumberAnimation {
-                        duration: Settings.data.ui.durationSlow
+                        duration: Style.durationSlow
                         easing.type: Easing.OutExpo
                     }
                 }
 
                 Behavior on opacity {
                     NumberAnimation {
-                        duration: Settings.data.ui.durationNormal
+                        duration: Style.durationNormal
                         easing.type: Easing.OutQuad
                     }
                 }
@@ -457,7 +457,7 @@ Loader {
                         const nx = dragStartX + translation.x;
                         const ny = dragStartY + translation.y;
 
-                        const baseGap = Settings.data.ui.spacingS * scaling;
+                        const baseGap = Style.spacingS * scaling;
                         const insetLeft = baseGap + panelBackground.marginLeft;
                         const insetRight = baseGap + panelBackground.marginRight;
                         const insetTop = baseGap + panelBackground.marginTop;
@@ -477,8 +477,8 @@ Loader {
                 Rectangle {
                     anchors.fill: parent
                     anchors.margins: 0
-                    color: "transparent"
-                    border.color: Settings.data.colors.mPrimary
+                    color: Color.transparent
+                    border.color: Color.mPrimary
                     border.width: Math.max(2, 3 * scaling)
                     radius: parent.radius
                     visible: panelBackground.isDragged && dragHandler.active
@@ -489,8 +489,8 @@ Loader {
                     Rectangle {
                         anchors.fill: parent
                         anchors.margins: 0
-                        color: "transparent"
-                        border.color: Settings.data.colors.mPrimary
+                        color: Color.transparent
+                        border.color: Color.mPrimary
                         border.width: Math.max(1, 1 * scaling)
                         radius: parent.radius
                         opacity: 0.3

@@ -11,8 +11,8 @@ IconButton {
     property real scaling: 1.0
 
     icon: ""  // Nerd Font: fa-power-off
-    size: Math.round(Settings.data.ui.iconSize * scaling)
-    iconColor: Settings.data.colors.mPrimary
+    size: Math.round(Style.iconSize * scaling)
+    iconColor: Color.mPrimary
     onClicked: {
         const sessionMenu = PanelService.getPanel("sessionMenuPanel");
         if (sessionMenu) {

@@ -62,22 +62,22 @@ Variants {
 
                 Rectangle {
                     anchors.fill: parent
-                    color: Settings.data.colors.mSurfaceContainer
-                    border.color: Settings.data.colors.mOutlineVariant
+                    color: Color.mSurfaceContainer
+                    border.color: Color.mOutlineVariant
                     border.width: 2
-                    radius: Settings.data.ui.radiusM
+                    radius: Style.radiusM
 
                     // Left and right sections in RowLayout
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: Math.round(Settings.data.ui.spacingM * scaling)
-                        anchors.rightMargin: Math.round(Settings.data.ui.spacingM * scaling)
-                        spacing: Math.round(Settings.data.ui.spacingM * scaling)
+                        anchors.leftMargin: Math.round(Style.spacingM * scaling)
+                        anchors.rightMargin: Math.round(Style.spacingM * scaling)
+                        spacing: Math.round(Style.spacingM * scaling)
 
                         RowLayout {
                             id: leftSection
                             Layout.alignment: Qt.AlignLeft
-                            spacing: Math.round(Settings.data.ui.spacingS * scaling)
+                            spacing: Math.round(Style.spacingS * scaling)
 
                             Repeater {
                                 model: Settings.data.bar.widgets.left
@@ -102,7 +102,7 @@ Variants {
                         RowLayout {
                             id: rightSection
                             Layout.alignment: Qt.AlignRight
-                            spacing: Math.round(Settings.data.ui.spacingS * scaling)
+                            spacing: Math.round(Style.spacingS * scaling)
 
                             Repeater {
                                 model: Settings.data.bar.widgets.right
@@ -126,7 +126,7 @@ Variants {
                         id: centerSection
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: Math.round(Settings.data.ui.spacingXs * scaling)
+                        spacing: Math.round(Style.spacingXs * scaling)
 
                         Repeater {
                             model: Settings.data.bar.widgets.center

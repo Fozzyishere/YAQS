@@ -22,15 +22,15 @@ RowLayout {
     readonly property bool showTime: widgetSettings.showTime ?? widgetMetadata.showTime ?? true
     readonly property bool showDate: widgetSettings.showDate ?? widgetMetadata.showDate ?? true
 
-    spacing: Math.round(Settings.data.ui.spacingS * scaling)
+    spacing: Math.round(Style.spacingS * scaling)
 
     // Time
     Text {
         visible: showTime
         text: Qt.formatTime(Time.current, timeFormat)
-        font.family: Settings.data.ui.fontFamily
-        font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
-        color: Settings.data.colors.mOnSurface
+        font.family: Style.fontFamily
+        font.pixelSize: Math.round(Style.fontSize * scaling)
+        color: Color.mOnSurface
     }
 
     // Separator
@@ -38,7 +38,7 @@ RowLayout {
         visible: showTime && showDate
         width: 1
         height: Math.round(Settings.data.bar.height * 0.5 * scaling)
-        color: Settings.data.colors.mOutlineVariant
+        color: Color.mOutlineVariant
         opacity: 0.3
     }
 
@@ -46,8 +46,8 @@ RowLayout {
     Text {
         visible: showDate
         text: Qt.formatDate(Time.current, dateFormat)
-        font.family: Settings.data.ui.fontFamily
-        font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
-        color: Settings.data.colors.mOnSurface
+        font.family: Style.fontFamily
+        font.pixelSize: Math.round(Style.fontSize * scaling)
+        color: Color.mOnSurface
     }
 }

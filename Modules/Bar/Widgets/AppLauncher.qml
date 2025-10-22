@@ -11,8 +11,8 @@ IconButton {
     property real scaling: 1.0
 
     icon: ""  // Nerd Font: fa-bars (menu icon)
-    size: Math.round(Settings.data.ui.iconSize * scaling)
-    iconColor: Settings.data.colors.mPrimary  // Primary color
+    size: Math.round(Style.iconSize * scaling)
+    iconColor: Color.mPrimary  // Primary color
 
     onClicked: {
         const launcher = PanelService.getPanel("launcherPanel");

@@ -21,7 +21,7 @@ Panel {
     preferredHeight: Settings.data.launcher.height
 
     panelKeyboardFocus: true
-    panelBackgroundColor: Qt.alpha(Settings.data.colors.mSurface, Settings.data.launcher.backgroundOpacity)
+    panelBackgroundColor: Qt.alpha(Color.mSurface, Settings.data.launcher.backgroundOpacity)
 
     // ===== Positioning =====
     // Position based on user preference
@@ -339,20 +339,20 @@ Panel {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Math.round(Settings.data.ui.spacingL * scaling)
-            spacing: Math.round(Settings.data.ui.spacingM * scaling)
+            anchors.margins: Math.round(Style.spacingL * scaling)
+            spacing: Math.round(Style.spacingM * scaling)
 
             // ===== Header =====
             RowLayout {
                 Layout.fillWidth: true
-                spacing: Math.round(Settings.data.ui.spacingM * scaling)
+                spacing: Math.round(Style.spacingM * scaling)
 
                 Text {
                     text: "Applications"
-                    font.family: Settings.data.ui.fontFamily
-                    font.pixelSize: Math.round((Settings.data.ui.fontSizeXlarge + 4) * scaling)
+                    font.family: Style.fontFamily
+                    font.pixelSize: Math.round((Style.fontSizeXlarge + 4) * scaling)
                     font.weight: Font.Bold
-                    color: Settings.data.colors.mOnSurface
+                    color: Color.mOnSurface
                     Layout.fillWidth: true
                 }
 
@@ -360,13 +360,13 @@ Panel {
                 Rectangle {
                     Layout.preferredWidth: Math.round(50 * scaling)
                     Layout.preferredHeight: Math.round(30 * scaling)
-                    radius: Settings.data.ui.radiusM
+                    radius: Style.radiusM
                     color: sortToggleMouseArea.containsMouse 
-                        ? Settings.data.colors.mPrimaryContainer 
-                        : Settings.data.colors.mSurfaceVariant
+                        ? Color.mPrimaryContainer 
+                        : Color.mSurfaceVariant
 
                     Behavior on color {
-                        ColorAnimation { duration: Settings.data.ui.durationFast }
+                        ColorAnimation { duration: Style.durationFast }
                     }
 
                     Text {
@@ -390,9 +390,9 @@ Panel {
                         anchors.top: parent.bottom
                         anchors.topMargin: Math.round(4 * scaling)
                         text: sortByMostUsed ? "Most Used" : "Alphabetical"
-                        font.family: Settings.data.ui.fontFamily
-                        font.pixelSize: Math.round(Settings.data.ui.fontSizeSmall * scaling)
-                        color: Settings.data.colors.mOnSurfaceVariant
+                        font.family: Style.fontFamily
+                        font.pixelSize: Math.round(Style.fontSizeSmall * scaling)
+                        color: Color.mOnSurfaceVariant
                         z: 1000
                     }
                 }
@@ -403,33 +403,33 @@ Panel {
                 id: searchBox
                 Layout.fillWidth: true
                 Layout.preferredHeight: Math.round(40 * scaling)
-                color: Settings.data.colors.mSurfaceVariant
-                radius: Settings.data.ui.radiusM
+                color: Color.mSurfaceVariant
+                radius: Style.radiusM
                 border.color: searchInput.activeFocus
-                    ? Settings.data.colors.mPrimary
-                    : Settings.data.colors.mOutlineVariant
+                    ? Color.mPrimary
+                    : Color.mOutlineVariant
                 border.width: 2
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: Math.round(Settings.data.ui.spacingM * scaling)
-                    anchors.rightMargin: Math.round(Settings.data.ui.spacingM * scaling)
-                    spacing: Math.round(Settings.data.ui.spacingS * scaling)
+                    anchors.leftMargin: Math.round(Style.spacingM * scaling)
+                    anchors.rightMargin: Math.round(Style.spacingM * scaling)
+                    spacing: Math.round(Style.spacingS * scaling)
 
                     Text {
                         text: ""  // Search icon
-                        font.family: Settings.data.ui.fontFamily
-                        font.pixelSize: Math.round(Settings.data.ui.iconSize * scaling)
-                        color: Settings.data.colors.mOnSurfaceVariant
+                        font.family: Style.fontFamily
+                        font.pixelSize: Math.round(Style.iconSize * scaling)
+                        color: Color.mOnSurfaceVariant
                     }
 
                     TextInput {
                         id: searchInput
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        font.family: Settings.data.ui.fontFamily
-                        font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
-                        color: Settings.data.colors.mOnSurface
+                        font.family: Style.fontFamily
+                        font.pixelSize: Math.round(Style.fontSize * scaling)
+                        color: Color.mOnSurface
                         verticalAlignment: TextInput.AlignVCenter
                         clip: true
 
@@ -453,16 +453,16 @@ Panel {
                             verticalAlignment: TextInput.AlignVCenter
                             text: "Search applications..."
                             font: searchInput.font
-                            color: Settings.data.colors.mOnSurfaceVariant
-                            opacity: Settings.data.ui.opacityMedium
+                            color: Color.mOnSurfaceVariant
+                            opacity: Style.opacityMedium
                             visible: !searchInput.text
                         }
                     }
 
                     // Clear button
                     MouseArea {
-                        Layout.preferredWidth: Math.round(Settings.data.ui.iconSize * scaling)
-                        Layout.preferredHeight: Math.round(Settings.data.ui.iconSize * scaling)
+                        Layout.preferredWidth: Math.round(Style.iconSize * scaling)
+                        Layout.preferredHeight: Math.round(Style.iconSize * scaling)
                         visible: searchText.length > 0
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
@@ -473,9 +473,9 @@ Panel {
                         Text {
                             anchors.centerIn: parent
                             text: ""  // Close icon
-                            font.family: Settings.data.ui.fontFamily
-                            font.pixelSize: Math.round(Settings.data.ui.iconSize * scaling)
-                            color: Settings.data.colors.mOnSurfaceVariant
+                            font.family: Style.fontFamily
+                            font.pixelSize: Math.round(Style.iconSize * scaling)
+                            color: Color.mOnSurfaceVariant
                         }
                     }
                 }
@@ -485,7 +485,7 @@ Panel {
             RowLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                spacing: Math.round(Settings.data.ui.spacingXs * scaling)
+                spacing: Math.round(Style.spacingXs * scaling)
 
                 ListView {
                     id: appList
@@ -493,7 +493,7 @@ Panel {
                     Layout.fillHeight: true
                     clip: true
                     model: filteredApps
-                    spacing: Math.round(Settings.data.ui.spacingXs * scaling)
+                    spacing: Math.round(Style.spacingXs * scaling)
                     currentIndex: selectedIndex
 
                     delegate: Rectangle {
@@ -503,19 +503,19 @@ Panel {
                     width: appList.width
                     height: root.entryHeight
                     color: index === selectedIndex
-                        ? Settings.data.colors.mPrimaryContainer
-                        : (appMouseArea.containsMouse ? Settings.data.colors.mSurfaceContainerHigh : "transparent")
-                    radius: Settings.data.ui.radiusS
+                        ? Color.mPrimaryContainer
+                        : (appMouseArea.containsMouse ? Color.mSurfaceContainerHigh : "transparent")
+                    radius: Style.radiusS
 
                     Behavior on color {
-                        ColorAnimation { duration: Settings.data.ui.durationFast }
+                        ColorAnimation { duration: Style.durationFast }
                     }
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: Math.round(Settings.data.ui.spacingM * scaling)
-                        anchors.rightMargin: Math.round(Settings.data.ui.spacingM * scaling)
-                        spacing: Math.round(Settings.data.ui.spacingM * scaling)
+                        anchors.leftMargin: Math.round(Style.spacingM * scaling)
+                        anchors.rightMargin: Math.round(Style.spacingM * scaling)
+                        spacing: Math.round(Style.spacingM * scaling)
 
                         // App Icon with fallback
                         Item {
@@ -536,11 +536,11 @@ Panel {
                             Text {
                                 anchors.fill: parent
                                 text: ""  // Generic app icon placeholder
-                                font.family: Settings.data.ui.fontFamily
+                                font.family: Style.fontFamily
                                 font.pixelSize: Math.round(24 * scaling)
                                 color: index === selectedIndex
-                                    ? Settings.data.colors.mOnPrimaryContainer
-                                    : Settings.data.colors.mPrimary
+                                    ? Color.mOnPrimaryContainer
+                                    : Color.mPrimary
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
                                 visible: !appIcon.visible
@@ -554,16 +554,16 @@ Panel {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                spacing: Math.round(Settings.data.ui.spacingXs * scaling)
+                                spacing: Math.round(Style.spacingXs * scaling)
 
                                 Text {
                                     text: modelData.name
-                                    font.family: Settings.data.ui.fontFamily
-                                    font.pixelSize: Math.round((Settings.data.ui.fontSizeLarge + 2) * scaling)
+                                    font.family: Style.fontFamily
+                                    font.pixelSize: Math.round((Style.fontSizeLarge + 2) * scaling)
                                     font.weight: Font.Medium
                                     color: index === selectedIndex
-                                        ? Settings.data.colors.mOnPrimaryContainer
-                                        : Settings.data.colors.mOnSurface
+                                        ? Color.mOnPrimaryContainer
+                                        : Color.mOnSurface
                                     elide: Text.ElideRight
                                     Layout.fillWidth: true
                                 }
@@ -579,12 +579,12 @@ Panel {
 
                             Text {
                                 text: modelData.comment || modelData.genericName || ""
-                                font.family: Settings.data.ui.fontFamily
-                                font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
+                                font.family: Style.fontFamily
+                                font.pixelSize: Math.round(Style.fontSize * scaling)
                                 color: index === selectedIndex
-                                    ? Settings.data.colors.mOnPrimaryContainer
-                                    : Settings.data.colors.mOnSurfaceVariant
-                                opacity: Settings.data.ui.opacityHeavy
+                                    ? Color.mOnPrimaryContainer
+                                    : Color.mOnSurfaceVariant
+                                opacity: Style.opacityHeavy
                                 elide: Text.ElideRight
                                 Layout.fillWidth: true
                                 visible: text.length > 0
@@ -617,10 +617,10 @@ Panel {
                         anchors.centerIn: parent
                         visible: filteredApps.length === 0
                         text: searchText ? "No applications found" : "Loading applications..."
-                        font.family: Settings.data.ui.fontFamily
-                        font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
-                        color: Settings.data.colors.mOnSurfaceVariant
-                        opacity: Settings.data.ui.opacityMedium
+                        font.family: Style.fontFamily
+                        font.pixelSize: Math.round(Style.fontSize * scaling)
+                        color: Color.mOnSurfaceVariant
+                        opacity: Style.opacityMedium
                     }
                 }
 
@@ -644,14 +644,14 @@ Panel {
                         implicitWidth: Math.round(6 * scaling)
                         radius: Math.round(3 * scaling)
                         color: scrollBar.pressed
-                            ? Settings.data.colors.mPrimary
+                            ? Color.mPrimary
                             : (scrollBar.hovered
-                                ? Settings.data.colors.mOnSurfaceVariant
-                                : Qt.alpha(Settings.data.colors.mOnSurfaceVariant, 0.5))
+                                ? Color.mOnSurfaceVariant
+                                : Qt.alpha(Color.mOnSurfaceVariant, 0.5))
                         opacity: scrollBar.size < 1.0 ? 1.0 : 0.0
 
                         Behavior on color {
-                            ColorAnimation { duration: Settings.data.ui.durationFast }
+                            ColorAnimation { duration: Style.durationFast }
                         }
                     }
 

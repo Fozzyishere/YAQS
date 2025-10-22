@@ -102,51 +102,6 @@ Singleton {
 
         property int settingsVersion: 1
 
-        // ==================== UI Theme ====================
-        property JsonObject ui: JsonObject {
-            // Spacing scale
-            property int spacing0: 0
-            property int spacingXxs: 1
-            property int spacingXs: 2
-            property int spacingS: 4
-            property int spacingM: 8
-            property int spacingL: 12
-            property int spacingXl: 16
-            property int spacing2xl: 24
-            property int spacing3xl: 32
-
-            // Radius scale
-            property int radiusXs: 2
-            property int radiusS: 4
-            property int radiusM: 8
-            property int radiusL: 12
-            property int radiusXl: 16
-            property int radiusFull: 9999
-
-            // Animation durations (milliseconds)
-            property int durationInstant: 0
-            property int durationFast: 100
-            property int durationNormal: 200
-            property int durationSlow: 300
-
-            // Opacity levels
-            property real opacityNone: 0.0
-            property real opacityLight: 0.25
-            property real opacityMedium: 0.5
-            property real opacityHeavy: 0.75
-            property real opacityFull: 1.0
-
-            // Typography
-            property string fontFamily: "JetBrainsMono Nerd Font"
-            property int fontSize: 7
-            property int fontSizeSmall: 5
-            property int fontSizeLarge: 9
-            property int fontSizeXlarge: 9
-
-            // Icons
-            property int iconSize: 9
-        }
-
         // ==================== Bar Configuration ====================
         property JsonObject bar: JsonObject {
             // Bar positioning
@@ -187,62 +142,6 @@ Singleton {
                     { "id": "PowerMenu" }
                 ]
             }
-        }
-
-        // ==================== Colors ====================
-        
-        // 'm' prefix prevents QML from misinterpreting as signals (e.g., 'onPrimary')
-        property JsonObject colors: JsonObject {
-            // Primary color (Blue in Gruvbox)
-            property color mPrimary: "#83a598"           // Bright blue
-            property color mOnPrimary: "#1d2021"         // Dark text on primary
-            property color mPrimaryContainer: "#458588"  // Neutral blue container
-            property color mOnPrimaryContainer: "#fbf1c7" // Light text on container
-
-            // Secondary color (Aqua in Gruvbox)
-            property color mSecondary: "#8ec07c"          // Bright aqua
-            property color mOnSecondary: "#1d2021"        // Dark text on secondary
-            property color mSecondaryContainer: "#689d6a" // Neutral aqua container
-            property color mOnSecondaryContainer: "#fbf1c7"
-
-            // Tertiary color (Yellow for highlights)
-            property color mTertiary: "#fabd2f"           // Bright yellow
-            property color mOnTertiary: "#1d2021"         // Dark text on tertiary
-            property color mTertiaryContainer: "#d79921"  // Neutral yellow container
-            property color mOnTertiaryContainer: "#fbf1c7"
-
-            // Error color (Red)
-            property color mError: "#fb4934"              // Bright red
-            property color mOnError: "#1d2021"            // Dark text on error
-            property color mErrorContainer: "#cc241d"     // Neutral red container
-            property color mOnErrorContainer: "#fbf1c7"
-
-            // Surface colors (backgrounds)
-            property color mSurface: "#1d2021"            // Main background (hard dark)
-            property color mOnSurface: "#ebdbb2"          // Main text (light1)
-            property color mSurfaceVariant: "#3c3836"     // Subtle variation (dark1)
-            property color mOnSurfaceVariant: "#d5c4a1"   // Secondary text (light2)
-            property color mSurfaceContainer: "#282828"   // Cards/dialogs (dark0)
-            property color mSurfaceContainerLow: "#1d2021" // Lower elevation
-            property color mSurfaceContainerHigh: "#504945" // Higher elevation (dark2)
-            property color mSurfaceContainerHighest: "#665c54" // Highest elevation (dark3)
-
-            // Outline/border colors
-            property color mOutline: "#7c6f64"            // Main borders (dark4)
-            property color mOutlineVariant: "#504945"     // Subtle borders (dark2)
-            property color mShadow: "#000000"             // Shadows
-
-            // Extension: Success color (not in standard M3)
-            property color mSuccess: "#b8bb26"            // Bright green
-            property color mOnSuccess: "#1d2021"
-            property color mSuccessContainer: "#98971a"   // Neutral green
-            property color mOnSuccessContainer: "#fbf1c7"
-
-            // Extension: Warning color (not in standard M3)
-            property color mWarning: "#fe8019"            // Bright orange
-            property color mOnWarning: "#1d2021"
-            property color mWarningContainer: "#d65d0e"   // Neutral orange
-            property color mOnWarningContainer: "#fbf1c7"
         }
 
         // ==================== Scaling Configuration ====================

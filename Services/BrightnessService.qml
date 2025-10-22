@@ -340,6 +340,6 @@ Singleton {
 
     // Get color based on availability
     function getColor() {
-        return isAvailable ? Settings.data.colors.mTertiary : Settings.data.colors.mOutlineVariant;
+        return isAvailable ? Color.mTertiary : Color.mOutlineVariant;
     }
 }

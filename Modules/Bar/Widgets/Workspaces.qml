@@ -16,7 +16,7 @@ Item {
     property ListModel localWorkspaces: ListModel {}  // Filtered for this monitor
     property bool effectsActive: false
     property real masterProgress: 0.0
-    property color effectColor: Settings.data.colors.mPrimary
+    property color effectColor: Color.mPrimary
     property int lastFocusedWorkspaceId: -1  // Track last focused workspace to prevent unnecessary animations
     property bool hideUnoccupied: true  // Hide empty workspaces
 
@@ -26,7 +26,7 @@ Item {
 
     // ===== Sizing =====
     readonly property int pillSize: Math.round(12 * scaling)  // Compact pill size
-    readonly property int pillSpacing: Math.round(Settings.data.ui.spacingXs * scaling)
+    readonly property int pillSpacing: Math.round(Style.spacingXs * scaling)
 
     implicitWidth: computeWidth()
     implicitHeight: Math.round(Settings.data.bar.height * scaling)
@@ -128,7 +128,7 @@ Item {
     }
 
     function triggerBurstEffect() {
-        effectColor = Settings.data.colors.mPrimary;
+        effectColor = Color.mPrimary;
         burstAnimation.restart();
     }
 
@@ -144,7 +144,7 @@ Item {
             property: "masterProgress"
             from: 0.0
             to: 1.0
-            duration: Settings.data.ui.durationSlow * 2
+            duration: Style.durationSlow * 2
             easing.type: Easing.OutQuint
         }
         PropertyAction {
@@ -238,12 +238,12 @@ Item {
 
                     color: {
                         if (model.isUrgent)
-                            return Settings.data.colors.mError;
+                            return Color.mError;
                         if (model.isFocused)
-                            return Settings.data.colors.mPrimary;
+                            return Color.mPrimary;
                         if (model.isOccupied)
-                            return Settings.data.colors.mOnSurface;
-                        return Qt.alpha(Settings.data.colors.mOutlineVariant, 0.3);
+                            return Color.mOnSurface;
+                        return Qt.alpha(Color.mOutlineVariant, 0.3);
                     }
 
                     scale: model.isFocused ? 1.0 : 0.9
@@ -253,10 +253,10 @@ Item {
                         visible: model.isFocused
                         anchors.centerIn: parent
                         text: model.idx
-                        font.family: Settings.data.ui.fontFamily
+                        font.family: Style.fontFamily
                         font.pixelSize: Math.round(pillContainer.height * 0.6)
                         font.weight: Font.DemiBold
-                        color: Settings.data.colors.mSurface  // Contrasting colour
+                        color: Color.mSurface  // Contrasting colour
                     }
 
                     MouseArea {
@@ -270,21 +270,21 @@ Item {
                     // Smooth animations
                     Behavior on width {
                         NumberAnimation {
-                            duration: Settings.data.ui.durationNormal
+                            duration: Style.durationNormal
                             easing.type: Easing.OutBack
                         }
                     }
 
                     Behavior on color {
                         ColorAnimation {
-                            duration: Settings.data.ui.durationFast
+                            duration: Style.durationFast
                             easing.type: Easing.InOutCubic
                         }
                     }
 
                     Behavior on scale {
                         NumberAnimation {
-                            duration: Settings.data.ui.durationNormal
+                            duration: Style.durationNormal
                             easing.type: Easing.OutBack
                         }
                     }
@@ -307,7 +307,7 @@ Item {
                 // Smooth container resize
                 Behavior on width {
                     NumberAnimation {
-                        duration: Settings.data.ui.durationNormal
+                        duration: Style.durationNormal
                         easing.type: Easing.OutBack
                     }
                 }
