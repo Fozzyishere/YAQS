@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import "../Commons"
 
 /**
- * Label - Multi-line text display component
+ * FieldLabel - Multi-line text display component for form fields
  *
  * A flexible label widget that supports both a main label and optional description text.
  * Used throughout the UI for form labels, section headers, and descriptive text.
@@ -17,7 +17,7 @@ import "../Commons"
  * - Word wrapping for long text
  *
  * Usage:
- *   Label {
+ *   FieldLabel {
  *       label: "Username"
  *       description: "Enter your system username"
  *   }
@@ -33,10 +33,8 @@ ColumnLayout {
     property real scaling: 1.0
     property real labelSize: Style.fontSize * scaling
     property real descriptionSize: (Style.fontSize * 0.85) * scaling
-    property bool visible: label !== "" || description !== ""
 
     // Layout
-    Layout.fillWidth: true
     spacing: Style.spacingXxs * scaling
 
     // Main label text

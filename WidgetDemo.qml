@@ -50,14 +50,14 @@ Rectangle {
                 ColumnLayout {
                     spacing: Style.spacingM
 
-                    Label {
+                    FieldLabel {
                         label: "System Status"
                         description: "All systems operational. Last check: 2 minutes ago."
                     }
 
                     Divider { Layout.fillWidth: true; orientation: "horizontal" }
 
-                    Label {
+                    FieldLabel {
                         label: "Network Activity"
                         description: "Download: 1.2 MB/s | Upload: 320 KB/s"
                         labelColor: Color.mPrimary
@@ -74,13 +74,13 @@ Rectangle {
                 ColumnLayout {
                     spacing: Style.spacingL
 
-                    TextInput {
+                    TextFieldInput {
                         label: "Username"
                         placeholder: "Enter your username"
                         Layout.fillWidth: true
                     }
 
-                    TextInput {
+                    TextFieldInput {
                         label: "API Key"
                         placeholder: "sk-..."
                         Layout.fillWidth: true
@@ -517,7 +517,7 @@ Rectangle {
                                 checked: true
                             }
 
-                            TextInput {
+                            TextFieldInput {
                                 label: "Custom CSS"
                                 placeholder: "Enter custom styles..."
                                 Layout.fillWidth: true

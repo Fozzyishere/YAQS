@@ -47,7 +47,7 @@ RowLayout {
     spacing: Style.spacingM * scaling
 
     // Label component (if provided)
-    Label {
+    FieldLabel {
         label: root.label
         description: root.description
         scaling: root.scaling

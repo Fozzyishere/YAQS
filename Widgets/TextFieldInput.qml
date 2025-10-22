@@ -5,7 +5,7 @@ import QtQuick.Layouts
 import "../Commons"
 
 /**
- * TextInput - Single-line text input field
+ * TextFieldInput - Single-line text input field with label
  *
  * A text input field with label, placeholder, focus states, and proper mouse event handling.
  * Includes advanced mouse event blocking to prevent interaction issues in panels.
@@ -19,7 +19,7 @@ import "../Commons"
  * - Mouse event capture to prevent background dragging
  *
  * Usage:
- *   TextInput {
+ *   TextFieldInput {
  *       label: "Username"
  *       description: "Enter your system username"
  *       placeholderText: "john_doe"
@@ -52,7 +52,7 @@ ColumnLayout {
     spacing: Style.spacingS * scaling
 
     // Label component
-    Label {
+    FieldLabel {
         label: root.label
         description: root.description
         labelColor: root.labelColor

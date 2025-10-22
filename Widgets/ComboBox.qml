@@ -75,7 +75,7 @@ RowLayout {
     }
 
     // Label component
-    Label {
+    FieldLabel {
         label: root.label
         description: root.description
         scaling: root.scaling
