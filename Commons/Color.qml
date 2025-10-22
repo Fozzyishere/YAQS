@@ -31,12 +31,12 @@ QtObject {
     readonly property color mErrorContainer: "#CC241D"    // Gruvbox dark red
     readonly property color mOnErrorContainer: "#FBF1C7"
 
-    // Surface colors - Dark theme
-    readonly property color mSurface: "#282828"           // Gruvbox bg0
+    // Surface colors - Dark theme (Gruvbox Dark Hard)
+    readonly property color mSurface: "#1D2021"           // Gruvbox bg0_h (hard contrast)
     readonly property color mOnSurface: "#EBDBB2"         // Gruvbox light1
     readonly property color mSurfaceVariant: "#3C3836"    // Gruvbox bg1
     readonly property color mOnSurfaceVariant: "#A89984"  // Gruvbox light4
-    readonly property color mSurfaceContainer: "#32302F"  // Gruvbox bg0_s
+    readonly property color mSurfaceContainer: "#282828"  // Gruvbox bg0
     readonly property color mSurfaceContainerLow: "#1D2021"      // Gruvbox bg0_h
     readonly property color mSurfaceContainerHigh: "#3C3836"     // Gruvbox bg1
     readonly property color mSurfaceContainerHighest: "#504945"  // Gruvbox bg2

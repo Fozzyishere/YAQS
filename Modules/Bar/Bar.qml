@@ -62,7 +62,7 @@ Variants {
 
                 Rectangle {
                     anchors.fill: parent
-                    color: Color.mSurfaceContainer
+                    color: Color.mSurface
                     border.color: Color.mOutlineVariant
                     border.width: 2
                     radius: Style.radiusM
