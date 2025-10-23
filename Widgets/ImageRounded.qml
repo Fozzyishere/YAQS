@@ -1,7 +1,7 @@
 import QtQuick
 import Quickshell.Widgets
 
-import "../Commons"
+import qs.Commons
 
 /**
  * ImageRounded - Rounded rectangle image

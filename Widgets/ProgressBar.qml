@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 
-import "../Commons"
+import qs.Commons
 
 /**
  * ProgressBar - Progress indicator

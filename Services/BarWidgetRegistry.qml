@@ -3,8 +3,8 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
-import "../Commons"
-import "../Modules/Bar/Widgets"
+import qs.Commons
+import qs.Modules.Bar.Widgets
 
 Singleton {
     id: root

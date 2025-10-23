@@ -1,11 +1,11 @@
 import QtQuick
 import Quickshell
 
-import "Commons"
-import "Services"
-import "Modules/Bar"
-import "Modules/Launcher"
-import "Modules/SessionMenu"
+import qs.Commons
+import qs.Services
+import qs.Modules.Bar
+import qs.Modules.Launcher
+import qs.Modules.SessionMenu
 
 ShellRoot {
     id: root

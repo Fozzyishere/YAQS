@@ -1,7 +1,7 @@
 import QtQuick
 import Quickshell
 
-import "../../Commons"
+import qs.Commons
 
 PopupWindow {
     id: root

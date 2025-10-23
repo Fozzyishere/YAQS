@@ -1,6 +1,6 @@
 import QtQuick
 
-import "../Commons"
+import qs.Commons
 
 /**
  * Button - Standard button with variant and size support

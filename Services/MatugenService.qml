@@ -3,7 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-import "../Commons"
+import qs.Commons
 
 /**
  * MatugenService - Material You color generation service

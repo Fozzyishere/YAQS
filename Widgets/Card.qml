@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../Commons"
+import qs.Commons
 
 /**
  * Card - Container with elevation and optional title

@@ -1,6 +1,6 @@
 import QtQuick
 
-import "../Commons"
+import qs.Commons
 
 /**
  * BusyIndicator - Loading spinner

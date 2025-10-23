@@ -3,7 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Services.Mpris
-import "../Commons"
+import qs.Commons
 
 Singleton {
     id: root

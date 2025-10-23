@@ -2,8 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls as QQC
 
-import "./Commons"
-import "./Widgets"
+import qs.Commons
+import qs.Widgets
 
 /**
  * WidgetDemo - Visual testing showcase for all 20 base widgets

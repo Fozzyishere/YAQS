@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../Commons"
+import qs.Commons
 
 /**
  * ListItem - List row with icon, title, subtitle, and trailing component

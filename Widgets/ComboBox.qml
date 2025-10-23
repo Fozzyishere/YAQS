@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import "../Commons"
+import qs.Commons
 
 /**
  * ComboBox - Dropdown selector with popup

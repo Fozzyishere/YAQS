@@ -1,6 +1,6 @@
 import QtQuick
 
-import "../Commons"
+import qs.Commons
 
 /**
  * IconButton - Icon-only button with variant and size support

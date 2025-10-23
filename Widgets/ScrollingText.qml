@@ -1,6 +1,6 @@
 import QtQuick
 
-import "../Commons"
+import qs.Commons
 
 /**
  * ScrollingText - Auto-scrolling text container for overflow content

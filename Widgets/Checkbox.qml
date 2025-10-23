@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../Commons"
+import qs.Commons
 
 /**
  * Checkbox - Checkbox with animated checkmark

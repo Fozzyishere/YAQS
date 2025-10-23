@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../Commons"
+import qs.Commons
 
 /**
  * IconText - Icon + Text layout with smooth color transitions

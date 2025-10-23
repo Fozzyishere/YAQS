@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../../../Commons"
-import "../../../Services"
+import qs.Commons
+import qs.Services
 
 Item {
     id: root

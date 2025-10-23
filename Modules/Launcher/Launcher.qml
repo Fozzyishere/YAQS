@@ -7,10 +7,10 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import Quickshell
 import Quickshell.Io
-import "../../Commons"
-import "../../Services"
+import qs.Commons
+import qs.Services
 import "../../Helpers/fuzzysort.js" as Fuzzysort
-import "../../Widgets"
+import qs.Widgets
 
 Panel {
     id: root
