@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 
 import "../../../Commons"
+import "../../../Widgets"
 
 RowLayout {
     id: root
@@ -27,10 +28,8 @@ RowLayout {
     // Time
     Text {
         visible: showTime
+        scaling: root.scaling
         text: Qt.formatTime(Time.current, timeFormat)
-        font.family: Style.fontFamily
-        font.pixelSize: Math.round(Style.fontSize * scaling)
-        color: Color.mOnSurface
     }
 
     // Separator
@@ -45,9 +44,7 @@ RowLayout {
     // Date
     Text {
         visible: showDate
+        scaling: root.scaling
         text: Qt.formatDate(Time.current, dateFormat)
-        font.family: Style.fontFamily
-        font.pixelSize: Math.round(Style.fontSize * scaling)
-        color: Color.mOnSurface
     }
 }

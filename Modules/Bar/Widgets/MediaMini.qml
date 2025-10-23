@@ -3,6 +3,7 @@ import QtQuick.Layouts
 
 import "../../../Commons"
 import "../../../Services"
+import "../../../Widgets"
 
 Item {
     id: root
@@ -41,58 +42,13 @@ Item {
         }
 
         // ===== Scrolling Track Info =====
-        Item {
-            Layout.preferredWidth: Math.round(150 * scaling)  // Fixed width for scrolling
-            Layout.preferredHeight: trackText.height
-            clip: true
+        ScrollingText {
+            id: trackScroller
+            Layout.preferredWidth: Math.round(150 * scaling)
+            scaling: root.scaling
 
-            // Scrolling text container
-            Text {
-                id: trackText
-                text: MediaService.getTrackDisplay()
-                font.family: Style.fontFamily
-                font.pixelSize: Math.round(Style.fontSize * scaling)
-                color: MediaService.getColor()
-
-                // Smooth color transitions
-                Behavior on color {
-                    ColorAnimation {
-                        duration: Style.durationNormal
-                        easing.type: Easing.InOutCubic
-                    }
-                }
-
-                // Horizontal offset for scrolling
-                property real xOffset: 0
-                x: xOffset
-
-                // Scroll animation when text is too wide
-                NumberAnimation on xOffset {
-                    id: scrollAnimation
-                    running: trackText.width > trackText.parent.width && mouseArea.containsMouse
-                    from: 0
-                    to: -(trackText.width - trackText.parent.width + 10)  // +10 for padding
-                    duration: Math.max(3000, trackText.text.length * 100)
-                    loops: Animation.Infinite
-                    easing.type: Easing.Linear
-                }
-
-                // Reset to start when not hovering
-                Behavior on xOffset {
-                    enabled: !scrollAnimation.running
-                    NumberAnimation {
-                        duration: Style.durationNormal
-                        easing.type: Easing.OutCubic
-                    }
-                }
-
-                // Reset offset when not hovering
-                Component.onCompleted: {
-                    if (!mouseArea.containsMouse) {
-                        xOffset = 0;
-                    }
-                }
-            }
+            text: MediaService.getTrackDisplay()
+            color: MediaService.getColor()
         }
     }
 
@@ -134,7 +90,6 @@ Item {
         }
 
         onExited: {
-            trackText.xOffset = 0;
             TooltipService.hide();
         }
     }

@@ -1,10 +1,10 @@
 import QtQuick
-import QtQuick.Layouts
 
 import "../../../Commons"
 import "../../../Services"
+import "../../../Widgets"
 
-RowLayout {
+Item {
     id: root
 
     // ===== Properties =====
@@ -13,37 +13,20 @@ RowLayout {
 
     // ===== State =====
     visible: BatteryService.hasBattery
-    spacing: Math.round(Style.spacingXs * scaling)
 
-    // ===== Icon =====
-    Text {
-        text: BatteryService.getIcon()
-        font.family: "Symbols Nerd Font"
-        font.pixelSize: Math.round(Style.iconSize * scaling)
-        color: BatteryService.getColor()
+    // Auto-size to content
+    implicitWidth: iconText.implicitWidth
+    implicitHeight: iconText.implicitHeight
 
-        // Smooth color transitions
-        Behavior on color {
-            ColorAnimation {
-                duration: Style.durationNormal
-                easing.type: Easing.InOutCubic
-            }
-        }
-    }
+    // ===== Icon + Text Component =====
+    IconText {
+        id: iconText
+        anchors.fill: parent
+        scaling: root.scaling
 
-    // ===== Percentage =====
-    Text {
+        icon: BatteryService.getIcon()
         text: BatteryService.batteryPercent + "%"
-        font.family: Style.fontFamily
-        font.pixelSize: Math.round(Style.fontSize * scaling)
-        color: BatteryService.getColor()
-
-        // Smooth color transitions
-        Behavior on color {
-            ColorAnimation {
-                duration: Style.durationNormal
-                easing.type: Easing.InOutCubic
-            }
-        }
+        iconColor: BatteryService.getColor()
+        textColor: BatteryService.getColor()
     }
 }

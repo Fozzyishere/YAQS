@@ -1,8 +1,8 @@
 import QtQuick
-import QtQuick.Layouts
 
 import "../../../Commons"
 import "../../../Services"
+import "../../../Widgets"
 
 Item {
     id: root
@@ -15,76 +15,35 @@ Item {
     visible: NetworkService.isEnabled || NetworkService.isConnected
 
     // Auto-size to content
-    implicitWidth: layout.implicitWidth
-    implicitHeight: layout.implicitHeight
+    implicitWidth: barPill.implicitWidth
+    implicitHeight: barPill.implicitHeight
 
-    // ===== Layout =====
-    RowLayout {
-        id: layout
+    // ===== Bar Pill Component =====
+    BarPill {
+        id: barPill
         anchors.fill: parent
-        spacing: Math.round(Style.spacingXs * scaling)
+        scaling: root.scaling
 
-        // ===== Icon =====
-        Text {
-            text: NetworkService.getIcon()
-            font.family: "Symbols Nerd Font"
-            font.pixelSize: Math.round(Style.iconSize * scaling)
-            color: NetworkService.getColor()
+        icon: NetworkService.getIcon()
+        text: NetworkService.getStatusText()
+        iconColor: NetworkService.getColor()
+        textColor: NetworkService.getColor()
 
-            // Smooth color transitions
-            Behavior on color {
-                ColorAnimation {
-                    duration: Style.durationNormal
-                    easing.type: Easing.InOutCubic
-                }
+        tooltipText: {
+            if (!NetworkService.isEnabled) {
+                return "WiFi Disabled"
+            } else if (!NetworkService.isConnected) {
+                return "WiFi: Not Connected"
+            } else {
+                return "Connected to: " + NetworkService.ssid + "\nSignal: " + NetworkService.signalStrength + "%"
             }
         }
 
-        // ===== Status Text =====
-        Text {
-            text: NetworkService.getStatusText()
-            font.family: Style.fontFamily
-            font.pixelSize: Math.round(Style.fontSize * scaling)
-            color: NetworkService.getColor()
+        clickable: true
 
-            // Smooth color transitions
-            Behavior on color {
-                ColorAnimation {
-                    duration: Style.durationNormal
-                    easing.type: Easing.InOutCubic
-                }
-            }
-        }
-    }
-
-    // ===== Interaction =====
-    MouseArea {
-        anchors.fill: parent
-        hoverEnabled: true
-        acceptedButtons: Qt.LeftButton
-        cursorShape: Qt.PointingHandCursor
-
-        // Click action
         onClicked: {
             // Placeholder for future panel integration
-            Logger.log("WiFi", "Widget clicked - panel integration coming soon");
-        }
-
-        // Tooltip
-        onEntered: {
-            let tooltipText = "";
-            if (!NetworkService.isEnabled) {
-                tooltipText = "WiFi Disabled";
-            } else if (!NetworkService.isConnected) {
-                tooltipText = "WiFi: Not Connected";
-            } else {
-                tooltipText = "Connected to: " + NetworkService.ssid + "\nSignal: " + NetworkService.signalStrength + "%";
-            }
-            TooltipService.show(root, tooltipText, 500);
-        }
-
-        onExited: {
-            TooltipService.hide();
+            Logger.log("WiFi", "Widget clicked - panel integration coming soon")
         }
     }
 }

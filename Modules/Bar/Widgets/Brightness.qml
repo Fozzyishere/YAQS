@@ -1,8 +1,8 @@
 import QtQuick
-import QtQuick.Layouts
 
 import "../../../Commons"
 import "../../../Services"
+import "../../../Widgets"
 
 Item {
     id: root
@@ -29,80 +29,39 @@ Item {
     visible: BrightnessService.isAvailable
 
     // Auto-size to content
-    implicitWidth: layout.implicitWidth
-    implicitHeight: layout.implicitHeight
+    implicitWidth: barPill.implicitWidth
+    implicitHeight: barPill.implicitHeight
 
-    // ===== Layout =====
-    RowLayout {
-        id: layout
+    // ===== Bar Pill Component =====
+    BarPill {
+        id: barPill
         anchors.fill: parent
-        spacing: Math.round(Style.spacingXs * scaling)
+        scaling: root.scaling
 
-        // ===== Icon =====
-        Text {
-            text: BrightnessService.getIcon()
-            font.family: "Symbols Nerd Font"
-            font.pixelSize: Math.round(Style.iconSize * scaling)
-            color: BrightnessService.getColor()
+        icon: BrightnessService.getIcon()
+        text: BrightnessService.brightness
+        suffix: "%"
+        iconColor: BrightnessService.getColor()
+        textColor: BrightnessService.getColor()
 
-            // Smooth color transitions
-            Behavior on color {
-                ColorAnimation {
-                    duration: Style.durationNormal
-                    easing.type: Easing.InOutCubic
-                }
-            }
-        }
+        showText: showPercentage
+        showTextOnHover: displayMode === "onhover"
+        tooltipText: "Brightness: " + BrightnessService.brightness + "%\nScroll to adjust"
 
-        // ===== Brightness Percentage =====
-        Text {
-            visible: showPercentage
-            text: BrightnessService.brightness + "%"
-            font.family: Style.fontFamily
-            font.pixelSize: Math.round(Style.fontSize * scaling)
-            color: BrightnessService.getColor()
+        acceptWheel: true
+        clickable: false
 
-            // Smooth color transitions
-            Behavior on color {
-                ColorAnimation {
-                    duration: Style.durationNormal
-                    easing.type: Easing.InOutCubic
-                }
-            }
-        }
-    }
-
-    // ===== Interaction =====
-    MouseArea {
-        anchors.fill: parent
-        hoverEnabled: true
-        acceptedButtons: Qt.NoButton  // Only wheel scroll, no click
-
-        // Wheel scroll
-        onWheel: function(wheel) {
-            wheelAccumulator += wheel.angleDelta.y;
+        onWheel: function(delta) {
+            wheelAccumulator += delta
 
             // One notch = 120 units
             if (wheelAccumulator >= 120) {
-                wheelAccumulator = 0;
-                BrightnessService.increaseBrightness(5);  // +5%
-                wheel.accepted = true;
+                wheelAccumulator = 0
+                BrightnessService.increaseBrightness(5)  // +5%
             } else if (wheelAccumulator <= -120) {
-                wheelAccumulator = 0;
-                BrightnessService.decreaseBrightness(5);  // -5%
-                wheel.accepted = true;
+                wheelAccumulator = 0
+                BrightnessService.decreaseBrightness(5)  // -5%
             }
-        }
-
-        cursorShape: Qt.PointingHandCursor
-
-        // Tooltip
-        onEntered: {
-            TooltipService.show(root, "Brightness: " + BrightnessService.brightness + "%\nScroll to adjust", 500);
-        }
-
-        onExited: {
-            TooltipService.hide();
         }
     }
 }

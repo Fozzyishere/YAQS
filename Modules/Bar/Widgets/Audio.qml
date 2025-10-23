@@ -1,8 +1,8 @@
 import QtQuick
-import QtQuick.Layouts
 
 import "../../../Commons"
 import "../../../Services"
+import "../../../Widgets"
 
 Item {
     id: root
@@ -26,77 +26,43 @@ Item {
     property int wheelAccumulator: 0
 
     // Auto-size to content
-    implicitWidth: layout.implicitWidth
-    implicitHeight: layout.implicitHeight
+    implicitWidth: barPill.implicitWidth
+    implicitHeight: barPill.implicitHeight
 
-    // ===== Layout =====
-    RowLayout {
-        id: layout
+    // ===== Bar Pill Component =====
+    BarPill {
+        id: barPill
         anchors.fill: parent
-        spacing: Math.round(Style.spacingXs * scaling)
+        scaling: root.scaling
 
-        // ===== Icon =====
-        Text {
-            id: iconText
-            text: AudioService.getIcon()
-            font.family: "Symbols Nerd Font"
-            font.pixelSize: Math.round(Style.iconSize * scaling)
-            color: AudioService.getColor()
+        icon: AudioService.getIcon()
+        text: AudioService.volume
+        suffix: "%"
+        iconColor: AudioService.getColor()
+        textColor: AudioService.getColor()
 
-            // Smooth color transitions
-            Behavior on color {
-                ColorAnimation {
-                    duration: Style.durationNormal
-                    easing.type: Easing.InOutCubic
-                }
-            }
-        }
+        showText: showPercentage
+        showTextOnHover: displayMode === "onhover"
+        tooltipText: "Volume: " + AudioService.volume + "%\nClick to mute\nScroll to adjust"
 
-        // ===== Volume percentage =====
-        Text {
-            visible: showPercentage
-            text: AudioService.volume + "%"
-            font.family: Style.fontFamily
-            font.pixelSize: Math.round(Style.fontSize * scaling)
-            color: AudioService.getColor()
+        acceptWheel: true
+        clickable: true
 
-            // Smooth color transitions
-            Behavior on color {
-                ColorAnimation {
-                    duration: Style.durationNormal
-                    easing.type: Easing.InOutCubic
-                }
-            }
-        }
-    }
-
-    // ===== Interaction =====
-    MouseArea {
-        anchors.fill: parent
-        hoverEnabled: true
-        acceptedButtons: Qt.LeftButton
-
-        // Click to toggle mute
         onClicked: {
-            AudioService.toggleMute();
+            AudioService.toggleMute()
         }
 
-        // Wheel scroll to change volume
-        onWheel: function(wheel) {
-            wheelAccumulator += wheel.angleDelta.y;
+        onWheel: function(delta) {
+            wheelAccumulator += delta
 
             // One notch = 120 units
             if (wheelAccumulator >= 120) {
-                wheelAccumulator = 0;
-                AudioService.increaseVolume(5);  // +5%
-                wheel.accepted = true;
+                wheelAccumulator = 0
+                AudioService.increaseVolume(5)  // +5%
             } else if (wheelAccumulator <= -120) {
-                wheelAccumulator = 0;
-                AudioService.decreaseVolume(5);  // -5%
-                wheel.accepted = true;
+                wheelAccumulator = 0
+                AudioService.decreaseVolume(5)  // -5%
             }
         }
-
-        cursorShape: Qt.PointingHandCursor
     }
 }
