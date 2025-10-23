@@ -12,6 +12,7 @@ Singleton {
     property int brightness: 50                 // Current brightness (0-100)
     property int maxBrightness: 100             // Maximum brightness value
     property bool isAvailable: false            // Brightness control available
+    property bool initialized: false
 
     // ===== Private Properties =====
     property string _backend: ""                // brightnessctl or light
@@ -21,17 +22,29 @@ Singleton {
     property bool _isPolling: false             // Polling active
     property int _queuedBrightness: -1          // Debounced value (-1 = none)
 
-
     // ===== Initialization =====
-    Component.onCompleted: {
-        Logger.log("BrightnessService", "Initialized");
+    function init() {
+        if (initialized) {
+            Logger.warn("BrightnessService", "Already initialized");
+            return;
+        }
+
+        Logger.log("BrightnessService", "Initializing...");
         detectBackend();
+        initialized = true;
+        // Note: "Initialization complete" logged after backend detection
     }
 
     // ===== Backend Detection =====
     function detectBackend() {
-        // Try brightnessctl first
-        brightnessctlCheckProcess.running = true;
+        try {
+            // Try brightnessctl first
+            brightnessctlCheckProcess.running = true;
+        } catch (e) {
+            Logger.error("BrightnessService", "Failed to detect backend:", e);
+            Logger.callStack();
+            isAvailable = false;
+        }
     }
 
     Process {

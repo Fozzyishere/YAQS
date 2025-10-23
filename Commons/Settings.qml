@@ -33,12 +33,9 @@ Singleton {
 
         Logger.log("Settings", "Initializing settings system...")
 
-        if (adapter.settingsVersion === undefined || adapter.settingsVersion < 1) {
-            adapter.settingsVersion = 1
-        }
 
-        // Set adapter connection
-        settingsFileView.adapter = adapter
+        adapter.settingsVersion = 1
+
     }
 
     // Auto-save with debounce to avoid excessive IO
@@ -55,6 +52,7 @@ Singleton {
     FileView {
         id: settingsFileView
         path: directoriesCreated ? settingsFile : undefined
+        adapter: adapter
         printErrors: false
         watchChanges: true
 
@@ -282,7 +280,10 @@ Singleton {
      * Helper function to centralize save logic
      */
     function saveSettings() {
-        settingsFileView.writeAdapter()
+        // Prefer debounced saves to avoid overlapping FileView operations.
+        // This coalesces multiple rapid changes (e.g., during migrations)
+        // into a single write to prevent "dropped operation" warnings.
+        saveTimer.start()
     }
 
     /**
@@ -297,10 +298,12 @@ Singleton {
 
         Logger.log("Settings", "Upgrading settings from v" + adapter.settingsVersion + " to v" + currentSettingsVersion)
 
+        var didModify = false
+
         // Version 1 -> 2: No schema changes (validation improvements only)
         if (adapter.settingsVersion < 2) {
             adapter.settingsVersion = 2
-            saveSettings()
+            didModify = true
             Logger.log("Settings", "Upgraded to v2")
         }
 
@@ -313,6 +316,7 @@ Singleton {
                     "step": 5
                 }
                 Logger.log("Settings", "Added brightness settings")
+                didModify = true
             }
 
             // Add sessionMenu settings if missing
@@ -324,16 +328,18 @@ Singleton {
                     "height": 380
                 }
                 Logger.log("Settings", "Added sessionMenu settings")
+                didModify = true
             }
 
             // Add network.updateInterval if missing
             if (!adapter.network.updateInterval) {
                 adapter.network.updateInterval = 30000
                 Logger.log("Settings", "Added network.updateInterval")
+                didModify = true
             }
 
             adapter.settingsVersion = 3
-            saveSettings()
+            didModify = true
             Logger.log("Settings", "Upgraded to v3")
         }
 
@@ -350,13 +356,18 @@ Singleton {
                     "schemeType": "scheme-tonal-spot"
                 }
                 Logger.log("Settings", "Added theme settings")
+                didModify = true
             }
 
             adapter.settingsVersion = 4
-            saveSettings()
+            didModify = true
             Logger.log("Settings", "Upgraded to v4")
         }
 
+        // Perform a single debounced save after all upgrades.
+        if (didModify) {
+            saveSettings()
+        }
         // Future migrations go here
         // if (adapter.settingsVersion < 5) { ... }
     }

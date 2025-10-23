@@ -17,6 +17,7 @@ Singleton {
     property int _volume: 0
     property bool _muted: false
     property bool _isReady: false
+    property bool initialized: false
 
     // ===== Audio sink reference =====
     readonly property var sink: Pipewire.defaultAudioSink
@@ -25,10 +26,17 @@ Singleton {
         objects: [root.sink]
     }
 
-    // ===== Initialisation =====
-    Component.onCompleted: {
-        Logger.log("AudioService", "Initialised");
+    // ===== Initialization =====
+    function init() {
+        if (initialized) {
+            Logger.warn("AudioService", "Already initialized");
+            return;
+        }
+
+        Logger.log("AudioService", "Initializing...");
         updateAudio();
+        initialized = true;
+        Logger.log("AudioService", "Initialization complete");
     }
 
     // ===== Watch for sink changes =====
@@ -71,6 +79,7 @@ Singleton {
             Logger.log("AudioService", "Audio ready - Volume:", _volume, "Muted:", _muted);
         } catch (e) {
             Logger.error("AudioService", "Failed to update audio:", e);
+            Logger.callStack();
             _isReady = false;
         }
     }

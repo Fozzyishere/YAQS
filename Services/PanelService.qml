@@ -21,9 +21,20 @@ Singleton {
     signal willClose()                       // Emitted when a panel is about to close
     signal popupChanged()                    // Emitted when popup state changes
 
+    // ===== Private state =====
+    property bool initialized: false
+
     // ===== Initialization =====
-    Component.onCompleted: {
-        Logger.log("PanelService", "Initialized");
+    function init() {
+        if (initialized) {
+            Logger.warn("PanelService", "Already initialized");
+            return;
+        }
+
+        Logger.log("PanelService", "Initializing...");
+        // PanelService is passive - panels register themselves
+        initialized = true;
+        Logger.log("PanelService", "Initialization complete");
     }
 
     // ===== Panel Registration =====

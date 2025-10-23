@@ -9,6 +9,8 @@ import "../Modules/Bar/Widgets"
 Singleton {
     id: root
 
+    property bool initialized: false
+
     // Widget component registry
     // Maps widget IDs to their Component definitions for lazy loading
     property var widgets: ({
@@ -125,8 +127,17 @@ Singleton {
         MediaMini {}
     }
 
-    Component.onCompleted: {
-        Logger.log("BarWidgetRegistry", "Initialized with widgets:", getAllWidgetIds().join(", "))
+    // ===== Initialization =====
+    function init() {
+        if (initialized) {
+            Logger.warn("BarWidgetRegistry", "Already initialized");
+            return;
+        }
+
+        Logger.log("BarWidgetRegistry", "Initializing...");
+        Logger.log("BarWidgetRegistry", "Registered widgets:", getAllWidgetIds().join(", "));
+        initialized = true;
+        Logger.log("BarWidgetRegistry", "Initialization complete");
     }
 
     function getWidget(widgetId) {

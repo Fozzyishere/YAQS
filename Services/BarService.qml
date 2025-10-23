@@ -8,13 +8,24 @@ import "../Commons"
 Singleton {
     id: root
 
+    property bool initialized: false
+
     // Widget instance registry
     // Key format: "screenName|section|widgetId|index"
     // Example: "eDP-1|left|AppLauncher|0"
     property var widgetInstances: ({})
 
-    Component.onCompleted: {
-        Logger.log("BarService", "Service initialized")
+    // ===== Initialization =====
+    function init() {
+        if (initialized) {
+            Logger.warn("BarService", "Already initialized");
+            return;
+        }
+
+        Logger.log("BarService", "Initializing...");
+        // BarService is passive - widgets register themselves
+        initialized = true;
+        Logger.log("BarService", "Initialization complete");
     }
 
     // ==================== Widget Registration ====================

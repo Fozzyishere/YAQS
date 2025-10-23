@@ -27,11 +27,19 @@ Singleton {
 
     // ===== Private Properties =====
     property int _selectedPlayerIndex: 0
+    property bool initialized: false
 
     // ===== Initialization =====
-    Component.onCompleted: {
-        Logger.log("MediaService", "Initialized");
+    function init() {
+        if (initialized) {
+            Logger.warn("MediaService", "Already initialized");
+            return;
+        }
+
+        Logger.log("MediaService", "Initializing...");
         updateCurrentPlayer();
+        initialized = true;
+        Logger.log("MediaService", "Initialization complete");
     }
 
     // ===== Watch for player changes =====

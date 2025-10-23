@@ -13,6 +13,7 @@ Singleton {
     property int batteryPercent: 0          // Percentage (0-100)
     property bool isCharging: false         // Currently charging
     property bool isReady: false            // Device ready
+    property bool initialized: false
 
     // ===== Signal =====
     signal batteryChanged()
@@ -21,9 +22,16 @@ Singleton {
     property var batteryDevice: null
 
     // ===== Initialization =====
-    Component.onCompleted: {
-        Logger.log("BatteryService", "Initialized");
+    function init() {
+        if (initialized) {
+            Logger.warn("BatteryService", "Already initialized");
+            return;
+        }
+
+        Logger.log("BatteryService", "Initializing...");
         updateBattery();
+        initialized = true;
+        Logger.log("BatteryService", "Initialization complete");
     }
 
 
@@ -69,6 +77,7 @@ Singleton {
             safeUpdateBattery();
         } catch (e) {
             Logger.error("BatteryService", "Failed to update battery:", e);
+            Logger.callStack();
             hasBattery = false;
             isReady = false;
         }

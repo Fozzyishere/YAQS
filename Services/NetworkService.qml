@@ -14,6 +14,7 @@ Singleton {
     property string ssid: ""                    // Connected network SSID
     property int signalStrength: 0              // Signal strength (0-100)
     property string status: "disconnected"      // Connection status
+    property bool initialized: false
 
     // ===== Private Properties =====
     property bool _isAvailable: false           // NetworkManager available
@@ -22,14 +23,27 @@ Singleton {
     signal networkChanged()
 
     // ===== Initialization =====
-    Component.onCompleted: {
-        Logger.log("NetworkService", "Initialized");
+    function init() {
+        if (initialized) {
+            Logger.warn("NetworkService", "Already initialized");
+            return;
+        }
+
+        Logger.log("NetworkService", "Initializing...");
         checkAvailability();
+        initialized = true;
+        // Note: "Initialization complete" logged after availability check
     }
 
     // ===== Availability Check =====
     function checkAvailability() {
-        availabilityCheckProcess.running = true;
+        try {
+            availabilityCheckProcess.running = true;
+        } catch (e) {
+            Logger.error("NetworkService", "Failed to check availability:", e);
+            Logger.callStack();
+            _isAvailable = false;
+        }
     }
 
     Process {
@@ -70,6 +84,7 @@ Singleton {
                     handleWifiStateChange(text.trim() === "enabled");
                 } catch (e) {
                     Logger.error("NetworkService", "Failed to parse WiFi state:", e);
+                    Logger.callStack();
                 }
             }
         }
