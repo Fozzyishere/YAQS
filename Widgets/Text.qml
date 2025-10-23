@@ -1,6 +1,6 @@
 import QtQuick
 
-import "../Commons"
+import qs.Commons
 
 Text {
     property real scaling: 1.0

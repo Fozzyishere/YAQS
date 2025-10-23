@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../Commons"
-import "../Services"
+import qs.Commons
+import qs.Services
 
 /**
  * BarPill - Expandable icon+text bar widget with interaction support

@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Templates as T
 
-import "../Commons"
+import qs.Commons
 
 /**
  * ScrollView - Scrollable container with custom scrollbars

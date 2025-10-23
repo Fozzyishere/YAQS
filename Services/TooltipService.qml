@@ -1,8 +1,8 @@
 pragma Singleton
 
 import QtQuick
-import "../Commons"
-import "../Modules/Tooltip"
+import qs.Commons
+import qs.Modules.Tooltip
 
 QtObject {
     id: root

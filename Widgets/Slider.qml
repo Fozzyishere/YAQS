@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 
-import "../Commons"
+import qs.Commons
 
 /**
  * Slider - Range slider with gradient fill

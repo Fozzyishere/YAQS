@@ -1,8 +1,8 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
-import "../Commons"
-import "../Services"
+import qs.Commons
+import qs.Services
 
 Loader {
     id: root

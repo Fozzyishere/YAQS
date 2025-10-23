@@ -1,8 +1,8 @@
 import QtQuick
 import Quickshell
 
-import "../../Commons"
-import "../../Services"
+import qs.Commons
+import qs.Services
 
 Item {
     id: root

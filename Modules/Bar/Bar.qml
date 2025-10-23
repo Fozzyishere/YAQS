@@ -3,9 +3,9 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 
-import "../../Commons"
-import "../../Services"
-import "." as BarComponents
+import qs.Commons
+import qs.Services
+import qs.Modules.Bar as BarComponents
 
 Variants {
     model: Quickshell.screens

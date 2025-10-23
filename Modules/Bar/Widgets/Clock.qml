@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../../../Commons"
-import "../../../Widgets"
+import qs.Commons
+import qs.Widgets
 
 RowLayout {
     id: root
