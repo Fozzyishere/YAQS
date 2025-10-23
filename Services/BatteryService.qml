@@ -13,6 +13,7 @@ Singleton {
     property int batteryPercent: 0          // Percentage (0-100)
     property bool isCharging: false         // Currently charging
     property bool isReady: false            // Device ready
+    property bool initialized: false
 
     // ===== Signal =====
     signal batteryChanged()
@@ -21,9 +22,16 @@ Singleton {
     property var batteryDevice: null
 
     // ===== Initialization =====
-    Component.onCompleted: {
-        Logger.log("BatteryService", "Initialized");
+    function init() {
+        if (initialized) {
+            Logger.warn("BatteryService", "Already initialized");
+            return;
+        }
+
+        Logger.log("BatteryService", "Initializing...");
         updateBattery();
+        initialized = true;
+        Logger.log("BatteryService", "Initialization complete");
     }
 
 
@@ -69,6 +77,7 @@ Singleton {
             safeUpdateBattery();
         } catch (e) {
             Logger.error("BatteryService", "Failed to update battery:", e);
+            Logger.callStack();
             hasBattery = false;
             isReady = false;
         }
@@ -161,17 +170,17 @@ Singleton {
     // ===== Helper: Get color based on state =====
     function getColor() {
         if (!hasBattery || !isReady) {
-            return Settings.data.colors.mOutlineVariant;
+            return Color.mOutlineVariant;
         }
 
         if (isCharging) {
-            return Settings.data.colors.mSuccess;  // Charging = green
+            return Color.mTertiary;  // Charging = positive state
         }
 
         // Color based on charge level
-        if (batteryPercent < 10) return Settings.data.colors.mError;    // Critical = red
-        if (batteryPercent < 20) return Settings.data.colors.mError;    // Low = red
-        if (batteryPercent < 40) return Settings.data.colors.mTertiary;    // Medium = yellow
-        return Settings.data.colors.mOnSurface;  // Normal = default foreground
+        if (batteryPercent < 10) return Color.mError;    // Critical = red
+        if (batteryPercent < 20) return Color.mError;    // Low = red
+        if (batteryPercent < 40) return Color.mSecondary;    // Medium = caution
+        return Color.mOnSurface;  // Normal = default foreground
     }
 }

@@ -7,11 +7,22 @@ import "../../../Services"
 Item {
     id: root
 
-    // ===== Properties =====
+    // ===== Standard widget properties =====
     property var screen: null
     property real scaling: 1.0
 
-    // Wheel scroll accumulator
+    // ===== Metadata and settings support =====
+    property string widgetId: ""
+    property string section: ""
+    property int sectionWidgetIndex: -1
+    property var widgetMetadata: ({})
+    property var widgetSettings: ({})
+
+    // Settings resolution: user settings → metadata defaults → hardcoded fallback
+    readonly property string displayMode: widgetSettings.displayMode ?? widgetMetadata.displayMode ?? "onhover"
+    readonly property bool showPercentage: widgetSettings.showPercentage ?? widgetMetadata.showPercentage ?? true
+
+    // ===== Internal properties =====
     property int wheelAccumulator: 0
 
     // ===== Visibility =====
@@ -25,19 +36,19 @@ Item {
     RowLayout {
         id: layout
         anchors.fill: parent
-        spacing: Math.round(Settings.data.ui.spacingXs * scaling)
+        spacing: Math.round(Style.spacingXs * scaling)
 
         // ===== Icon =====
         Text {
             text: BrightnessService.getIcon()
             font.family: "Symbols Nerd Font"
-            font.pixelSize: Math.round(Settings.data.ui.iconSize * scaling)
+            font.pixelSize: Math.round(Style.iconSize * scaling)
             color: BrightnessService.getColor()
 
             // Smooth color transitions
             Behavior on color {
                 ColorAnimation {
-                    duration: Settings.data.ui.durationNormal
+                    duration: Style.durationNormal
                     easing.type: Easing.InOutCubic
                 }
             }
@@ -45,15 +56,16 @@ Item {
 
         // ===== Brightness Percentage =====
         Text {
+            visible: showPercentage
             text: BrightnessService.brightness + "%"
-            font.family: Settings.data.ui.fontFamily
-            font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
+            font.family: Style.fontFamily
+            font.pixelSize: Math.round(Style.fontSize * scaling)
             color: BrightnessService.getColor()
 
             // Smooth color transitions
             Behavior on color {
                 ColorAnimation {
-                    duration: Settings.data.ui.durationNormal
+                    duration: Style.durationNormal
                     easing.type: Easing.InOutCubic
                 }
             }

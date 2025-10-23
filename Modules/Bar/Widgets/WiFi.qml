@@ -22,19 +22,19 @@ Item {
     RowLayout {
         id: layout
         anchors.fill: parent
-        spacing: Math.round(Settings.data.ui.spacingXs * scaling)
+        spacing: Math.round(Style.spacingXs * scaling)
 
         // ===== Icon =====
         Text {
             text: NetworkService.getIcon()
             font.family: "Symbols Nerd Font"
-            font.pixelSize: Math.round(Settings.data.ui.iconSize * scaling)
+            font.pixelSize: Math.round(Style.iconSize * scaling)
             color: NetworkService.getColor()
 
             // Smooth color transitions
             Behavior on color {
                 ColorAnimation {
-                    duration: Settings.data.ui.durationNormal
+                    duration: Style.durationNormal
                     easing.type: Easing.InOutCubic
                 }
             }
@@ -43,14 +43,14 @@ Item {
         // ===== Status Text =====
         Text {
             text: NetworkService.getStatusText()
-            font.family: Settings.data.ui.fontFamily
-            font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
+            font.family: Style.fontFamily
+            font.pixelSize: Math.round(Style.fontSize * scaling)
             color: NetworkService.getColor()
 
             // Smooth color transitions
             Behavior on color {
                 ColorAnimation {
-                    duration: Settings.data.ui.durationNormal
+                    duration: Style.durationNormal
                     easing.type: Easing.InOutCubic
                 }
             }

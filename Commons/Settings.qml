@@ -7,10 +7,14 @@ import Quickshell.Io
 Singleton {
     id: root
 
+    // Settings version - increment when schema changes
+    readonly property int currentSettingsVersion: 4
+
     // Access pattern: Settings.data.bar.height, Settings.data.colors.mPrimary
     readonly property alias data: adapter
     property bool isLoaded: false
     property bool directoriesCreated: false
+    property bool allowSave: false  // Prevent saves during initialization
 
     // Configuration paths
     property string shellName: "quickshell"
@@ -29,8 +33,9 @@ Singleton {
 
         Logger.log("Settings", "Initializing settings system...")
 
-        // Trigger file loading
-        settingsFileView.adapter = adapter
+
+        adapter.settingsVersion = 1
+
     }
 
     // Auto-save with debounce to avoid excessive IO
@@ -47,11 +52,16 @@ Singleton {
     FileView {
         id: settingsFileView
         path: directoriesCreated ? settingsFile : undefined
+        adapter: adapter
         printErrors: false
         watchChanges: true
 
         onFileChanged: reload()
-        onAdapterUpdated: saveTimer.start()
+        onAdapterUpdated: {
+            if (allowSave) {
+                saveTimer.start()
+            }
+        }
 
         onPathChanged: {
             if (path !== undefined) {
@@ -62,7 +72,12 @@ Singleton {
         onLoaded: function() {
             if (!isLoaded) {
                 Logger.log("Settings", "Settings loaded from: " + settingsFile)
+
+                upgradeSettings()
+                validateSettings()
+
                 isLoaded = true
+                allowSave = true  // Enable auto-save after initial load complete
                 settingsLoaded()
             }
         }
@@ -71,7 +86,9 @@ Singleton {
             if (error.toString().includes("No such file") || error === 2) {
                 // File doesn't exist, create with defaults
                 Logger.log("Settings", "No settings file found, creating with defaults")
+                adapter.settingsVersion = currentSettingsVersion
                 writeAdapter()
+                allowSave = true  // Enable auto-save for new installs
             } else {
                 Logger.error("Settings", "Failed to load settings:", error)
             }
@@ -82,51 +99,6 @@ Singleton {
         id: adapter
 
         property int settingsVersion: 1
-
-        // ==================== UI Theme ====================
-        property JsonObject ui: JsonObject {
-            // Spacing scale
-            property int spacing0: 0
-            property int spacingXxs: 1
-            property int spacingXs: 2
-            property int spacingS: 4
-            property int spacingM: 8
-            property int spacingL: 12
-            property int spacingXl: 16
-            property int spacing2xl: 24
-            property int spacing3xl: 32
-
-            // Radius scale
-            property int radiusXs: 2
-            property int radiusS: 4
-            property int radiusM: 8
-            property int radiusL: 12
-            property int radiusXl: 16
-            property int radiusFull: 9999
-
-            // Animation durations (milliseconds)
-            property int durationInstant: 0
-            property int durationFast: 100
-            property int durationNormal: 200
-            property int durationSlow: 300
-
-            // Opacity levels
-            property real opacityNone: 0.0
-            property real opacityLight: 0.25
-            property real opacityMedium: 0.5
-            property real opacityHeavy: 0.75
-            property real opacityFull: 1.0
-
-            // Typography
-            property string fontFamily: "JetBrainsMono Nerd Font"
-            property int fontSize: 7
-            property int fontSizeSmall: 5
-            property int fontSizeLarge: 9
-            property int fontSizeXlarge: 9
-
-            // Icons
-            property int iconSize: 9
-        }
 
         // ==================== Bar Configuration ====================
         property JsonObject bar: JsonObject {
@@ -170,60 +142,10 @@ Singleton {
             }
         }
 
-        // ==================== Colors ====================
-        
-        // 'm' prefix prevents QML from misinterpreting as signals (e.g., 'onPrimary')
-        property JsonObject colors: JsonObject {
-            // Primary color (Blue in Gruvbox)
-            property color mPrimary: "#83a598"           // Bright blue
-            property color mOnPrimary: "#1d2021"         // Dark text on primary
-            property color mPrimaryContainer: "#458588"  // Neutral blue container
-            property color mOnPrimaryContainer: "#fbf1c7" // Light text on container
-
-            // Secondary color (Aqua in Gruvbox)
-            property color mSecondary: "#8ec07c"          // Bright aqua
-            property color mOnSecondary: "#1d2021"        // Dark text on secondary
-            property color mSecondaryContainer: "#689d6a" // Neutral aqua container
-            property color mOnSecondaryContainer: "#fbf1c7"
-
-            // Tertiary color (Yellow for highlights)
-            property color mTertiary: "#fabd2f"           // Bright yellow
-            property color mOnTertiary: "#1d2021"         // Dark text on tertiary
-            property color mTertiaryContainer: "#d79921"  // Neutral yellow container
-            property color mOnTertiaryContainer: "#fbf1c7"
-
-            // Error color (Red)
-            property color mError: "#fb4934"              // Bright red
-            property color mOnError: "#1d2021"            // Dark text on error
-            property color mErrorContainer: "#cc241d"     // Neutral red container
-            property color mOnErrorContainer: "#fbf1c7"
-
-            // Surface colors (backgrounds)
-            property color mSurface: "#1d2021"            // Main background (hard dark)
-            property color mOnSurface: "#ebdbb2"          // Main text (light1)
-            property color mSurfaceVariant: "#3c3836"     // Subtle variation (dark1)
-            property color mOnSurfaceVariant: "#d5c4a1"   // Secondary text (light2)
-            property color mSurfaceContainer: "#282828"   // Cards/dialogs (dark0)
-            property color mSurfaceContainerLow: "#1d2021" // Lower elevation
-            property color mSurfaceContainerHigh: "#504945" // Higher elevation (dark2)
-            property color mSurfaceContainerHighest: "#665c54" // Highest elevation (dark3)
-
-            // Outline/border colors
-            property color mOutline: "#7c6f64"            // Main borders (dark4)
-            property color mOutlineVariant: "#504945"     // Subtle borders (dark2)
-            property color mShadow: "#000000"             // Shadows
-
-            // Extension: Success color (not in standard M3)
-            property color mSuccess: "#b8bb26"            // Bright green
-            property color mOnSuccess: "#1d2021"
-            property color mSuccessContainer: "#98971a"   // Neutral green
-            property color mOnSuccessContainer: "#fbf1c7"
-
-            // Extension: Warning color (not in standard M3)
-            property color mWarning: "#fe8019"            // Bright orange
-            property color mOnWarning: "#1d2021"
-            property color mWarningContainer: "#d65d0e"   // Neutral orange
-            property color mOnWarningContainer: "#fbf1c7"
+        // ==================== UI Configuration ====================
+        property JsonObject ui: JsonObject {
+            property int fontSize: 7
+            property int iconSize: 9
         }
 
         // ==================== Scaling Configuration ====================
@@ -236,6 +158,7 @@ Singleton {
         // ==================== Network Configuration ====================
         property JsonObject network: JsonObject {
             property bool wifiEnabled: true
+            property int updateInterval: 30000  // WiFi state polling interval (ms)
         }
 
         // ==================== Audio Configuration ====================
@@ -244,22 +167,46 @@ Singleton {
             property bool volumeOverdrive: false
         }
 
+        // ==================== Brightness Configuration ====================
+        property JsonObject brightness: JsonObject {
+            property int pollInterval: 500  // Polling interval for light backend (ms)
+            property int step: 5            // Brightness adjustment step size
+        }
+
         // ==================== Launcher Configuration ====================
         property JsonObject launcher: JsonObject {
             // Launch behavior
             property bool useApp2Unit: false
             property string terminalCommand: "xterm -e"
-            
+
             // Display and sorting
             property bool sortByMostUsed: true
             property list<string> favoriteApps: []
             property int maxResults: 50
-            
+
             // Position and appearance
             property string position: "top_left"  // "top_left", "top_center", "top_right", "center", "bottom_left", "bottom_center", "bottom_right"
             property real backgroundOpacity: 0.95
             property int width: 350
             property int height: 450
+        }
+
+        // ==================== Session Menu Configuration ====================
+        property JsonObject sessionMenu: JsonObject {
+            property int confirmationDelay: 9000  // Countdown duration (ms)
+            property bool enableConfirmation: true
+            property int width: 280
+            property int height: 380
+        }
+
+        // ==================== Theme Configuration ====================
+        property JsonObject theme: JsonObject {
+            property bool autoReload: true
+            property bool enableNotifications: true
+            property string regenerationMode: "auto"  // "auto", "manual", "scheduled"
+            property int autoRegenerationInterval: 3600000  // 1 hour in ms
+            property string colorMode: "dark"  // "dark", "light"
+            property string schemeType: "scheme-tonal-spot"  // Matugen scheme variant
         }
     }
 
@@ -324,5 +271,227 @@ Singleton {
         saveTimer.start()
 
         Logger.log("Settings", `Removed widget at index ${index} from ${section} section`)
+    }
+
+    // ==================== Settings Management Functions ====================
+
+    /**
+     * Save settings to disk
+     * Helper function to centralize save logic
+     */
+    function saveSettings() {
+        // Prefer debounced saves to avoid overlapping FileView operations.
+        // This coalesces multiple rapid changes (e.g., during migrations)
+        // into a single write to prevent "dropped operation" warnings.
+        saveTimer.start()
+    }
+
+    /**
+     * Upgrade settings from older versions to current schema
+     * Runs automatically when settings are loaded
+     */
+    function upgradeSettings() {
+        // Check if upgrade is needed
+        if (adapter.settingsVersion >= currentSettingsVersion) {
+            return
+        }
+
+        Logger.log("Settings", "Upgrading settings from v" + adapter.settingsVersion + " to v" + currentSettingsVersion)
+
+        var didModify = false
+
+        // Version 1 -> 2: No schema changes (validation improvements only)
+        if (adapter.settingsVersion < 2) {
+            adapter.settingsVersion = 2
+            didModify = true
+            Logger.log("Settings", "Upgraded to v2")
+        }
+
+        // Version 2 -> 3: Add brightness, sessionMenu, network.updateInterval
+        if (adapter.settingsVersion < 3) {
+            // Add brightness settings if missing
+            if (!adapter.brightness) {
+                adapter.brightness = {
+                    "pollInterval": 500,
+                    "step": 5
+                }
+                Logger.log("Settings", "Added brightness settings")
+                didModify = true
+            }
+
+            // Add sessionMenu settings if missing
+            if (!adapter.sessionMenu) {
+                adapter.sessionMenu = {
+                    "confirmationDelay": 9000,
+                    "enableConfirmation": true,
+                    "width": 280,
+                    "height": 380
+                }
+                Logger.log("Settings", "Added sessionMenu settings")
+                didModify = true
+            }
+
+            // Add network.updateInterval if missing
+            if (!adapter.network.updateInterval) {
+                adapter.network.updateInterval = 30000
+                Logger.log("Settings", "Added network.updateInterval")
+                didModify = true
+            }
+
+            adapter.settingsVersion = 3
+            didModify = true
+            Logger.log("Settings", "Upgraded to v3")
+        }
+
+        // Version 3 -> 4: Add theme settings
+        if (adapter.settingsVersion < 4) {
+            // Add theme settings if missing
+            if (!adapter.theme) {
+                adapter.theme = {
+                    "autoReload": true,
+                    "enableNotifications": true,
+                    "regenerationMode": "auto",
+                    "autoRegenerationInterval": 3600000,
+                    "colorMode": "dark",
+                    "schemeType": "scheme-tonal-spot"
+                }
+                Logger.log("Settings", "Added theme settings")
+                didModify = true
+            }
+
+            adapter.settingsVersion = 4
+            didModify = true
+            Logger.log("Settings", "Upgraded to v4")
+        }
+
+        // Perform a single debounced save after all upgrades.
+        if (didModify) {
+            saveSettings()
+        }
+        // Future migrations go here
+        // if (adapter.settingsVersion < 5) { ... }
+    }
+
+    /**
+     * Validate settings and fix invalid values
+     * Ensures data integrity and prevents crashes from corrupted settings
+     */
+    function validateSettings() {
+        var needsSave = false
+
+        if (!adapter.ui) {
+            adapter.ui = {
+                "fontSize": 7,
+                "iconSize": 9
+            }
+            needsSave = true
+        }
+
+        // Validate UI settings
+        if (adapter.ui.fontSize === undefined || adapter.ui.fontSize < 1 || adapter.ui.fontSize > 72) {
+            Logger.warn("Settings", "Invalid fontSize (" + adapter.ui.fontSize + "), resetting to 7")
+            adapter.ui.fontSize = 7
+            needsSave = true
+        }
+
+        if (adapter.ui.iconSize === undefined || adapter.ui.iconSize < 1 || adapter.ui.iconSize > 100) {
+            Logger.warn("Settings", "Invalid iconSize (" + adapter.ui.iconSize + "), resetting to 9")
+            adapter.ui.iconSize = 9
+            needsSave = true
+        }
+
+        // Validate bar settings
+        if (adapter.bar.height < 10 || adapter.bar.height > 200) {
+            Logger.warn("Settings", "Invalid bar height (" + adapter.bar.height + "), resetting to 22")
+            adapter.bar.height = 22
+            needsSave = true
+        }
+
+        var validPositions = ["top", "bottom", "left", "right"]
+        if (!validPositions.includes(adapter.bar.position)) {
+            Logger.warn("Settings", "Invalid bar position (" + adapter.bar.position + "), resetting to 'top'")
+            adapter.bar.position = "top"
+            needsSave = true
+        }
+
+        // Validate launcher settings
+        if (adapter.launcher.maxResults < 1 || adapter.launcher.maxResults > 500) {
+            Logger.warn("Settings", "Invalid launcher maxResults (" + adapter.launcher.maxResults + "), resetting to 50")
+            adapter.launcher.maxResults = 50
+            needsSave = true
+        }
+
+        // Validate audio settings
+        if (adapter.audio.volumeStep < 1 || adapter.audio.volumeStep > 50) {
+            Logger.warn("Settings", "Invalid audio volumeStep (" + adapter.audio.volumeStep + "), resetting to 5")
+            adapter.audio.volumeStep = 5
+            needsSave = true
+        }
+
+        // Validate brightness settings
+        if (adapter.brightness.pollInterval < 100 || adapter.brightness.pollInterval > 5000) {
+            Logger.warn("Settings", "Invalid brightness pollInterval (" + adapter.brightness.pollInterval + "), resetting to 500")
+            adapter.brightness.pollInterval = 500
+            needsSave = true
+        }
+
+        if (adapter.brightness.step < 1 || adapter.brightness.step > 50) {
+            Logger.warn("Settings", "Invalid brightness step (" + adapter.brightness.step + "), resetting to 5")
+            adapter.brightness.step = 5
+            needsSave = true
+        }
+
+        // Validate network settings
+        if (adapter.network.updateInterval < 5000 || adapter.network.updateInterval > 300000) {
+            Logger.warn("Settings", "Invalid network updateInterval (" + adapter.network.updateInterval + "), resetting to 30000")
+            adapter.network.updateInterval = 30000
+            needsSave = true
+        }
+
+        // Validate sessionMenu settings
+        if (adapter.sessionMenu.confirmationDelay < 1000 || adapter.sessionMenu.confirmationDelay > 60000) {
+            Logger.warn("Settings", "Invalid sessionMenu confirmationDelay (" + adapter.sessionMenu.confirmationDelay + "), resetting to 9000")
+            adapter.sessionMenu.confirmationDelay = 9000
+            needsSave = true
+        }
+
+        if (adapter.sessionMenu.width < 200 || adapter.sessionMenu.width > 600) {
+            Logger.warn("Settings", "Invalid sessionMenu width (" + adapter.sessionMenu.width + "), resetting to 280")
+            adapter.sessionMenu.width = 280
+            needsSave = true
+        }
+
+        if (adapter.sessionMenu.height < 200 || adapter.sessionMenu.height > 800) {
+            Logger.warn("Settings", "Invalid sessionMenu height (" + adapter.sessionMenu.height + "), resetting to 380")
+            adapter.sessionMenu.height = 380
+            needsSave = true
+        }
+
+        // Validate theme settings
+        if (adapter.theme.autoRegenerationInterval < 60000 || adapter.theme.autoRegenerationInterval > 86400000) {
+            Logger.warn("Settings", "Invalid theme autoRegenerationInterval (" + adapter.theme.autoRegenerationInterval + "), resetting to 3600000")
+            adapter.theme.autoRegenerationInterval = 3600000
+            needsSave = true
+        }
+
+        var validRegenerationModes = ["auto", "manual", "scheduled"]
+        if (adapter.theme.regenerationMode && !validRegenerationModes.includes(adapter.theme.regenerationMode)) {
+            Logger.warn("Settings", "Invalid theme regenerationMode (" + adapter.theme.regenerationMode + "), resetting to auto")
+            adapter.theme.regenerationMode = "auto"
+            needsSave = true
+        }
+
+        var validColorModes = ["dark", "light"]
+        if (adapter.theme.colorMode && !validColorModes.includes(adapter.theme.colorMode)) {
+            Logger.warn("Settings", "Invalid theme colorMode (" + adapter.theme.colorMode + "), resetting to dark")
+            adapter.theme.colorMode = "dark"
+            needsSave = true
+        }
+
+        // Save if any corrections were made
+        if (needsSave) {
+            Logger.log("Settings", "Validation complete, saving corrected settings")
+            saveSettings()
+        }
     }
 }

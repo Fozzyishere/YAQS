@@ -31,4 +31,18 @@ Singleton {
         var msg = _formatMessage(...args);
         console.error(msg);
     }
+
+    function debug(...args) {
+        if (Settings.data?.debug?.enabled ?? false) {
+            var msg = _formatMessage(...args);
+            console.log("\x1b[90m[DEBUG]\x1b[0m", msg);
+        }
+    }
+
+    function callStack() {
+        console.log("\x1b[36m--------------------------\x1b[0m");
+        console.log("\x1b[36mCall Stack Trace:\x1b[0m");
+        console.trace();
+        console.log("\x1b[36m--------------------------\x1b[0m");
+    }
 }

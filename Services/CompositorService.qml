@@ -10,6 +10,7 @@ Singleton {
     // ===== Compositor detection =====
     property bool isHyprland: false
     property bool isNiri: false
+    property bool initialized: false
 
     // ===== Facade properties (synced from backend) =====
     property ListModel workspaces: ListModel {}
@@ -26,8 +27,16 @@ Singleton {
     property var backend: null
 
     // ===== Initialization =====
-    Component.onCompleted: {
+    function init() {
+        if (initialized) {
+            Logger.warn("CompositorService", "Already initialized");
+            return;
+        }
+
+        Logger.log("CompositorService", "Initializing...");
         detectCompositor();
+        initialized = true;
+        // Note: "Initialization complete" logged after compositor detection
     }
 
     // ===== Compositor detection =====
@@ -51,7 +60,7 @@ Singleton {
             if (item) {
                 root.backend = item;
                 setupBackendConnections();
-                backend.initialize();  // Explicit initialization
+                backend.init();  // Initialize backend service
                 Logger.log("CompositorService", "Backend initialized");
             }
         }

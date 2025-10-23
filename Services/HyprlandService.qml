@@ -29,11 +29,15 @@ Item {
         onTriggered: safeUpdate()
     }
 
-    // ===== Initialization (called by CompositorService) =====
-    function initialize() {
-        if (initialized)
+    // ===== Initialization =====
+    function init() {
+        if (initialized) {
+            Logger.warn("HyprlandService", "Already initialized");
             return;
+        }
+
         try {
+            Logger.log("HyprlandService", "Initializing...");
             Hyprland.refreshWorkspaces();
             Hyprland.refreshToplevels();
             Qt.callLater(() => {
@@ -41,9 +45,10 @@ Item {
                 safeUpdateWindows();
             });
             initialized = true;
-            Logger.log("HyprlandService", "Initialized successfully");
+            Logger.log("HyprlandService", "Initialization complete");
         } catch (e) {
             Logger.error("HyprlandService", "Failed to initialize:", e);
+            Logger.callStack();
         }
     }
 

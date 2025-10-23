@@ -9,9 +9,23 @@ QtObject {
 
     property var activeTooltip: null
     property var pendingTooltip: null
+    property bool initialized: false
 
     property Component tooltipComponent: Component {
         Tooltip {}
+    }
+
+    // ===== Initialization =====
+    function init() {
+        if (initialized) {
+            Logger.warn("TooltipService", "Already initialized");
+            return;
+        }
+
+        Logger.log("TooltipService", "Initializing...");
+        // TooltipService is passive - tooltips are created on demand
+        initialized = true;
+        Logger.log("TooltipService", "Initialization complete");
     }
 
     function show(target, text, delay) {

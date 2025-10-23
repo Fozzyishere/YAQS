@@ -11,14 +11,14 @@ Panel {
 
     // ===== Panel Configuration =====
     objectName: "sessionMenuPanel"
-    preferredWidth: 280
-    preferredHeight: 380
+    preferredWidth: Settings.data.sessionMenu?.width ?? 280
+    preferredHeight: Settings.data.sessionMenu?.height ?? 380
     panelAnchorRight: true
     panelAnchorTop: true
     panelKeyboardFocus: true
 
     // ===== Timer Properties =====
-    property int timerDuration: 9000  // 9 seconds
+    property int timerDuration: Settings.data.sessionMenu?.confirmationDelay ?? 9000
     property string pendingAction: ""
     property bool timerActive: false
     property int timeRemaining: 0
@@ -232,11 +232,11 @@ Panel {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.topMargin: Math.round(Settings.data.ui.spacingL * scaling)
-            anchors.leftMargin: Math.round(Settings.data.ui.spacingL * scaling)
-            anchors.rightMargin: Math.round(Settings.data.ui.spacingL * scaling)
-            anchors.bottomMargin: Math.round(Settings.data.ui.spacingM * scaling)
-            spacing: Math.round(Settings.data.ui.spacingS * scaling)
+            anchors.topMargin: Math.round(Style.spacingL * scaling)
+            anchors.leftMargin: Math.round(Style.spacingL * scaling)
+            anchors.rightMargin: Math.round(Style.spacingL * scaling)
+            anchors.bottomMargin: Math.round(Style.spacingM * scaling)
+            spacing: Math.round(Style.spacingS * scaling)
 
             // ===== Header =====
             RowLayout {
@@ -248,10 +248,10 @@ Panel {
                         ? pendingAction.charAt(0).toUpperCase() + pendingAction.slice(1) +
                           " in " + Math.ceil(timeRemaining / 1000) + "s"
                         : "Session Menu"
-                    font.family: Settings.data.ui.fontFamily
-                    font.pixelSize: Math.round(Settings.data.ui.fontSizeLarge * scaling)
+                    font.family: Style.fontFamily
+                    font.pixelSize: Math.round(Style.fontSizeLarge * scaling)
                     font.weight: Font.DemiBold
-                    color: timerActive ? Settings.data.colors.mPrimary : Settings.data.colors.mOnSurface
+                    color: timerActive ? Color.mPrimary : Color.mOnSurface
                     Layout.alignment: Qt.AlignVCenter
                     verticalAlignment: Text.AlignVCenter
                 }
@@ -275,17 +275,17 @@ Panel {
 
                     Rectangle {
                         anchors.fill: parent
-                        radius: Settings.data.ui.radiusFull
+                        radius: Style.radiusFull
                         color: parent.containsMouse
-                            ? (timerActive ? Qt.alpha(Settings.data.colors.mError, 0.1) : Settings.data.colors.mSurfaceContainerHigh)
+                            ? (timerActive ? Qt.alpha(Color.mError, 0.1) : Color.mSurfaceContainerHigh)
                             : "transparent"
 
                         Text {
                             anchors.centerIn: parent
                             text: timerActive ? "" : ""  // stop or close icon
-                            font.family: Settings.data.ui.fontFamily
-                            font.pixelSize: Math.round(Settings.data.ui.iconSize * scaling)
-                            color: timerActive ? Settings.data.colors.mError : Settings.data.colors.mOnSurface
+                            font.family: Style.fontFamily
+                            font.pixelSize: Math.round(Style.iconSize * scaling)
+                            color: timerActive ? Color.mError : Color.mOnSurface
                         }
                     }
                 }
@@ -295,14 +295,14 @@ Panel {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
-                color: Settings.data.colors.mOutlineVariant
+                color: Color.mOutlineVariant
             }
 
             // ===== Power Options =====
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                spacing: Math.round(Settings.data.ui.spacingM * scaling)
+                spacing: Math.round(Style.spacingM * scaling)
 
                 Repeater {
                     model: powerOptions
@@ -342,50 +342,50 @@ Panel {
         signal clicked
 
         height: Math.round(64 * scaling)
-        radius: Settings.data.ui.radiusS * scaling
+        radius: Style.radiusS * scaling
         color: {
             if (pending) {
-                return Qt.alpha(Settings.data.colors.mPrimary, 0.08);
+                return Qt.alpha(Color.mPrimary, 0.08);
             }
             if (isSelected || mouseArea.containsMouse) {
-                return Settings.data.colors.mSurfaceContainerHigh;
+                return Color.mSurfaceContainerHigh;
             }
             return "transparent";
         }
 
         border.width: pending ? Math.max(2, 2 * scaling) : 0
-        border.color: pending ? Settings.data.colors.mPrimary : Settings.data.colors.mOutline
+        border.color: pending ? Color.mPrimary : Color.mOutline
 
         Behavior on color {
             ColorAnimation {
-                duration: Settings.data.ui.durationFast
+                duration: Style.durationFast
             }
         }
 
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: Math.round(Settings.data.ui.spacingL * scaling)
-            anchors.rightMargin: Math.round(Settings.data.ui.spacingL * scaling)
-            spacing: Math.round(Settings.data.ui.spacingM * scaling)
+            anchors.leftMargin: Math.round(Style.spacingL * scaling)
+            anchors.rightMargin: Math.round(Style.spacingL * scaling)
+            spacing: Math.round(Style.spacingM * scaling)
 
             // Icon
             Text {
                 text: buttonRoot.icon
-                font.family: Settings.data.ui.fontFamily
+                font.family: Style.fontFamily
                 font.pixelSize: Math.round(24 * scaling)
                 color: {
-                    if (buttonRoot.pending) return Settings.data.colors.mPrimary;
+                    if (buttonRoot.pending) return Color.mPrimary;
                     if (buttonRoot.isDestructive && !buttonRoot.isSelected && !mouseArea.containsMouse) {
-                        return Settings.data.colors.mError;
+                        return Color.mError;
                     }
-                    return Settings.data.colors.mOnSurface;
+                    return Color.mOnSurface;
                 }
                 Layout.preferredWidth: Math.round(32 * scaling)
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
 
                 Behavior on color {
-                    ColorAnimation { duration: Settings.data.ui.durationFast }
+                    ColorAnimation { duration: Style.durationFast }
                 }
             }
 
@@ -396,34 +396,34 @@ Panel {
 
                 Text {
                     text: buttonRoot.title
-                    font.family: Settings.data.ui.fontFamily
-                    font.pixelSize: Math.round(Settings.data.ui.fontSize * scaling)
+                    font.family: Style.fontFamily
+                    font.pixelSize: Math.round(Style.fontSize * scaling)
                     font.weight: Font.Medium
                     color: {
-                        if (buttonRoot.pending) return Settings.data.colors.mPrimary;
+                        if (buttonRoot.pending) return Color.mPrimary;
                         if (buttonRoot.isDestructive && !buttonRoot.isSelected && !mouseArea.containsMouse) {
-                            return Settings.data.colors.mError;
+                            return Color.mError;
                         }
-                        return Settings.data.colors.mOnSurface;
+                        return Color.mOnSurface;
                     }
 
                     Behavior on color {
-                        ColorAnimation { duration: Settings.data.ui.durationFast }
+                        ColorAnimation { duration: Style.durationFast }
                     }
                 }
 
                 Text {
                     text: buttonRoot.pending ? "Click again to execute" : buttonRoot.subtitle
-                    font.family: Settings.data.ui.fontFamily
-                    font.pixelSize: Math.round(Settings.data.ui.fontSizeSmall * scaling)
+                    font.family: Style.fontFamily
+                    font.pixelSize: Math.round(Style.fontSizeSmall * scaling)
                     color: {
-                        if (buttonRoot.pending) return Settings.data.colors.mPrimary;
+                        if (buttonRoot.pending) return Color.mPrimary;
                         if (buttonRoot.isDestructive && !buttonRoot.isSelected && !mouseArea.containsMouse) {
-                            return Settings.data.colors.mError;
+                            return Color.mError;
                         }
-                        return Settings.data.colors.mOnSurfaceVariant;
+                        return Color.mOnSurfaceVariant;
                     }
-                    opacity: Settings.data.ui.opacityHeavy
+                    opacity: Style.opacityHeavy
                     wrapMode: Text.NoWrap
                     elide: Text.ElideRight
                 }
@@ -434,16 +434,16 @@ Panel {
                 Layout.preferredWidth: Math.round(24 * scaling)
                 Layout.preferredHeight: Math.round(24 * scaling)
                 radius: width * 0.5
-                color: Settings.data.colors.mPrimary
+                color: Color.mPrimary
                 visible: buttonRoot.pending
 
                 Text {
                     anchors.centerIn: parent
                     text: Math.ceil(timeRemaining / 1000)
-                    font.family: Settings.data.ui.fontFamily
-                    font.pixelSize: Math.round(Settings.data.ui.fontSizeSmall * scaling)
+                    font.family: Style.fontFamily
+                    font.pixelSize: Math.round(Style.fontSizeSmall * scaling)
                     font.weight: Font.DemiBold
-                    color: Settings.data.colors.mSurface
+                    color: Color.mSurface
                 }
             }
         }
