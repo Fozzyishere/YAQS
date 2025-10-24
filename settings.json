@@ -62,6 +62,7 @@
     },
     "launcher": {
         "backgroundOpacity": 1,
+        "enableClipboardHistory": false,
         "favoriteApps": [
         ],
         "height": 450,
@@ -86,7 +87,7 @@
         "height": 380,
         "width": 280
     },
-    "settingsVersion": 4,
+    "settingsVersion": 733559120,
     "theme": {
         "autoRegenerationInterval": 3600000,
         "autoReload": true,

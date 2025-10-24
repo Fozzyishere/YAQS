@@ -189,6 +189,9 @@ Singleton {
             property real backgroundOpacity: 0.95
             property int width: 350
             property int height: 450
+
+            // Plugin configuration
+            property bool enableClipboardHistory: false
         }
 
         // ==================== Session Menu Configuration ====================
@@ -418,6 +421,21 @@ Singleton {
         if (adapter.launcher.maxResults < 1 || adapter.launcher.maxResults > 500) {
             Logger.warn("Settings", "Invalid launcher maxResults (" + adapter.launcher.maxResults + "), resetting to 50")
             adapter.launcher.maxResults = 50
+            needsSave = true
+        }
+
+        // Validate launcher.enableClipboardHistory (ensure it's a boolean)
+        if (adapter.launcher.enableClipboardHistory === undefined || typeof adapter.launcher.enableClipboardHistory !== "boolean") {
+            Logger.warn("Settings", "Invalid launcher enableClipboardHistory, resetting to false")
+            adapter.launcher.enableClipboardHistory = false
+            needsSave = true
+        }
+
+        // Validate launcher position
+        var validLauncherPositions = ["top_left", "top_center", "top_right", "center", "bottom_left", "bottom_center", "bottom_right"]
+        if (!validLauncherPositions.includes(adapter.launcher.position)) {
+            Logger.warn("Settings", "Invalid launcher position (" + adapter.launcher.position + "), resetting to 'top_left'")
+            adapter.launcher.position = "top_left"
             needsSave = true
         }
 

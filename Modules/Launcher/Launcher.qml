@@ -126,6 +126,26 @@ Panel {
         } else {
             Logger.error("Launcher", "Failed to load ApplicationsPlugin")
         }
+
+        // Load calculator plugin
+        const calcPlugin = Qt.createComponent("Plugins/CalculatorPlugin.qml").createObject(root)
+        if (calcPlugin) {
+            registerPlugin(calcPlugin)
+            Logger.log("Launcher", "Registered: CalculatorPlugin")
+        } else {
+            Logger.error("Launcher", "Failed to load CalculatorPlugin")
+        }
+
+        // Load clipboard plugin (if enabled in settings)
+        if (Settings.data.launcher.enableClipboardHistory) {
+            const clipPlugin = Qt.createComponent("Plugins/ClipboardPlugin.qml").createObject(root)
+            if (clipPlugin) {
+                registerPlugin(clipPlugin)
+                Logger.log("Launcher", "Registered: ClipboardPlugin")
+            } else {
+                Logger.error("Launcher", "Failed to load ClipboardPlugin")
+            }
+        }
     }
 
 
