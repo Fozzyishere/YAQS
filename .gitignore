@@ -2,6 +2,7 @@ notes/
 .claude/
 .vscode/
 noctalia-shell-main/
+.github/
 
 CLAUDE.md
 .env
