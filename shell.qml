@@ -36,6 +36,9 @@ ShellRoot {
         QsCommons.Logger.i("Shell", "Settings loaded successfully")
         QsCommons.Logger.i("Shell", "")
         
+        // Force early initialization of somem services
+        var _ = QsServices.BrightnessService.monitors
+        
         // Start test sequence
         runTest1_ProgramChecker()
       }
@@ -317,12 +320,72 @@ ShellRoot {
         QsCommons.Logger.i("Test", "=== Test 3 Complete ===")
         QsCommons.Logger.i("Test", "")
         
+        // Small delay to allow BrightnessService async init to complete
+        Qt.callLater(() => {
+          test4Timer.start()
+        })
+      }
+
+      // ========================================
+      // Test 4: BrightnessService
+      // ========================================
+      // Note: BrightnessService initializes at startup, but detection is async.
+      // We add a small delay to ensure the Process completes.
+
+      Timer {
+        id: test4Timer
+        interval: 500
+        running: false
+        repeat: false
+        onTriggered: runTest4_BrightnessService()
+      }
+
+      function runTest4_BrightnessService() {
+        QsCommons.Logger.i("Test", "")
+        QsCommons.Logger.i("Test", "===========================")
+        QsCommons.Logger.i("Test", "Test 4: BrightnessService")
+        QsCommons.Logger.i("Test", "===========================")
+        QsCommons.Logger.i("Test", "")
+        
+        // Test monitor detection
+        QsCommons.Logger.i("Test", "Detected Monitors: " + QsServices.BrightnessService.monitors.length)
+        for (var i = 0; i < QsServices.BrightnessService.monitors.length; i++) {
+          const monitor = QsServices.BrightnessService.monitors[i]
+          QsCommons.Logger.i("Test", "  [" + i + "] " + monitor.modelData.name)
+          QsCommons.Logger.i("Test", "      Available:  " + monitor.isAvailable)
+          if (monitor.isAvailable) {
+            QsCommons.Logger.i("Test", "      Method:     " + monitor.method)
+            QsCommons.Logger.i("Test", "      Device:     " + (monitor.backlightDevice || "N/A"))
+            QsCommons.Logger.i("Test", "      Brightness: " + Math.round(monitor.brightness * 100) + "%")
+            QsCommons.Logger.i("Test", "      Max Value:  " + monitor.maxBrightness)
+          }
+        }
+        QsCommons.Logger.i("Test", "")
+        
+        // Test available methods
+        const methods = QsServices.BrightnessService.getAvailableMethods()
+        QsCommons.Logger.i("Test", "Available Methods: " + (methods.length > 0 ? methods.join(", ") : "None"))
+        if (methods.length === 0) {
+          QsCommons.Logger.i("Test", "  (This is normal for desktop systems without internal backlights)")
+        }
+        QsCommons.Logger.i("Test", "")
+        
+        // Test settings
+        QsCommons.Logger.i("Test", "Settings:")
+        QsCommons.Logger.i("Test", "  brightnessStep: " + QsCommons.Settings.data.brightness.step)
+        QsCommons.Logger.i("Test", "")
+        
+        QsCommons.Logger.i("Test", "=== Test 4 Complete ===")
+        QsCommons.Logger.i("Test", "")
+        
         // All tests complete
-        QsCommons.Logger.i("Shell", "")
-        QsCommons.Logger.i("Shell", "========================================")
-        QsCommons.Logger.i("Shell", "All Tests Complete")
-        QsCommons.Logger.i("Shell", "========================================")
-        QsCommons.Logger.i("Shell", "")
+        Qt.callLater(() => {
+          QsCommons.Logger.i("Shell", "")
+          QsCommons.Logger.i("Shell", "========================================")
+          QsCommons.Logger.i("Shell", "All Tests Complete")
+          QsCommons.Logger.i("Shell", "========================================")
+          QsCommons.Logger.i("Shell", "")
+        })
       }
 
       // TODO:

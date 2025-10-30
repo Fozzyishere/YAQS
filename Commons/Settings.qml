@@ -158,6 +158,11 @@ Singleton {
       property real volumeStep: 5.0         // Volume step percentage (0-100)
       property bool volumeOverdrive: false  // Allow volume >100% (up to 150%)
     }
+
+    // brightness
+    property JsonObject brightness: JsonObject {
+      property real step: 5.0  // Brightness step percentage (0-100)
+    }
   }
 
   // -----------------------------------------------------
