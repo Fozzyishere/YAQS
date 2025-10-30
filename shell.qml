@@ -9,8 +9,9 @@ ShellRoot {
   property bool settingsLoaded: false
 
   Component.onCompleted: {
-    QsCommons.Logger.i("Shell", "---------------------------")
-    QsCommons.Logger.i("Shell", "YAQS Shell Loading...")
+    QsCommons.Logger.i("Shell", "========================================")
+    QsCommons.Logger.i("Shell", "YAQS Test Suite - Running All Tests")
+    QsCommons.Logger.i("Shell", "========================================")
   }
 
   Connections {
@@ -32,193 +33,311 @@ ShellRoot {
 
     sourceComponent: Item {
       Component.onCompleted: {
-        QsCommons.Logger.i("Shell", "---------------------------")
-        QsCommons.Logger.i("Shell", "YAQS Hello!")
-        QsCommons.Logger.i("Shell", "---------------------------")
+        QsCommons.Logger.i("Shell", "Settings loaded successfully")
+        QsCommons.Logger.i("Shell", "")
         
-        // Start programservice tests
-        testProgramChecker()
+        // Start test sequence
+        runTest1_ProgramChecker()
+      }
+
+      // ========================================
+      // Test 1: ProgramCheckerService
+      // ========================================
+      
+      function runTest1_ProgramChecker() {
+        QsCommons.Logger.i("Test", "")
+        QsCommons.Logger.i("Test", "=================================")
+        QsCommons.Logger.i("Test", "Test 1: ProgramCheckerService")
+        QsCommons.Logger.i("Test", "=================================")
+        QsCommons.Logger.i("Test", "")
+        QsCommons.Logger.i("Test", "Checking for required programs...")
+        QsCommons.Logger.i("Test", "(Results will appear when checks complete)")
+        QsCommons.Logger.i("Test", "")
       }
 
       Connections {
         target: QsServices.ProgramCheckerService
         function onChecksCompleted() {
-          QsCommons.Logger.i("Shell", "")
-          QsCommons.Logger.i("Shell", "=== ProgramCheckerService Results ===")
-          QsCommons.Logger.i("Shell", "")
-          QsCommons.Logger.i("Shell", "Program Availability:")
-          QsCommons.Logger.i("Shell", "  matugen: " + QsServices.ProgramCheckerService.matugenAvailable)
-          QsCommons.Logger.i("Shell", "  kitty: " + QsServices.ProgramCheckerService.kittyAvailable)
-          QsCommons.Logger.i("Shell", "  foot: " + QsServices.ProgramCheckerService.footAvailable)
-          QsCommons.Logger.i("Shell", "  ghostty: " + QsServices.ProgramCheckerService.ghosttyAvailable)
-          QsCommons.Logger.i("Shell", "  gpu-screen-recorder: " + QsServices.ProgramCheckerService.gpuScreenRecorderAvailable)
-          QsCommons.Logger.i("Shell", "  nmcli: " + QsServices.ProgramCheckerService.nmcliAvailable)
-          QsCommons.Logger.i("Shell", "  bluetoothctl: " + QsServices.ProgramCheckerService.bluetoothctlAvailable)
-          QsCommons.Logger.i("Shell", "  brightnessctl: " + QsServices.ProgramCheckerService.brightnessctlAvailable)
-          QsCommons.Logger.i("Shell", "  playerctl: " + QsServices.ProgramCheckerService.playerctlAvailable)
-          QsCommons.Logger.i("Shell", "")
-          QsCommons.Logger.i("Shell", "=== Test Complete ===")
-          QsCommons.Logger.i("Shell", "")
+          QsCommons.Logger.i("Test", "")
+          QsCommons.Logger.i("Test", "=== Results ===")
+          QsCommons.Logger.i("Test", "")
+          QsCommons.Logger.i("Test", "Program Availability:")
+          QsCommons.Logger.i("Test", "  matugen:             " + QsServices.ProgramCheckerService.matugenAvailable)
+          QsCommons.Logger.i("Test", "  kitty:               " + QsServices.ProgramCheckerService.kittyAvailable)
+          QsCommons.Logger.i("Test", "  foot:                " + QsServices.ProgramCheckerService.footAvailable)
+          QsCommons.Logger.i("Test", "  ghostty:             " + QsServices.ProgramCheckerService.ghosttyAvailable)
+          QsCommons.Logger.i("Test", "  gpu-screen-recorder: " + QsServices.ProgramCheckerService.gpuScreenRecorderAvailable)
+          QsCommons.Logger.i("Test", "  nmcli:               " + QsServices.ProgramCheckerService.nmcliAvailable)
+          QsCommons.Logger.i("Test", "  bluetoothctl:        " + QsServices.ProgramCheckerService.bluetoothctlAvailable)
+          QsCommons.Logger.i("Test", "  brightnessctl:       " + QsServices.ProgramCheckerService.brightnessctlAvailable)
+          QsCommons.Logger.i("Test", "  playerctl:           " + QsServices.ProgramCheckerService.playerctlAvailable)
+          QsCommons.Logger.i("Test", "")
+          QsCommons.Logger.i("Test", "=== Test 1 Complete ===")
+          QsCommons.Logger.i("Test", "")
           
-          // Test compositor service next
+          // Start next test
           Qt.callLater(() => {
-            testCompositorService()
+            runTest2_CompositorDetection()
             // Wait for backend initialization before testing data
-            testDataTimer.start()
+            test2DataTimer.start()
           })
         }
       }
 
-      function testProgramChecker() {
-        QsCommons.Logger.i("Shell", "")
-        QsCommons.Logger.i("Shell", "=== ProgramCheckerService Test ===")
-        QsCommons.Logger.i("Shell", "Checking for required programs...")
-        QsCommons.Logger.i("Shell", "(Results will appear when checks complete)")
-        QsCommons.Logger.i("Shell", "")
-      }
+      // ========================================
+      // Test 2: CompositorService
+      // ========================================
 
       Timer {
-        id: testDataTimer
+        id: test2DataTimer
         interval: 2000
         running: false
         repeat: false
-        onTriggered: testCompositorData()
+        onTriggered: {
+          runTest2_CompositorData()
+          // Wait for display scale query
+          test2DisplayTimer.start()
+        }
+      }
+
+      Timer {
+        id: test2DisplayTimer
+        interval: 1000
+        running: false
+        repeat: false
+        onTriggered: {
+          runTest2_DisplayScales()
+          // Start next test
+          Qt.callLater(() => {
+            test3AudioTimer.start()
+          })
+        }
       }
 
       Connections {
         target: QsServices.CompositorService
         function onWorkspaceChanged() {
-          QsCommons.Logger.d("Shell", "Workspace changed event received")
+          QsCommons.Logger.d("Test", "Workspace changed event received")
         }
         function onActiveWindowChanged() {
-          QsCommons.Logger.d("Shell", "Active window changed event received")
+          QsCommons.Logger.d("Test", "Active window changed event received")
         }
         function onDisplayScalesChanged() {
-          QsCommons.Logger.i("Shell", "Display scales updated")
+          QsCommons.Logger.d("Test", "Display scales updated")
         }
       }
 
-      // Compositor test
-      function testCompositorService() {
-        QsCommons.Logger.i("Shell", "")
-        QsCommons.Logger.i("Shell", "=== CompositorService Detection Test ===")
-        QsCommons.Logger.i("Shell", "")
+      function runTest2_CompositorDetection() {
+        QsCommons.Logger.i("Test", "")
+        QsCommons.Logger.i("Test", "============================")
+        QsCommons.Logger.i("Test", "Test 2: CompositorService")
+        QsCommons.Logger.i("Test", "============================")
+        QsCommons.Logger.i("Test", "")
+        QsCommons.Logger.i("Test", "=== Part A: Compositor Detection ===")
+        QsCommons.Logger.i("Test", "")
         
-        QsCommons.Logger.i("Shell", "Environment Variables:")
-        QsCommons.Logger.i("Shell", "  HYPRLAND_INSTANCE_SIGNATURE: " + Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE"))
-        QsCommons.Logger.i("Shell", "  NIRI_SOCKET: " + Quickshell.env("NIRI_SOCKET"))
-        QsCommons.Logger.i("Shell", "  SWAYSOCK: " + Quickshell.env("SWAYSOCK"))
-        QsCommons.Logger.i("Shell", "")
+        QsCommons.Logger.i("Test", "Environment Variables:")
+        QsCommons.Logger.i("Test", "  HYPRLAND_INSTANCE_SIGNATURE: " + Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE"))
+        QsCommons.Logger.i("Test", "  NIRI_SOCKET:                 " + Quickshell.env("NIRI_SOCKET"))
+        QsCommons.Logger.i("Test", "  SWAYSOCK:                    " + Quickshell.env("SWAYSOCK"))
+        QsCommons.Logger.i("Test", "")
         
-        QsCommons.Logger.i("Shell", "Detected Compositor:")
-        QsCommons.Logger.i("Shell", "  isHyprland: " + QsServices.CompositorService.isHyprland)
-        QsCommons.Logger.i("Shell", "  isNiri: " + QsServices.CompositorService.isNiri)
-        QsCommons.Logger.i("Shell", "  isSway: " + QsServices.CompositorService.isSway)
-        QsCommons.Logger.i("Shell", "")
+        QsCommons.Logger.i("Test", "Detected Compositor:")
+        QsCommons.Logger.i("Test", "  isHyprland: " + QsServices.CompositorService.isHyprland)
+        QsCommons.Logger.i("Test", "  isNiri:     " + QsServices.CompositorService.isNiri)
+        QsCommons.Logger.i("Test", "  isSway:     " + QsServices.CompositorService.isSway)
+        QsCommons.Logger.i("Test", "")
         
-        QsCommons.Logger.i("Shell", "Backend loaded: " + (QsServices.CompositorService.backend !== null))
-        QsCommons.Logger.i("Shell", "Display cache path: " + QsServices.CompositorService.displayCachePath)
-        QsCommons.Logger.i("Shell", "")
-        
-        QsCommons.Logger.i("Shell", "=== Test Complete ===")
-        QsCommons.Logger.i("Shell", "")
+        QsCommons.Logger.i("Test", "Backend loaded:       " + (QsServices.CompositorService.backend !== null))
+        QsCommons.Logger.i("Test", "Display cache path:   " + QsServices.CompositorService.displayCachePath)
+        QsCommons.Logger.i("Test", "")
       }
 
-      // Hyprland support test
-      function testCompositorData() {
-        QsCommons.Logger.i("Shell", "")
-        QsCommons.Logger.i("Shell", "=== HyprlandService Data Test ===")
-        QsCommons.Logger.i("Shell", "")
+      function runTest2_CompositorData() {
+        QsCommons.Logger.i("Test", "=== Part B: Workspace & Window Data ===")
+        QsCommons.Logger.i("Test", "")
         
         // Test workspace data
-        QsCommons.Logger.i("Shell", "Workspaces (count: " + QsServices.CompositorService.workspaces.count + "):")
+        QsCommons.Logger.i("Test", "Workspaces (count: " + QsServices.CompositorService.workspaces.count + "):")
         for (var i = 0; i < QsServices.CompositorService.workspaces.count; i++) {
           const ws = QsServices.CompositorService.workspaces.get(i)
-          QsCommons.Logger.i("Shell", "  [" + ws.id + "] " + ws.name + ": " +
+          QsCommons.Logger.i("Test", "  [" + ws.id + "] " + ws.name + ": " +
             "focused=" + ws.isFocused + ", " +
             "active=" + ws.isActive + ", " +
             "occupied=" + ws.isOccupied + ", " +
             "output=" + ws.output)
         }
-        QsCommons.Logger.i("Shell", "")
+        QsCommons.Logger.i("Test", "")
         
         // Test window data
-        QsCommons.Logger.i("Shell", "Windows (count: " + QsServices.CompositorService.windows.count + "):")
+        QsCommons.Logger.i("Test", "Windows (count: " + QsServices.CompositorService.windows.count + "):")
         for (var i = 0; i < Math.min(QsServices.CompositorService.windows.count, 5); i++) {
           const win = QsServices.CompositorService.windows.get(i)
-          QsCommons.Logger.i("Shell", "  [" + win.id.substring(0, 8) + "...] " +
+          QsCommons.Logger.i("Test", "  [" + win.id.substring(0, 8) + "...] " +
             "title=\"" + win.title + "\", " +
             "app=\"" + win.appId + "\", " +
             "ws=" + win.workspaceId + ", " +
             "focused=" + win.isFocused)
         }
         if (QsServices.CompositorService.windows.count > 5) {
-          QsCommons.Logger.i("Shell", "  ... and " + (QsServices.CompositorService.windows.count - 5) + " more")
+          QsCommons.Logger.i("Test", "  ... and " + (QsServices.CompositorService.windows.count - 5) + " more")
         }
-        QsCommons.Logger.i("Shell", "")
+        QsCommons.Logger.i("Test", "")
         
         // Test focused window
         const focused = QsServices.CompositorService.getFocusedWindow()
         if (focused) {
-          QsCommons.Logger.i("Shell", "Focused Window:")
-          QsCommons.Logger.i("Shell", "  title: \"" + focused.title + "\"")
-          QsCommons.Logger.i("Shell", "  app: \"" + focused.appId + "\"")
-          QsCommons.Logger.i("Shell", "  workspace: " + focused.workspaceId)
+          QsCommons.Logger.i("Test", "Focused Window:")
+          QsCommons.Logger.i("Test", "  title:     \"" + focused.title + "\"")
+          QsCommons.Logger.i("Test", "  app:       \"" + focused.appId + "\"")
+          QsCommons.Logger.i("Test", "  workspace: " + focused.workspaceId)
         } else {
-          QsCommons.Logger.i("Shell", "No focused window")
+          QsCommons.Logger.i("Test", "No focused window")
         }
-        QsCommons.Logger.i("Shell", "")
+        QsCommons.Logger.i("Test", "")
         
         // Test current workspace
         const currentWs = QsServices.CompositorService.getCurrentWorkspace()
         if (currentWs) {
-          QsCommons.Logger.i("Shell", "Current Workspace:")
-          QsCommons.Logger.i("Shell", "  id: " + currentWs.id)
-          QsCommons.Logger.i("Shell", "  name: " + currentWs.name)
-          QsCommons.Logger.i("Shell", "  output: " + currentWs.output)
+          QsCommons.Logger.i("Test", "Current Workspace:")
+          QsCommons.Logger.i("Test", "  id:     " + currentWs.id)
+          QsCommons.Logger.i("Test", "  name:   " + currentWs.name)
+          QsCommons.Logger.i("Test", "  output: " + currentWs.output)
         }
-        QsCommons.Logger.i("Shell", "")
+        QsCommons.Logger.i("Test", "")
         
         // Trigger display scale query
-        QsCommons.Logger.i("Shell", "Querying display scales...")
+        QsCommons.Logger.i("Test", "Querying display scales...")
         QsServices.CompositorService.updateDisplayScales()
-        
-        // Wait a bit then show display scales
-        displayScaleTimer.start()
       }
 
+      function runTest2_DisplayScales() {
+        QsCommons.Logger.i("Test", "")
+        QsCommons.Logger.i("Test", "=== Part C: Display Scales ===")
+        QsCommons.Logger.i("Test", "")
+        
+        const scales = QsServices.CompositorService.displayScales
+        const displayNames = Object.keys(scales)
+        
+        if (displayNames.length === 0) {
+          QsCommons.Logger.i("Test", "  No displays detected yet")
+        } else {
+          for (var i = 0; i < displayNames.length; i++) {
+            const name = displayNames[i]
+            const info = scales[name]
+            QsCommons.Logger.i("Test", "Display: " + name)
+            QsCommons.Logger.i("Test", "  resolution:  " + info.width + "x" + info.height)
+            QsCommons.Logger.i("Test", "  scale:       " + info.scale)
+            QsCommons.Logger.i("Test", "  refresh:     " + info.refresh_rate + " Hz")
+            QsCommons.Logger.i("Test", "  position:    (" + info.x + ", " + info.y + ")")
+            QsCommons.Logger.i("Test", "  vrr:         " + info.vrr)
+            QsCommons.Logger.i("Test", "  focused:     " + info.focused)
+            QsCommons.Logger.i("Test", "")
+          }
+        }
+        
+        QsCommons.Logger.i("Test", "Cache file: " + QsServices.CompositorService.displayCachePath)
+        QsCommons.Logger.i("Test", "")
+        QsCommons.Logger.i("Test", "=== Test 2 Complete ===")
+        QsCommons.Logger.i("Test", "")
+      }
+
+      // ========================================
+      // Test 3: AudioService
+      // ========================================
+
       Timer {
-        id: displayScaleTimer
-        interval: 1000
+        id: test3AudioTimer
+        interval: 2000
         running: false
         repeat: false
-        onTriggered: {
-          QsCommons.Logger.i("Shell", "")
-          QsCommons.Logger.i("Shell", "Display Scales:")
-          const scales = QsServices.CompositorService.displayScales
-          const displayNames = Object.keys(scales)
-          
-          if (displayNames.length === 0) {
-            QsCommons.Logger.i("Shell", "  No displays detected yet")
-          } else {
-            for (var i = 0; i < displayNames.length; i++) {
-              const name = displayNames[i]
-              const info = scales[name]
-              QsCommons.Logger.i("Shell", "  " + name + ":")
-              QsCommons.Logger.i("Shell", "    resolution: " + info.width + "x" + info.height)
-              QsCommons.Logger.i("Shell", "    scale: " + info.scale)
-              QsCommons.Logger.i("Shell", "    refresh: " + info.refresh_rate + " Hz")
-              QsCommons.Logger.i("Shell", "    position: (" + info.x + ", " + info.y + ")")
-              QsCommons.Logger.i("Shell", "    vrr: " + info.vrr)
-              QsCommons.Logger.i("Shell", "    focused: " + info.focused)
-            }
-          }
-          QsCommons.Logger.i("Shell", "")
-          QsCommons.Logger.i("Shell", "Cache file: " + QsServices.CompositorService.displayCachePath)
-          QsCommons.Logger.i("Shell", "")
-          QsCommons.Logger.i("Shell", "")
-        }
+        onTriggered: runTest3_AudioService()
       }
+
+      function runTest3_AudioService() {
+        QsCommons.Logger.i("Test", "")
+        QsCommons.Logger.i("Test", "======================")
+        QsCommons.Logger.i("Test", "Test 3: AudioService")
+        QsCommons.Logger.i("Test", "======================")
+        QsCommons.Logger.i("Test", "")
+        
+        // Test output devices
+        QsCommons.Logger.i("Test", "Output Devices (Sinks) - count: " + QsServices.AudioService.sinks.length)
+        for (var i = 0; i < QsServices.AudioService.sinks.length; i++) {
+          const sink = QsServices.AudioService.sinks[i]
+          const isDefault = (sink === QsServices.AudioService.sink)
+          QsCommons.Logger.i("Test", "  [" + i + "] " + sink.name +
+            (isDefault ? " (DEFAULT)" : "") +
+            " - vol: " + Math.round(sink.audio.volume * 100) + "%, " +
+            "muted: " + sink.audio.muted)
+        }
+        QsCommons.Logger.i("Test", "")
+        
+        // Test input devices
+        QsCommons.Logger.i("Test", "Input Devices (Sources) - count: " + QsServices.AudioService.sources.length)
+        for (var i = 0; i < QsServices.AudioService.sources.length; i++) {
+          const source = QsServices.AudioService.sources[i]
+          const isDefault = (source === QsServices.AudioService.source)
+          QsCommons.Logger.i("Test", "  [" + i + "] " + source.name +
+            (isDefault ? " (DEFAULT)" : "") +
+            " - vol: " + Math.round(source.audio.volume * 100) + "%, " +
+            "muted: " + source.audio.muted)
+        }
+        QsCommons.Logger.i("Test", "")
+        
+        // Test default sink state
+        if (QsServices.AudioService.sink) {
+          QsCommons.Logger.i("Test", "Default Output:")
+          QsCommons.Logger.i("Test", "  name:        " + QsServices.AudioService.sink.name)
+          QsCommons.Logger.i("Test", "  description: " + QsServices.AudioService.sink.description)
+          QsCommons.Logger.i("Test", "  volume:      " + Math.round(QsServices.AudioService.volume * 100) + "%")
+          QsCommons.Logger.i("Test", "  muted:       " + QsServices.AudioService.muted)
+        } else {
+          QsCommons.Logger.i("Test", "No default output device")
+        }
+        QsCommons.Logger.i("Test", "")
+        
+        // Test default source state
+        if (QsServices.AudioService.source) {
+          QsCommons.Logger.i("Test", "Default Input:")
+          QsCommons.Logger.i("Test", "  name:        " + QsServices.AudioService.source.name)
+          QsCommons.Logger.i("Test", "  description: " + QsServices.AudioService.source.description)
+          QsCommons.Logger.i("Test", "  volume:      " + Math.round(QsServices.AudioService.inputVolume * 100) + "%")
+          QsCommons.Logger.i("Test", "  muted:       " + QsServices.AudioService.inputMuted)
+        } else {
+          QsCommons.Logger.i("Test", "No default input device")
+        }
+        QsCommons.Logger.i("Test", "")
+        
+        QsCommons.Logger.i("Test", "Settings:")
+        QsCommons.Logger.i("Test", "  volumeStep:      " + QsCommons.Settings.data.audio.volumeStep)
+        QsCommons.Logger.i("Test", "  volumeOverdrive: " + QsCommons.Settings.data.audio.volumeOverdrive)
+        QsCommons.Logger.i("Test", "")
+        
+        QsCommons.Logger.i("Test", "=== Test 3 Complete ===")
+        QsCommons.Logger.i("Test", "")
+        
+        // All tests complete
+        QsCommons.Logger.i("Shell", "")
+        QsCommons.Logger.i("Shell", "========================================")
+        QsCommons.Logger.i("Shell", "All Tests Complete")
+        QsCommons.Logger.i("Shell", "========================================")
+        QsCommons.Logger.i("Shell", "")
+      }
+
+      // TODO:
+      // - Background
+      // - Bar
+      // - ControlCenter
+      // - Dock
+      // - Launcher
+      // - LockScreen
+      // - Notification
+      // - OSD
+      // - SessionMenu
+      // - Toast
+      // - Tooltip
+      // - Wallpaper
     }
   }
 }

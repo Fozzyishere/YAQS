@@ -152,6 +152,12 @@ Singleton {
       property bool tooltipsEnabled: true
       property bool panelsOverlayLayer: true
     }
+
+    // audio
+    property JsonObject audio: JsonObject {
+      property real volumeStep: 5.0         // Volume step percentage (0-100)
+      property bool volumeOverdrive: false  // Allow volume >100% (up to 150%)
+    }
   }
 
   // -----------------------------------------------------

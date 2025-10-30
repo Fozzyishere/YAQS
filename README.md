@@ -17,5 +17,5 @@ A modern, feature-rich desktop shell for Hyprland and other Wayland compositors 
 ├── Modules/                   # UI modules and panels
 ├── Services/                  # Singleton services for system integration
 ├── Shaders/                   # GLSL shaders for visual effects
-├── Primitives/                # UI primitives widgets  to build UI modules
+├── Primitives/                # UI primitives widgets to build UI modules
 ```
