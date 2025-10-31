@@ -35,9 +35,10 @@ ShellRoot {
       Component.onCompleted: {
         QsCommons.Logger.i("Shell", "Settings loaded successfully")
         QsCommons.Logger.i("Shell", "")
-        
-        // Force early initialization of somem services
+
+        // Force early initialization of some services
         var _ = QsServices.BrightnessService.monitors
+        QsServices.NetworkService.init()
         
         // Start test sequence
         runTest1_ProgramChecker()
@@ -377,14 +378,10 @@ ShellRoot {
         
         QsCommons.Logger.i("Test", "=== Test 4 Complete ===")
         QsCommons.Logger.i("Test", "")
-        
-        // All tests complete
+
+        // Proceed to network service tests
         Qt.callLater(() => {
-          QsCommons.Logger.i("Shell", "")
-          QsCommons.Logger.i("Shell", "========================================")
-          QsCommons.Logger.i("Shell", "All Tests Complete")
-          QsCommons.Logger.i("Shell", "========================================")
-          QsCommons.Logger.i("Shell", "")
+          test5NetworkTimer.start()
         })
       }
 
@@ -401,6 +398,90 @@ ShellRoot {
       // - Toast
       // - Tooltip
       // - Wallpaper
+      
+      // ========================================
+      // Test 5: NetworkService
+      // ========================================
+
+      Timer {
+        id: test5NetworkTimer
+        interval: 2000
+        running: false
+        repeat: false
+        onTriggered: runTest5_NetworkService()
+      }
+
+      Timer {
+        id: test5NetworkResultsTimer
+        interval: 5000
+        running: false
+        repeat: false
+        onTriggered: runTest5_NetworkServiceResults()
+      }
+
+      function runTest5_NetworkService() {
+        QsCommons.Logger.i("Test", "")
+        QsCommons.Logger.i("Test", "=========================")
+        QsCommons.Logger.i("Test", "Test 5: NetworkService")
+        QsCommons.Logger.i("Test", "=========================")
+        QsCommons.Logger.i("Test", "")
+
+        if (!QsServices.ProgramCheckerService.nmcliAvailable) {
+          QsCommons.Logger.w("Test", "nmcli not available; NetworkService initialization skipped")
+          QsCommons.Logger.i("Test", "")
+          finalizeTestSuite()
+          return
+        }
+
+        QsCommons.Logger.i("Test", "Waiting for Wi-Fi scan results...")
+        QsCommons.Logger.i("Test", "")
+        test5NetworkResultsTimer.start()
+      }
+
+      function runTest5_NetworkServiceResults() {
+        const nets = QsServices.NetworkService.networks
+        const ssids = Object.keys(nets)
+
+        QsCommons.Logger.i("Test", "Wi-Fi Enabled: " + QsCommons.Settings.data.network.wifiEnabled)
+        QsCommons.Logger.i("Test", "Ethernet Connected: " + QsServices.NetworkService.ethernetConnected)
+        QsCommons.Logger.i("Test", "Active Scan: " + QsServices.NetworkService.scanning)
+        QsCommons.Logger.i("Test", "Networks Found: " + ssids.length)
+
+        for (var i = 0; i < Math.min(ssids.length, 5); i++) {
+          const ssid = ssids[i]
+          const net = nets[ssid]
+          QsCommons.Logger.i("Test", "  [" + i + "] " + ssid + ":")
+          QsCommons.Logger.i("Test", "      Signal:    " + net.signal + "%")
+          QsCommons.Logger.i("Test", "      Security:  " + net.security)
+          QsCommons.Logger.i("Test", "      Connected: " + net.connected)
+          QsCommons.Logger.i("Test", "      Saved:     " + net.existing)
+          QsCommons.Logger.i("Test", "      Cached:    " + net.cached)
+        }
+
+        if (ssids.length > 5) {
+          QsCommons.Logger.i("Test", "  ... and " + (ssids.length - 5) + " more")
+        }
+
+        if (QsServices.NetworkService.lastError) {
+          QsCommons.Logger.w("Test", "Last error: " + QsServices.NetworkService.lastError)
+        }
+
+        QsCommons.Logger.i("Test", "")
+        QsCommons.Logger.i("Test", "=== Test 5 Complete ===")
+        QsCommons.Logger.i("Test", "")
+
+        finalizeTestSuite()
+      }
+
+      function finalizeTestSuite() {
+        Qt.callLater(() => {
+          QsCommons.Logger.i("Shell", "")
+          QsCommons.Logger.i("Shell", "========================================")
+          QsCommons.Logger.i("Shell", "All Tests Complete")
+          QsCommons.Logger.i("Shell", "========================================")
+          QsCommons.Logger.i("Shell", "")
+        })
+      }
     }
   }
 }

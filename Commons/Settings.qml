@@ -163,6 +163,11 @@ Singleton {
     property JsonObject brightness: JsonObject {
       property real step: 5.0  // Brightness step percentage (0-100)
     }
+
+    // network
+    property JsonObject network: JsonObject {
+      property bool wifiEnabled: true
+    }
   }
 
   // -----------------------------------------------------
