@@ -40,6 +40,9 @@ ShellRoot {
         var _ = QsServices.BrightnessService.monitors
         QsServices.NetworkService.init()
         
+        // Force BluetoothService initialization early to allow D-Bus adapter discovery
+        var _bt = QsServices.BluetoothService.available
+        
         // Start test sequence
         runTest1_ProgramChecker()
       }
@@ -468,6 +471,106 @@ ShellRoot {
 
         QsCommons.Logger.i("Test", "")
         QsCommons.Logger.i("Test", "=== Test 5 Complete ===")
+        QsCommons.Logger.i("Test", "")
+
+        // Proceed to Bluetooth test
+        Qt.callLater(() => {
+          test6BluetoothTimer.start()
+        })
+      }
+
+      // ========================================
+      // Test 6: BluetoothService
+      // ========================================
+      // Note: Bluetooth adapter needs ~2s to initialize via D-Bus
+
+      Timer {
+        id: test6BluetoothTimer
+        interval: 3000  // 3s delay to allow Bluetooth D-Bus initialization
+        running: false
+        repeat: false
+        onTriggered: runTest6_BluetoothService()
+      }
+
+      function runTest6_BluetoothService() {
+        QsCommons.Logger.i("Test", "")
+        QsCommons.Logger.i("Test", "===========================")
+        QsCommons.Logger.i("Test", "Test 6: BluetoothService")
+        QsCommons.Logger.i("Test", "===========================")
+        QsCommons.Logger.i("Test", "")
+        QsCommons.Logger.i("Test", "(Waited 3s for Bluetooth D-Bus initialization)")
+        QsCommons.Logger.i("Test", "")
+
+        if (!QsServices.ProgramCheckerService.bluetoothctlAvailable) {
+          QsCommons.Logger.w("Test", "bluetoothctl not available; Bluetooth features may be limited")
+        }
+
+        // Check adapter availability
+        QsCommons.Logger.i("Test", "Adapter Available: " + QsServices.BluetoothService.available)
+        
+        if (!QsServices.BluetoothService.available) {
+          QsCommons.Logger.w("Test", "No Bluetooth adapter found")
+          QsCommons.Logger.i("Test", "")
+          QsCommons.Logger.i("Test", "=== Test 6 Complete ===")
+          QsCommons.Logger.i("Test", "")
+          finalizeTestSuite()
+          return
+        }
+
+        QsCommons.Logger.i("Test", "Bluetooth Enabled: " + QsServices.BluetoothService.enabled)
+        QsCommons.Logger.i("Test", "Discovering: " + QsServices.BluetoothService.discovering)
+        QsCommons.Logger.i("Test", "")
+
+        // Display paired devices
+        const paired = QsServices.BluetoothService.pairedDevices
+        QsCommons.Logger.i("Test", "Paired Devices: " + paired.length)
+        
+        for (var i = 0; i < Math.min(paired.length, 5); i++) {
+          const device = paired[i]
+          QsCommons.Logger.i("Test", "  [" + i + "] " + (device.name || device.address))
+          QsCommons.Logger.i("Test", "      Address:   " + device.address)
+          QsCommons.Logger.i("Test", "      Connected: " + device.connected)
+          QsCommons.Logger.i("Test", "      Trusted:   " + device.trusted)
+          QsCommons.Logger.i("Test", "      Icon:      " + QsServices.BluetoothService.getDeviceIcon(device))
+          
+          if (device.batteryAvailable) {
+            QsCommons.Logger.i("Test", "      " + QsServices.BluetoothService.getBattery(device))
+          }
+          
+          if (device.signalStrength !== undefined && device.signalStrength > 0) {
+            QsCommons.Logger.i("Test", "      " + QsServices.BluetoothService.getSignalStrength(device))
+          }
+        }
+        
+        if (paired.length > 5) {
+          QsCommons.Logger.i("Test", "  ... and " + (paired.length - 5) + " more")
+        }
+        
+        QsCommons.Logger.i("Test", "")
+
+        // Display connected devices
+        const connected = QsServices.BluetoothService.connectedDevices
+        QsCommons.Logger.i("Test", "Connected Devices: " + connected.length)
+        
+        for (var j = 0; j < connected.length; j++) {
+          const dev = connected[j]
+          QsCommons.Logger.i("Test", "  [" + j + "] " + (dev.name || dev.address))
+        }
+        
+        QsCommons.Logger.i("Test", "")
+
+        // Display devices with battery
+        const withBattery = QsServices.BluetoothService.allDevicesWithBattery
+        QsCommons.Logger.i("Test", "Devices with Battery Info: " + withBattery.length)
+        
+        for (var k = 0; k < withBattery.length; k++) {
+          const battDev = withBattery[k]
+          QsCommons.Logger.i("Test", "  [" + k + "] " + (battDev.name || battDev.address) + 
+                             " - " + Math.round(battDev.battery * 100) + "%")
+        }
+        
+        QsCommons.Logger.i("Test", "")
+        QsCommons.Logger.i("Test", "=== Test 6 Complete ===")
         QsCommons.Logger.i("Test", "")
 
         finalizeTestSuite()
