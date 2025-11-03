@@ -157,6 +157,8 @@ Singleton {
     property JsonObject audio: JsonObject {
       property real volumeStep: 5.0         // Volume step percentage (0-100)
       property bool volumeOverdrive: false  // Allow volume >100% (up to 150%)
+      property list<string> mprisBlacklist: []  // Player identities to ignore (TODO: Add sample list later)
+      property string preferredPlayer: ""       // Preferred player identity
     }
 
     // brightness

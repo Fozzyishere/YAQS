@@ -43,6 +43,9 @@ ShellRoot {
         // Force BluetoothService initialization early to allow D-Bus adapter discovery
         var _bt = QsServices.BluetoothService.available
         
+        // Force MediaService initialization early to allow MPRIS discovery
+        var _media = QsServices.MediaService.currentPlayer
+        
         // Start test sequence
         runTest1_ProgramChecker()
       }
@@ -513,7 +516,11 @@ ShellRoot {
           QsCommons.Logger.i("Test", "")
           QsCommons.Logger.i("Test", "=== Test 6 Complete ===")
           QsCommons.Logger.i("Test", "")
-          finalizeTestSuite()
+          
+          // Proceed to Media test
+          Qt.callLater(() => {
+            test7MediaTimer.start()
+          })
           return
         }
 
@@ -573,6 +580,97 @@ ShellRoot {
         QsCommons.Logger.i("Test", "=== Test 6 Complete ===")
         QsCommons.Logger.i("Test", "")
 
+        // Proceed to Media test
+        Qt.callLater(() => {
+          test7MediaTimer.start()
+        })
+      }
+
+      // ========================================
+      // Test 7: MediaService
+      // ========================================
+
+      Timer {
+        id: test7MediaTimer
+        interval: 2000
+        running: false
+        repeat: false
+        onTriggered: runTest7_MediaService()
+      }
+
+      function runTest7_MediaService() {
+        QsCommons.Logger.i("Test", "")
+        QsCommons.Logger.i("Test", "======================")
+        QsCommons.Logger.i("Test", "Test 7: MediaService")
+        QsCommons.Logger.i("Test", "======================")
+        QsCommons.Logger.i("Test", "")
+        
+        // Note: Can't access Mpris directly from shell.qml scope
+        // MediaService has detailed logging in getAvailablePlayers()
+        
+        // Test available players
+        const players = QsServices.MediaService.getAvailablePlayers()
+        QsCommons.Logger.i("Test", "Available Players: " + players.length)
+        
+        for (var i = 0; i < players.length; i++) {
+          const player = players[i]
+          QsCommons.Logger.i("Test", "  [" + i + "] " + player.identity)
+          QsCommons.Logger.i("Test", "      Playing:     " + 
+            (player.isPlaying || false))
+          QsCommons.Logger.i("Test", "      Can Control: " + player.canControl)
+          if (player._controlTarget) {
+            QsCommons.Logger.i("Test", "      Virtual:     true (paired player)")
+          }
+        }
+        QsCommons.Logger.i("Test", "")
+        
+        // Test current player
+        if (QsServices.MediaService.currentPlayer) {
+          QsCommons.Logger.i("Test", "Current Player:")
+          QsCommons.Logger.i("Test", "  Identity:  " + 
+            QsServices.MediaService.currentPlayer.identity)
+          QsCommons.Logger.i("Test", "  Playing:   " + 
+            QsServices.MediaService.isPlaying)
+          QsCommons.Logger.i("Test", "  Track:     \"" + 
+            QsServices.MediaService.trackTitle + "\"")
+          QsCommons.Logger.i("Test", "  Artist:    \"" + 
+            QsServices.MediaService.trackArtist + "\"")
+          QsCommons.Logger.i("Test", "  Album:     \"" + 
+            QsServices.MediaService.trackAlbum + "\"")
+          QsCommons.Logger.i("Test", "  Art URL:   " + 
+            (QsServices.MediaService.trackArtUrl ? "Yes" : "No"))
+          QsCommons.Logger.i("Test", "  Position:  " + 
+            Math.round(QsServices.MediaService.currentPosition) + "s / " +
+            Math.round(QsServices.MediaService.trackLength) + "s")
+          QsCommons.Logger.i("Test", "")
+          
+          QsCommons.Logger.i("Test", "Capabilities:")
+          QsCommons.Logger.i("Test", "  Can Play:     " + 
+            QsServices.MediaService.canPlay)
+          QsCommons.Logger.i("Test", "  Can Pause:    " + 
+            QsServices.MediaService.canPause)
+          QsCommons.Logger.i("Test", "  Can Next:     " + 
+            QsServices.MediaService.canGoNext)
+          QsCommons.Logger.i("Test", "  Can Previous: " + 
+            QsServices.MediaService.canGoPrevious)
+          QsCommons.Logger.i("Test", "  Can Seek:     " + 
+            QsServices.MediaService.canSeek)
+        } else {
+          QsCommons.Logger.i("Test", "No active media player")
+          QsCommons.Logger.i("Test", "  (Start a media player like Spotify, VLC, or a browser video)")
+        }
+        QsCommons.Logger.i("Test", "")
+        
+        QsCommons.Logger.i("Test", "Settings:")
+        QsCommons.Logger.i("Test", "  mprisBlacklist:  " + 
+          JSON.stringify(QsCommons.Settings.data.audio.mprisBlacklist))
+        QsCommons.Logger.i("Test", "  preferredPlayer: " + 
+          QsCommons.Settings.data.audio.preferredPlayer)
+        QsCommons.Logger.i("Test", "")
+        
+        QsCommons.Logger.i("Test", "=== Test 7 Complete ===")
+        QsCommons.Logger.i("Test", "")
+        
         finalizeTestSuite()
       }
 
