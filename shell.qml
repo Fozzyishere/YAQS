@@ -671,7 +671,110 @@ ShellRoot {
         QsCommons.Logger.i("Test", "=== Test 7 Complete ===")
         QsCommons.Logger.i("Test", "")
         
-        finalizeTestSuite()
+        // Continue to ClipboardService test
+        Qt.callLater(() => {
+          test8ClipboardTimer.start()
+        })
+      }
+
+      // ========================================
+      // Test 8: ClipboardService
+      // ========================================
+
+      Timer {
+        id: test8ClipboardTimer
+        interval: 2000
+        running: false
+        repeat: false
+        onTriggered: runTest8_ClipboardService()
+      }
+
+      function runTest8_ClipboardService() {
+        QsCommons.Logger.i("Test", "")
+        QsCommons.Logger.i("Test", "============================")
+        QsCommons.Logger.i("Test", "Test 8: ClipboardService")
+        QsCommons.Logger.i("Test", "============================")
+        QsCommons.Logger.i("Test", "")
+        
+        if (!QsServices.ClipboardService.cliphistAvailable) {
+          QsCommons.Logger.w("Test", "cliphist not available; test skipped")
+          QsCommons.Logger.i("Test", "  (Install cliphist to enable clipboard history)")
+          QsCommons.Logger.i("Test", "")
+          QsCommons.Logger.i("Test", "=== Test 8 Complete ===")
+          QsCommons.Logger.i("Test", "")
+          finalizeTestSuite()
+          return
+        }
+        
+        QsCommons.Logger.i("Test", "cliphist available: " + 
+          QsServices.ClipboardService.cliphistAvailable)
+        QsCommons.Logger.i("Test", "Active: " + 
+          QsServices.ClipboardService.active)
+        QsCommons.Logger.i("Test", "Watchers Started: " + 
+          QsServices.ClipboardService.watchersStarted)
+        QsCommons.Logger.i("Test", "")
+        
+        // Enable feature in settings for test
+        if (!QsCommons.Settings.data.appLauncher.enableClipboardHistory) {
+          QsCommons.Logger.i("Test", "Enabling clipboard history in settings...")
+          QsCommons.Settings.data.appLauncher.enableClipboardHistory = true
+          Qt.callLater(() => {
+            QsCommons.Logger.i("Test", "Active after enable: " + 
+              QsServices.ClipboardService.active)
+            QsCommons.Logger.i("Test", "")
+          })
+        }
+        
+        // List clipboard items
+        QsCommons.Logger.i("Test", "Querying clipboard history...")
+        QsServices.ClipboardService.list()
+        
+        // Wait for list to complete
+        listCompletedConnection.enabled = true
+      }
+
+      Connections {
+        id: listCompletedConnection
+        target: QsServices.ClipboardService
+        enabled: false
+        
+        function onListCompleted() {
+          listCompletedConnection.enabled = false
+          
+          const items = QsServices.ClipboardService.items
+          QsCommons.Logger.i("Test", "Clipboard Items: " + items.length)
+          QsCommons.Logger.i("Test", "")
+          
+          if (items.length === 0) {
+            QsCommons.Logger.i("Test", "  (No clipboard history found)")
+            QsCommons.Logger.i("Test", "  (Copy some text or images to test clipboard history)")
+          } else {
+            for (var i = 0; i < Math.min(items.length, 5); i++) {
+              const item = items[i]
+              const preview = item.preview.substring(0, 60)
+              QsCommons.Logger.i("Test", "  [" + i + "] ID: " + item.id)
+              QsCommons.Logger.i("Test", "      Preview: " + 
+                (preview.length < item.preview.length ? preview + "..." : preview))
+              QsCommons.Logger.i("Test", "      MIME:    " + item.mime)
+              QsCommons.Logger.i("Test", "      Image:   " + item.isImage)
+            }
+            
+            if (items.length > 5) {
+              QsCommons.Logger.i("Test", "  ... and " + (items.length - 5) + " more")
+            }
+          }
+          
+          QsCommons.Logger.i("Test", "")
+          QsCommons.Logger.i("Test", "Settings:")
+          QsCommons.Logger.i("Test", "  enableClipboardHistory: " + 
+            QsCommons.Settings.data.appLauncher.enableClipboardHistory)
+          QsCommons.Logger.i("Test", "")
+          
+          QsCommons.Logger.i("Test", "=== Test 8 Complete ===")
+          QsCommons.Logger.i("Test", "")
+          
+          finalizeTestSuite()
+        }
       }
 
       function finalizeTestSuite() {

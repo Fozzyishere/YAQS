@@ -170,6 +170,11 @@ Singleton {
     property JsonObject network: JsonObject {
       property bool wifiEnabled: true
     }
+
+    // placeholder for launcher settings (TODO: Change when implemented later)
+    property JsonObject appLauncher: JsonObject {
+      property bool enableClipboardHistory: false  // Enable clipboard history in launcher
+    }
   }
 
   // -----------------------------------------------------
