@@ -184,6 +184,17 @@ Singleton {
       property int normalUrgencyDuration: 5
       property int criticalUrgencyDuration: 10
     }
+
+    // calendar
+    property JsonObject calendar: JsonObject {
+      property bool enabled: true
+      property bool autoRefresh: true
+      property int refreshInterval: 300000      // 5 minutes in milliseconds
+      property int daysAhead: 31                // Days to load ahead
+      property int daysBehind: 14               // Days to load behind
+      property bool showInControlCenter: true   // Show calendar in control center
+      property bool showEventIndicators: true   // Show event dots on calendar dates (for future UI)
+    }
   }
 
   // -----------------------------------------------------

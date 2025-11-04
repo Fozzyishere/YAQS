@@ -892,6 +892,189 @@ ShellRoot {
         QsCommons.Logger.i("Test", "=== Test 9 Complete ===")
         QsCommons.Logger.i("Test", "")
         
+        // Continue to CalendarService test
+        Qt.callLater(() => {
+          test10CalendarTimer.start()
+        })
+      }
+
+      // ========================================
+      // Test 10: CalendarService
+      // ========================================
+
+      Timer {
+        id: test10CalendarTimer
+        interval: 2000
+        running: false
+        repeat: false
+        onTriggered: runTest10_CalendarService()
+      }
+
+      Connections {
+        id: calendarAvailabilityConnection
+        target: QsServices.CalendarService
+        enabled: false
+        
+        function onAvailabilityCheckCompleted() {
+          calendarAvailabilityConnection.enabled = false
+          displayCalendarTestResults()
+        }
+      }
+
+      function runTest10_CalendarService() {
+        QsCommons.Logger.i("Test", "")
+        QsCommons.Logger.i("Test", "================================")
+        QsCommons.Logger.i("Test", "Test 10: CalendarService")
+        QsCommons.Logger.i("Test", "================================")
+        QsCommons.Logger.i("Test", "")
+        
+        // Check if availability check already completed
+        if (QsServices.CalendarService.availabilityChecked) {
+          QsCommons.Logger.i("Test", "Availability check already completed")
+          displayCalendarTestResults()
+        } else {
+          QsCommons.Logger.i("Test", "Waiting for availability check...")
+          // Wait for availability check to complete
+          calendarAvailabilityConnection.enabled = true
+        }
+      }
+      
+      function displayCalendarTestResults() {
+        // Basic status
+        QsCommons.Logger.i("Test", "Service Status:")
+        QsCommons.Logger.i("Test", "  Available:  " + QsServices.CalendarService.available)
+        QsCommons.Logger.i("Test", "  Loading:    " + QsServices.CalendarService.loading)
+        QsCommons.Logger.i("Test", "")
+        
+        // Settings
+        const calSettings = QsCommons.Settings.data.calendar
+        QsCommons.Logger.i("Test", "Settings:")
+        QsCommons.Logger.i("Test", "  Enabled:         " + (calSettings ? calSettings.enabled : "undefined"))
+        QsCommons.Logger.i("Test", "  Auto-Refresh:    " + (calSettings ? calSettings.autoRefresh : "undefined"))
+        QsCommons.Logger.i("Test", "  Refresh Interval: " + (calSettings ? calSettings.refreshInterval / 1000 : "undefined") + "s")
+        QsCommons.Logger.i("Test", "  Days Ahead:      " + (calSettings ? calSettings.daysAhead : "undefined"))
+        QsCommons.Logger.i("Test", "  Days Behind:     " + (calSettings ? calSettings.daysBehind : "undefined"))
+        QsCommons.Logger.i("Test", "")
+        
+        // Check availability status
+        if (!QsServices.CalendarService.available) {
+          QsCommons.Logger.w("Test", "Calendar not available:")
+          if (QsServices.CalendarService.lastError) {
+            QsCommons.Logger.w("Test", "  Error: " + QsServices.CalendarService.lastError)
+          }
+          QsCommons.Logger.i("Test", "")
+          QsCommons.Logger.i("Test", "Dependencies:")
+          QsCommons.Logger.i("Test", "  - python3 (required)")
+          QsCommons.Logger.i("Test", "  - python3-gi (required)")
+          QsCommons.Logger.i("Test", "  - evolution-data-server (required)")
+          QsCommons.Logger.i("Test", "")
+          QsCommons.Logger.i("Test", "Install on Arch Linux:")
+          QsCommons.Logger.i("Test", "  sudo pacman -S python python-gobject evolution-data-server")
+          QsCommons.Logger.i("Test", "")
+          
+          // Show cached data if available
+          if (QsServices.CalendarService.calendars.length > 0) {
+            QsCommons.Logger.i("Test", "Cached Calendars: " + QsServices.CalendarService.calendars.length)
+            for (var i = 0; i < Math.min(3, QsServices.CalendarService.calendars.length); i++) {
+              const cal = QsServices.CalendarService.calendars[i]
+              QsCommons.Logger.i("Test", "  [" + i + "] " + cal.name)
+            }
+          }
+          
+          if (QsServices.CalendarService.events.length > 0) {
+            QsCommons.Logger.i("Test", "")
+            QsCommons.Logger.i("Test", "Cached Events: " + QsServices.CalendarService.events.length)
+            for (var i = 0; i < Math.min(3, QsServices.CalendarService.events.length); i++) {
+              const event = QsServices.CalendarService.events[i]
+              const startDate = new Date(event.start * 1000)
+              QsCommons.Logger.i("Test", "  [" + i + "] " + event.summary)
+              QsCommons.Logger.i("Test", "      Calendar: " + event.calendar)
+              QsCommons.Logger.i("Test", "      Start:    " + startDate.toLocaleString())
+              if (event.location) {
+                QsCommons.Logger.i("Test", "      Location: " + event.location)
+              }
+            }
+          }
+          
+          QsCommons.Logger.i("Test", "")
+          QsCommons.Logger.i("Test", "=== Test 10 Complete ===")
+          QsCommons.Logger.i("Test", "")
+          
+          finalizeTestSuite()
+          return
+        }
+        
+        // Service is available - show data
+        QsCommons.Logger.i("Test", "Evolution Data Server: Available ✓")
+        QsCommons.Logger.i("Test", "")
+        
+        // Calendars
+        QsCommons.Logger.i("Test", "Calendars: " + QsServices.CalendarService.calendars.length)
+        for (var i = 0; i < Math.min(5, QsServices.CalendarService.calendars.length); i++) {
+          const cal = QsServices.CalendarService.calendars[i]
+          QsCommons.Logger.i("Test", "  [" + i + "] " + cal.name)
+          QsCommons.Logger.i("Test", "      UID:     " + cal.uid)
+          QsCommons.Logger.i("Test", "      Enabled: " + cal.enabled)
+        }
+        
+        if (QsServices.CalendarService.calendars.length > 5) {
+          QsCommons.Logger.i("Test", "  ... and " + 
+            (QsServices.CalendarService.calendars.length - 5) + " more")
+        }
+        QsCommons.Logger.i("Test", "")
+        
+        // Events
+        QsCommons.Logger.i("Test", "Events: " + QsServices.CalendarService.events.length)
+        
+        if (QsServices.CalendarService.events.length === 0) {
+          QsCommons.Logger.i("Test", "  (No events found in date range)")
+          QsCommons.Logger.i("Test", "  (Add events in GNOME Calendar to test)")
+        } else {
+          for (var i = 0; i < Math.min(5, QsServices.CalendarService.events.length); i++) {
+            const event = QsServices.CalendarService.events[i]
+            const startDate = new Date(event.start * 1000)
+            const endDate = new Date(event.end * 1000)
+            const duration = (event.end - event.start) / 3600  // hours
+            
+            QsCommons.Logger.i("Test", "  [" + i + "] " + event.summary)
+            QsCommons.Logger.i("Test", "      Calendar: " + event.calendar)
+            QsCommons.Logger.i("Test", "      Start:    " + startDate.toLocaleString())
+            QsCommons.Logger.i("Test", "      End:      " + endDate.toLocaleString())
+            QsCommons.Logger.i("Test", "      Duration: " + duration.toFixed(1) + " hours")
+            
+            if (event.location) {
+              QsCommons.Logger.i("Test", "      Location: " + event.location)
+            }
+            
+            if (event.description && event.description.length > 0) {
+              const desc = event.description.substring(0, 60)
+              QsCommons.Logger.i("Test", "      Desc:     " + 
+                (desc.length < event.description.length ? desc + "..." : desc))
+            }
+          }
+          
+          if (QsServices.CalendarService.events.length > 5) {
+            QsCommons.Logger.i("Test", "  ... and " + 
+              (QsServices.CalendarService.events.length - 5) + " more")
+          }
+        }
+        
+        QsCommons.Logger.i("Test", "")
+        
+        // Cache info
+        QsCommons.Logger.i("Test", "Cache:")
+        QsCommons.Logger.i("Test", "  File: " + QsServices.CalendarService.cacheFile)
+        QsCommons.Logger.i("Test", "")
+        
+        QsCommons.Logger.i("Test", "Manual Testing:")
+        QsCommons.Logger.i("Test", "  1. Install GNOME Calendar: sudo pacman -S gnome-calendar")
+        QsCommons.Logger.i("Test", "  2. Add some events in GNOME Calendar")
+        QsCommons.Logger.i("Test", "  3. Reload shell to see events: quickshell --replace")
+        QsCommons.Logger.i("Test", "")
+        
+        QsCommons.Logger.i("Test", "=== Test 10 Complete ===")
+        QsCommons.Logger.i("Test", "")
+        
         finalizeTestSuite()
       }
 
