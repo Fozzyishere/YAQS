@@ -702,7 +702,11 @@ ShellRoot {
           QsCommons.Logger.i("Test", "")
           QsCommons.Logger.i("Test", "=== Test 8 Complete ===")
           QsCommons.Logger.i("Test", "")
-          finalizeTestSuite()
+          
+          // Continue to NotificationService test
+          Qt.callLater(() => {
+            test9NotificationTimer.start()
+          })
           return
         }
         
@@ -773,8 +777,122 @@ ShellRoot {
           QsCommons.Logger.i("Test", "=== Test 8 Complete ===")
           QsCommons.Logger.i("Test", "")
           
-          finalizeTestSuite()
+          // Continue to NotificationService test
+          Qt.callLater(() => {
+            test9NotificationTimer.start()
+          })
         }
+      }
+
+      // ========================================
+      // Test 9: NotificationService
+      // ========================================
+
+      Timer {
+        id: test9NotificationTimer
+        interval: 1000
+        running: false
+        repeat: false
+        onTriggered: runTest9_NotificationService()
+      }
+
+      function runTest9_NotificationService() {
+        QsCommons.Logger.i("Test", "")
+        QsCommons.Logger.i("Test", "================================")
+        QsCommons.Logger.i("Test", "Test 9: NotificationService")
+        QsCommons.Logger.i("Test", "================================")
+        QsCommons.Logger.i("Test", "")
+        
+        QsCommons.Logger.i("Test", "Service Initialized: true")
+        QsCommons.Logger.i("Test", "Active Notifications: " + 
+          QsServices.NotificationService.activeList.count)
+        QsCommons.Logger.i("Test", "History Count: " + 
+          QsServices.NotificationService.historyList.count)
+        QsCommons.Logger.i("Test", "Max Visible: " + 
+          QsServices.NotificationService.maxVisible)
+        QsCommons.Logger.i("Test", "Max History: " + 
+          QsServices.NotificationService.maxHistory)
+        QsCommons.Logger.i("Test", "")
+        
+        QsCommons.Logger.i("Test", "Persistence:")
+        QsCommons.Logger.i("Test", "  History File: " + 
+          QsServices.NotificationService.historyFile)
+        QsCommons.Logger.i("Test", "  State File:   " + 
+          QsServices.NotificationService.stateFile)
+        QsCommons.Logger.i("Test", "  Last Seen:    " + 
+          (QsServices.NotificationService.lastSeenTs ? 
+           new Date(QsServices.NotificationService.lastSeenTs).toLocaleString() : 
+           "Never"))
+        QsCommons.Logger.i("Test", "")
+        
+        // Display recent history
+        if (QsServices.NotificationService.historyList.count > 0) {
+          QsCommons.Logger.i("Test", "Recent History (showing up to 5):")
+          for (var i = 0; i < Math.min(5, QsServices.NotificationService.historyList.count); i++) {
+            const notif = QsServices.NotificationService.historyList.get(i)
+            const summary = notif.summary.substring(0, 40)
+            const body = notif.body ? notif.body.substring(0, 40) : ""
+            
+            QsCommons.Logger.i("Test", "  [" + i + "] " + notif.appName)
+            QsCommons.Logger.i("Test", "      Summary: " + 
+              (summary.length < notif.summary.length ? summary + "..." : summary))
+            if (body) {
+              QsCommons.Logger.i("Test", "      Body:    " + 
+                (body.length < notif.body.length ? body + "..." : body))
+            }
+            QsCommons.Logger.i("Test", "      Time:    " + notif.timestamp.toLocaleTimeString())
+            QsCommons.Logger.i("Test", "      Urgency: " + 
+              (notif.urgency === 0 ? "Low" : notif.urgency === 1 ? "Normal" : "Critical"))
+          }
+          
+          if (QsServices.NotificationService.historyList.count > 5) {
+            QsCommons.Logger.i("Test", "  ... and " + 
+              (QsServices.NotificationService.historyList.count - 5) + " more")
+          }
+        } else {
+          QsCommons.Logger.i("Test", "No notification history")
+          QsCommons.Logger.i("Test", "  (Send test notifications with: notify-send)")
+        }
+        QsCommons.Logger.i("Test", "")
+        
+        // Test settings
+        const notifSettings = QsCommons.Settings.data.notifications
+        if (notifSettings) {
+          QsCommons.Logger.i("Test", "Settings:")
+          QsCommons.Logger.i("Test", "  Do Not Disturb:         " + 
+            (notifSettings.doNotDisturb || false))
+          QsCommons.Logger.i("Test", "  Respect Expire Timeout: " + 
+            (notifSettings.respectExpireTimeout !== false))
+          QsCommons.Logger.i("Test", "  Low Urgency Duration:   " + 
+            (notifSettings.lowUrgencyDuration || 3) + "s")
+          QsCommons.Logger.i("Test", "  Normal Duration:        " + 
+            (notifSettings.normalUrgencyDuration || 8) + "s")
+          QsCommons.Logger.i("Test", "  Critical Duration:      " + 
+            (notifSettings.criticalUrgencyDuration || 15) + "s")
+        } else {
+          QsCommons.Logger.i("Test", "Settings: Using defaults (notifications not configured)")
+        }
+        QsCommons.Logger.i("Test", "")
+        
+        // Suggest manual testing
+        QsCommons.Logger.i("Test", "Manual Testing Commands:")
+        QsCommons.Logger.i("Test", "  Basic:     notify-send \"Test\" \"This is a test notification\"")
+        QsCommons.Logger.i("Test", "  With icon: notify-send -i dialog-information \"Test\" \"Message\"")
+        QsCommons.Logger.i("Test", "  Critical:  notify-send -u critical \"Important\" \"Urgent message\"")
+        QsCommons.Logger.i("Test", "  Expire:    notify-send -t 2000 \"Quick\" \"Disappears in 2s\"")
+        QsCommons.Logger.i("Test", "")
+        
+        QsCommons.Logger.i("Test", "Image Caching:")
+        QsCommons.Logger.i("Test", "  Cache Dir: " + 
+          QsCommons.Settings.cacheDirImagesNotifications)
+        QsCommons.Logger.i("Test", "  Queue:     " + 
+          QsServices.NotificationService.imageQueue.length + " pending")
+        QsCommons.Logger.i("Test", "")
+        
+        QsCommons.Logger.i("Test", "=== Test 9 Complete ===")
+        QsCommons.Logger.i("Test", "")
+        
+        finalizeTestSuite()
       }
 
       function finalizeTestSuite() {

@@ -175,6 +175,15 @@ Singleton {
     property JsonObject appLauncher: JsonObject {
       property bool enableClipboardHistory: false  // Enable clipboard history in launcher
     }
+
+    // notifications
+    property JsonObject notifications: JsonObject {
+      property bool doNotDisturb: false
+      property bool respectExpireTimeout: true
+      property int lowUrgencyDuration: 3
+      property int normalUrgencyDuration: 5
+      property int criticalUrgencyDuration: 10
+    }
   }
 
   // -----------------------------------------------------
