@@ -25,8 +25,28 @@
   },
   "colorSchemes": {
     "useWallpaperColors": false,
-    "predefinedScheme": "YAQS Default",
-    "darkMode": true
+    "predefinedScheme": "Gruvbox",
+    "darkMode": true,
+    "generateTemplatesForPredefined": false,
+    "matugenSchemeType": "scheme-fruit-salad"
+  },
+  "templates": {
+    "gtk": false,
+    "qt": false,
+    "kcolorscheme": false,
+    "kitty": false,
+    "foot": false,
+    "ghostty": false,
+    "fuzzel": false,
+    "pywalfox": false,
+    "discord_vesktop": false,
+    "discord_webcord": false,
+    "discord_armcord": false,
+    "discord_vencord": false,
+    "discord_equibop": false,
+    "discord_lightcord": false,
+    "discord_dorion": false,
+    "enableUserTemplates": false
   },
   "ui": {
     "fontDefault": "Roboto",

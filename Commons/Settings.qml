@@ -139,8 +139,30 @@ Singleton {
     // colorSchemes
     property JsonObject colorSchemes: JsonObject {
       property bool useWallpaperColors: false
-      property string predefinedScheme: "YAQS Default"
+      property string predefinedScheme: "Gruvbox"  // Default fallback when not using wallpaper colors
       property bool darkMode: true
+      property bool generateTemplatesForPredefined: false      // Trigger AppThemeService
+      property string matugenSchemeType: "scheme-tonal-spot"  // For AppThemeService
+    }
+
+    // templates (for AppThemeService integration in Phase 2.5.3)
+    property JsonObject templates: JsonObject {
+      property bool gtk: false
+      property bool qt: false
+      property bool kcolorscheme: false
+      property bool kitty: false
+      property bool foot: false
+      property bool ghostty: false
+      property bool fuzzel: false
+      property bool pywalfox: false
+      property bool discord_vesktop: false
+      property bool discord_webcord: false
+      property bool discord_armcord: false
+      property bool discord_vencord: false
+      property bool discord_equibop: false
+      property bool discord_lightcord: false
+      property bool discord_dorion: false
+      property bool enableUserTemplates: false
     }
 
     // ui

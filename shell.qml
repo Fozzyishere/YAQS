@@ -36,6 +36,9 @@ ShellRoot {
         QsCommons.Logger.i("Shell", "Settings loaded successfully")
         QsCommons.Logger.i("Shell", "")
 
+        // Initialize theming services
+        QsServices.ColorSchemeService.init()
+
         // Force early initialization of some services
         var _ = QsServices.BrightnessService.monitors
         QsServices.NetworkService.init()
@@ -1073,6 +1076,90 @@ ShellRoot {
         QsCommons.Logger.i("Test", "")
         
         QsCommons.Logger.i("Test", "=== Test 10 Complete ===")
+        QsCommons.Logger.i("Test", "")
+        
+        // Continue to ColorSchemeService test
+        Qt.callLater(() => {
+          runTest11_ColorSchemeService()
+        })
+      }
+
+      // ========================================
+      // Test 11: ColorSchemeService
+      // ========================================
+
+      function runTest11_ColorSchemeService() {
+        QsCommons.Logger.i("Test", "")
+        QsCommons.Logger.i("Test", "================================")
+        QsCommons.Logger.i("Test", "Test 11: ColorSchemeService")
+        QsCommons.Logger.i("Test", "================================")
+        QsCommons.Logger.i("Test", "")
+        
+        // Service status
+        QsCommons.Logger.i("Test", "Service Status:")
+        QsCommons.Logger.i("Test", "  Scanning:      " + QsServices.ColorSchemeService.scanning)
+        QsCommons.Logger.i("Test", "  Schemes Found: " + QsServices.ColorSchemeService.schemes.length)
+        QsCommons.Logger.i("Test", "")
+        
+        // Settings
+        QsCommons.Logger.i("Test", "Settings:")
+        QsCommons.Logger.i("Test", "  Use Wallpaper:  " + QsCommons.Settings.data.colorSchemes.useWallpaperColors)
+        QsCommons.Logger.i("Test", "  Current Scheme: " + QsCommons.Settings.data.colorSchemes.predefinedScheme)
+        QsCommons.Logger.i("Test", "  Dark Mode:      " + QsCommons.Settings.data.colorSchemes.darkMode)
+        QsCommons.Logger.i("Test", "")
+        
+        // List available schemes (first 10)
+        if (QsServices.ColorSchemeService.schemes.length > 0) {
+          QsCommons.Logger.i("Test", "Available Schemes:")
+          for (var i = 0; i < Math.min(10, QsServices.ColorSchemeService.schemes.length); i++) {
+            const schemePath = QsServices.ColorSchemeService.schemes[i]
+            const displayName = QsServices.ColorSchemeService.getBasename(schemePath)
+            QsCommons.Logger.i("Test", "  [" + i + "] " + displayName)
+          }
+          if (QsServices.ColorSchemeService.schemes.length > 10) {
+            QsCommons.Logger.i("Test", "  ... and " + 
+              (QsServices.ColorSchemeService.schemes.length - 10) + " more")
+          }
+        } else {
+          QsCommons.Logger.w("Test", "No color schemes found!")
+          QsCommons.Logger.w("Test", "Expected directory: " + QsServices.ColorSchemeService.schemesDirectory)
+        }
+        QsCommons.Logger.i("Test", "")
+        
+        // Color output file
+        QsCommons.Logger.i("Test", "Color Output:")
+        QsCommons.Logger.i("Test", "  File: " + QsServices.ColorSchemeService.colorsJsonFilePath)
+        QsCommons.Logger.i("Test", "")
+        
+        // Current colors (from Color.qml)
+        QsCommons.Logger.i("Test", "Active Colors (Material Design 3):")
+        QsCommons.Logger.i("Test", "  Primary:        " + QsCommons.Color.mPrimary)
+        QsCommons.Logger.i("Test", "  On Primary:     " + QsCommons.Color.mOnPrimary)
+        QsCommons.Logger.i("Test", "  Secondary:      " + QsCommons.Color.mSecondary)
+        QsCommons.Logger.i("Test", "  Surface:        " + QsCommons.Color.mSurface)
+        QsCommons.Logger.i("Test", "  On Surface:     " + QsCommons.Color.mOnSurface)
+        QsCommons.Logger.i("Test", "  Error:          " + QsCommons.Color.mError)
+        QsCommons.Logger.i("Test", "")
+        
+        // Verify scheme application worked
+        if (QsServices.ColorSchemeService.schemes.length > 0) {
+          if (QsCommons.Color.mPrimary !== "#000000" || QsCommons.Color.mSurface !== "#ffffff") {
+            QsCommons.Logger.i("Test", "Color scheme successfully applied")
+          } else {
+            QsCommons.Logger.w("Test", "Colors still at defaults (scheme may not have applied yet)")
+          }
+        }
+        QsCommons.Logger.i("Test", "")
+        
+        QsCommons.Logger.i("Test", "Manual Testing:")
+        QsCommons.Logger.i("Test", "  1. Colors should match 'Gruvbox' scheme (default)")
+        QsCommons.Logger.i("Test", "  2. Toggle dark mode to see variant switch:")
+        QsCommons.Logger.i("Test", "     QsCommons.Settings.data.colorSchemes.darkMode = false")
+        QsCommons.Logger.i("Test", "  3. Apply different scheme:")
+        QsCommons.Logger.i("Test", "     QsServices.ColorSchemeService.applyScheme('Tokyo Night')")
+        QsCommons.Logger.i("Test", "")
+        
+        QsCommons.Logger.i("Test", "=== Test 11 Complete ===")
         QsCommons.Logger.i("Test", "")
         
         finalizeTestSuite()
