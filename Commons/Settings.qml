@@ -217,6 +217,21 @@ Singleton {
       property bool showInControlCenter: true   // Show calendar in control center
       property bool showEventIndicators: true   // Show event dots on calendar dates (for future UI)
     }
+
+    // wallpaper
+    property JsonObject wallpaper: JsonObject {
+      property string directory: Settings.defaultWallpapersDirectory
+      property string defaultWallpaper: Quickshell.shellDir + "/Assets/Wallpaper/dark.jpeg"
+      property string fillMode: "crop"  // "center", "crop", "fit", "stretch"
+      property bool enableMultiMonitorDirectories: false
+      property bool randomEnabled: false
+      property int randomIntervalSec: 300  // 5 minutes (300 seconds)
+      property list<var> monitors: []  // [{name: string, directory: string, wallpaper: string}]
+      
+      // TODO: Add transition settings when implementing animated wallpaper changes
+      // property string transition: "none"  // Insert transition effects heere
+      // property int transitionDuration: 1000  // milliseconds
+    }
   }
 
   // -----------------------------------------------------

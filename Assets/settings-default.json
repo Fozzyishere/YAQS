@@ -55,5 +55,14 @@
     "fontFixedScale": 1,
     "tooltipsEnabled": true,
     "panelsOverlayLayer": true
+  },
+  "wallpaper": {
+    "directory": "~/Pictures/Wallpapers",
+    "defaultWallpaper": "",
+    "fillMode": "crop",
+    "enableMultiMonitorDirectories": false,
+    "randomEnabled": false,
+    "randomIntervalSec": 300,
+    "monitors": []
   }
 }

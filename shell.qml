@@ -37,6 +37,7 @@ ShellRoot {
         QsCommons.Logger.i("Shell", "")
 
         // Initialize theming services
+        QsServices.WallpaperService.init()
         QsServices.ColorSchemeService.init()
 
         // Force early initialization of some services
@@ -1160,6 +1161,105 @@ ShellRoot {
         QsCommons.Logger.i("Test", "")
         
         QsCommons.Logger.i("Test", "=== Test 11 Complete ===")
+        QsCommons.Logger.i("Test", "")
+        
+        // Continue to WallpaperService test
+        Qt.callLater(() => {
+          test12WallpaperTimer.start()
+        })
+      }
+
+      // ========================================
+      // Test 12: WallpaperService
+      // ========================================
+
+      Timer {
+        id: test12WallpaperTimer
+        interval: 2000
+        running: false
+        repeat: false
+        onTriggered: runTest12_WallpaperService()
+      }
+
+      function runTest12_WallpaperService() {
+        QsCommons.Logger.i("Test", "")
+        QsCommons.Logger.i("Test", "================================")
+        QsCommons.Logger.i("Test", "Test 12: WallpaperService")
+        QsCommons.Logger.i("Test", "================================")
+        QsCommons.Logger.i("Test", "")
+        
+        // Service status
+        QsCommons.Logger.i("Test", "Service Status:")
+        QsCommons.Logger.i("Test", "  Initialized: " + QsServices.WallpaperService.isInitialized)
+        QsCommons.Logger.i("Test", "  Scanning:    " + QsServices.WallpaperService.scanning)
+        QsCommons.Logger.i("Test", "")
+        
+        // Settings
+        QsCommons.Logger.i("Test", "Settings:")
+        QsCommons.Logger.i("Test", "  Directory:                    " + QsCommons.Settings.data.wallpaper.directory)
+        QsCommons.Logger.i("Test", "  Default Wallpaper:            " + QsCommons.Settings.data.wallpaper.defaultWallpaper)
+        QsCommons.Logger.i("Test", "  Fill Mode:                    " + QsCommons.Settings.data.wallpaper.fillMode)
+        QsCommons.Logger.i("Test", "  Multi-Monitor Directories:    " + QsCommons.Settings.data.wallpaper.enableMultiMonitorDirectories)
+        QsCommons.Logger.i("Test", "  Random Enabled:               " + QsCommons.Settings.data.wallpaper.randomEnabled)
+        QsCommons.Logger.i("Test", "  Random Interval (sec):        " + QsCommons.Settings.data.wallpaper.randomIntervalSec)
+        QsCommons.Logger.i("Test", "")
+        
+        // Fill modes
+        QsCommons.Logger.i("Test", "Fill Modes: " + QsServices.WallpaperService.fillModeModel.count)
+        for (var i = 0; i < QsServices.WallpaperService.fillModeModel.count; i++) {
+          const mode = QsServices.WallpaperService.fillModeModel.get(i)
+          const current = (mode.key === QsCommons.Settings.data.wallpaper.fillMode) ? " (CURRENT)" : ""
+          QsCommons.Logger.i("Test", "  [" + i + "] " + mode.name + " (" + mode.key + ") = uniform " + mode.uniform + current)
+        }
+        QsCommons.Logger.i("Test", "")
+        
+        QsCommons.Logger.i("Test", "Current Fill Mode Uniform: " + QsServices.WallpaperService.getFillModeUniform())
+        QsCommons.Logger.i("Test", "")
+        
+        // Per-screen wallpapers
+        QsCommons.Logger.i("Test", "Screen Wallpapers:")
+        for (var i = 0; i < Quickshell.screens.length; i++) {
+          const screen = Quickshell.screens[i]
+          const wallpaper = QsServices.WallpaperService.getWallpaper(screen.name)
+          const directory = QsServices.WallpaperService.getMonitorDirectory(screen.name)
+          const wallpaperList = QsServices.WallpaperService.getWallpapersList(screen.name)
+          
+          QsCommons.Logger.i("Test", "  [" + i + "] " + screen.name + ":")
+          QsCommons.Logger.i("Test", "      Current:   " + wallpaper)
+          QsCommons.Logger.i("Test", "      Directory: " + directory)
+          QsCommons.Logger.i("Test", "      Available: " + wallpaperList.length + " wallpapers")
+          
+          if (wallpaperList.length > 0) {
+            for (var j = 0; j < Math.min(3, wallpaperList.length); j++) {
+              QsCommons.Logger.i("Test", "        - " + wallpaperList[j])
+            }
+            if (wallpaperList.length > 3) {
+              QsCommons.Logger.i("Test", "        ... and " + (wallpaperList.length - 3) + " more")
+            }
+          }
+        }
+        QsCommons.Logger.i("Test", "")
+        
+        // Verify default wallpaper exists
+        const defaultWallpaper = QsCommons.Settings.data.wallpaper.defaultWallpaper
+        if (defaultWallpaper && defaultWallpaper !== "") {
+          QsCommons.Logger.i("Test", "Default Wallpaper:")
+          QsCommons.Logger.i("Test", "  Path: " + defaultWallpaper)
+        }
+        QsCommons.Logger.i("Test", "")
+        
+        QsCommons.Logger.i("Test", "Manual Testing:")
+        QsCommons.Logger.i("Test", "  1. Add wallpapers to ~/Pictures/Wallpapers/")
+        QsCommons.Logger.i("Test", "  2. Reload shell to detect new wallpapers")
+        QsCommons.Logger.i("Test", "  3. Change wallpaper:")
+        QsCommons.Logger.i("Test", "     QsServices.WallpaperService.changeWallpaper('/path/to/image.jpg')")
+        QsCommons.Logger.i("Test", "  4. Enable random wallpapers:")
+        QsCommons.Logger.i("Test", "     QsCommons.Settings.data.wallpaper.randomEnabled = true")
+        QsCommons.Logger.i("Test", "  5. Test fill modes:")
+        QsCommons.Logger.i("Test", "     QsCommons.Settings.data.wallpaper.fillMode = 'fit'")
+        QsCommons.Logger.i("Test", "")
+        
+        QsCommons.Logger.i("Test", "=== Test 12 Complete ===")
         QsCommons.Logger.i("Test", "")
         
         finalizeTestSuite()
