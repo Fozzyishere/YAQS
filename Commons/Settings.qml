@@ -153,7 +153,8 @@ Singleton {
       property bool kitty: false
       property bool foot: false
       property bool ghostty: false
-      property bool fuzzel: false
+      property bool btop: false
+      property bool hyprland: false
       property bool pywalfox: false
       property bool discord_vesktop: false
       property bool discord_webcord: false

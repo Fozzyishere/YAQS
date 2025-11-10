@@ -106,10 +106,12 @@ Singleton {
   // === Internal Functions ===
   
   // Check if any templates are enabled (for AppThemeService integration)
-  // TODO: Uncomment when AppThemeService is available
-//   function hasEnabledTemplates() {
-//     return null
-//   }
+  function hasEnabledTemplates() {
+    const t = QsCommons.Settings.data.templates
+    return t.gtk || t.qt || t.kcolorscheme || t.kitty || t.foot || t.ghostty ||
+           t.pywalfox || t.discord_vesktop || t.discord_webcord || t.discord_armcord ||
+           t.discord_equibop || t.discord_lightcord || t.discord_dorion || t.discord_vencord
+  }
 
   function writeColorsToDisk(obj) {
     function pick(o, a, b, fallback) {
@@ -206,11 +208,10 @@ Singleton {
         writeColorsToDisk(variant)
         QsCommons.Logger.i("ColorScheme", "Applying color scheme: " + getBasename(path))
 
-        // TODO: Generate Matugen templates if any are enabled and setting allows it
+        // Generate Matugen templates if any are enabled and setting allows it
         if (QsCommons.Settings.data.colorSchemes.generateTemplatesForPredefined 
             && hasEnabledTemplates()) {
-          // TODO: implement when appThemeService is available
-          // AppThemeService.generateFromPredefinedScheme(data)
+          AppThemeService.generateFromPredefinedScheme(data)
         }
       } catch (e) {
         QsCommons.Logger.e("ColorScheme", "Failed to parse scheme JSON: " + path + " - " + e)

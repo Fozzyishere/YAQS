@@ -49,38 +49,39 @@ Singleton {
 
     JsonAdapter {
       id: adapter
-      property color mPrimary
-      property color mOnPrimary
-      property color mSecondary
-      property color mOnSecondary
-      property color mTertiary
-      property color mOnTertiary
-      property color mError
-      property color mOnError
-      property color mSurface
-      property color mOnSurface
-      property color mSurfaceVariant
-      property color mOnSurfaceVariant
-      property color mOutline
-      property color mShadow
+      property string mPrimary
+      property string mOnPrimary
+      property string mSecondary
+      property string mOnSecondary
+      property string mTertiary
+      property string mOnTertiary
+      property string mError
+      property string mOnError
+      property string mSurface
+      property string mOnSurface
+      property string mSurfaceVariant
+      property string mOnSurfaceVariant
+      property string mOutline
+      property string mShadow
     }
 
     onLoaded: {
-      // Copy from adapter to root properties for reactivity
-      root.mPrimary = adapter.mPrimary
-      root.mOnPrimary = adapter.mOnPrimary
-      root.mSecondary = adapter.mSecondary
-      root.mOnSecondary = adapter.mOnSecondary
-      root.mTertiary = adapter.mTertiary
-      root.mOnTertiary = adapter.mOnTertiary
-      root.mError = adapter.mError
-      root.mOnError = adapter.mOnError
-      root.mSurface = adapter.mSurface
-      root.mOnSurface = adapter.mOnSurface
-      root.mSurfaceVariant = adapter.mSurfaceVariant
-      root.mOnSurfaceVariant = adapter.mOnSurfaceVariant
-      root.mOutline = adapter.mOutline
-      root.mShadow = adapter.mShadow
+      // Copy from adapter to root properties
+      // QML automatically converts string hex colors to color type when assigned to color properties
+      root.mPrimary = adapter.mPrimary || root.mPrimary
+      root.mOnPrimary = adapter.mOnPrimary || root.mOnPrimary
+      root.mSecondary = adapter.mSecondary || root.mSecondary
+      root.mOnSecondary = adapter.mOnSecondary || root.mOnSecondary
+      root.mTertiary = adapter.mTertiary || root.mTertiary
+      root.mOnTertiary = adapter.mOnTertiary || root.mOnTertiary
+      root.mError = adapter.mError || root.mError
+      root.mOnError = adapter.mOnError || root.mOnError
+      root.mSurface = adapter.mSurface || root.mSurface
+      root.mOnSurface = adapter.mOnSurface || root.mOnSurface
+      root.mSurfaceVariant = adapter.mSurfaceVariant || root.mSurfaceVariant
+      root.mOnSurfaceVariant = adapter.mOnSurfaceVariant || root.mOnSurfaceVariant
+      root.mOutline = adapter.mOutline || root.mOutline
+      root.mShadow = adapter.mShadow || root.mShadow
       
       Logger.d("Color", "Colors loaded from colors.json")
     }
