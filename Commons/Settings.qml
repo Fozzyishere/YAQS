@@ -143,6 +143,11 @@ Singleton {
       property bool darkMode: true
       property bool generateTemplatesForPredefined: false      // Trigger AppThemeService
       property string matugenSchemeType: "scheme-tonal-spot"  // For AppThemeService
+      
+      // DarkModeService scheduling
+      property string schedulingMode: "manual"  // "manual" or "location"
+      property string manualSunrise: "06:00"
+      property string manualSunset: "18:00"
     }
 
     // templates (for AppThemeService integration in Phase 2.5.3)
