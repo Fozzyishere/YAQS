@@ -1,0 +1,69 @@
+{
+  "settingsVersion": 1,
+  "setupCompleted": false,
+  "general": {
+    "avatarImage": "",
+    "scaleRatio": 1,
+    "radiusRatio": 1,
+    "animationSpeed": 1,
+    "animationDisabled": false,
+    "language": "en"
+  },
+  "bar": {
+    "position": "top",
+    "backgroundOpacity": 1,
+    "monitors": [],
+    "density": "default",
+    "floating": false,
+    "marginVertical": 0.25,
+    "marginHorizontal": 0.25,
+    "widgets": {
+      "left": [],
+      "center": [],
+      "right": []
+    }
+  },
+  "colorSchemes": {
+    "useWallpaperColors": false,
+    "predefinedScheme": "Gruvbox",
+    "darkMode": true,
+    "generateTemplatesForPredefined": false,
+    "matugenSchemeType": "scheme-fruit-salad"
+  },
+  "templates": {
+    "gtk": false,
+    "qt": false,
+    "kcolorscheme": false,
+    "kitty": false,
+    "foot": false,
+    "ghostty": false,
+    "btop": false,
+    "hyprland": false,
+    "pywalfox": false,
+    "discord_vesktop": false,
+    "discord_webcord": false,
+    "discord_armcord": false,
+    "discord_vencord": false,
+    "discord_equibop": false,
+    "discord_lightcord": false,
+    "discord_dorion": false,
+    "enableUserTemplates": false
+  },
+  "ui": {
+    "fontDefault": "Roboto",
+    "fontFixed": "DejaVu Sans Mono",
+    "fontDefaultScale": 1,
+    "fontFixedScale": 1,
+    "tooltipsEnabled": true,
+    "panelsOverlayLayer": true
+  },
+  "wallpaper": {
+    "directory": "~/Pictures/Wallpapers",
+    "defaultWallpaper": "",
+    "fillMode": "crop",
+    "enableMultiMonitorDirectories": false,
+    "randomEnabled": false,
+    "randomIntervalSec": 300,
+    "monitors": []
+  }
+}

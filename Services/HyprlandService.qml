@@ -1,300 +1,363 @@
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
-import qs.Commons
+import Quickshell.Io
+import "../Commons" as QsCommons
 
 Item {
-    id: root
+  id: root
 
-    // ===== Properties =====
-    property ListModel workspaces: ListModel {}
-    property var windows: []
-    property int focusedWindowIndex: -1
+  // === Public Properties (Backend Interface) ===
+  property ListModel workspaces: ListModel {}
+  property var windows: []
+  property int focusedWindowIndex: -1
 
-    // ===== Signals =====
-    signal workspaceChanged
-    signal activeWindowChanged
-    signal windowListChanged
+  // === Signals (Backend Interface) ===
+  signal workspaceChanged()
+  signal activeWindowChanged()
+  signal windowListChanged()
 
-    // ===== Internal state =====
-    property bool initialized: false
-    property var workspaceCache: ({})
-    property var windowCache: ({})
+  // === Internal State ===
+  property bool initialized: false
+  property var workspaceCache: ({})
+  property var windowCache: ({})
 
-    // ===== Debounce timer =====
-    Timer {
-        id: updateTimer
-        interval: 50
-        repeat: false
-        onTriggered: safeUpdate()
+  // === Debounce Timer ===
+  Timer {
+    id: updateTimer
+    interval: 50
+    repeat: false
+    onTriggered: safeUpdate()
+  }
+
+  // === Initialization ===
+  function initialize() {
+    if (initialized) return
+
+    try {
+      Hyprland.refreshWorkspaces()
+      Hyprland.refreshToplevels()
+      Qt.callLater(() => {
+        safeUpdateWorkspaces()
+        safeUpdateWindows()
+        queryDisplayScales()
+      })
+      initialized = true
+      QsCommons.Logger.i("HyprlandService", "Initialized successfully")
+    } catch (e) {
+      QsCommons.Logger.e("HyprlandService", "Failed to initialize:", e)
+    }
+  }
+
+  // === Display Scale Query ===
+  function queryDisplayScales() {
+    hyprlandMonitorsProcess.running = true
+  }
+
+  Process {
+    id: hyprlandMonitorsProcess
+    running: false
+    command: ["hyprctl", "monitors", "-j"]
+
+    property string accumulatedOutput: ""
+
+    stdout: SplitParser {
+      onRead: function(line) {
+        hyprlandMonitorsProcess.accumulatedOutput += line
+      }
     }
 
-    // ===== Initialization =====
-    function init() {
-        if (initialized) {
-            Logger.warn("HyprlandService", "Already initialized");
-            return;
-        }
+    onExited: function(exitCode) {
+      if (exitCode !== 0 || !accumulatedOutput) {
+        QsCommons.Logger.e("HyprlandService", "Failed to query monitors, exit code:", exitCode)
+        accumulatedOutput = ""
+        return
+      }
 
-        try {
-            Logger.log("HyprlandService", "Initializing...");
-            Hyprland.refreshWorkspaces();
-            Hyprland.refreshToplevels();
-            Qt.callLater(() => {
-                safeUpdateWorkspaces();
-                safeUpdateWindows();
-            });
-            initialized = true;
-            Logger.log("HyprlandService", "Initialization complete");
-        } catch (e) {
-            Logger.error("HyprlandService", "Failed to initialize:", e);
-            Logger.callStack();
-        }
-    }
+      try {
+        const monitorsData = JSON.parse(accumulatedOutput)
+        const scales = {}
 
-    // ===== Update wrapper =====
-    function safeUpdate() {
-        safeUpdateWindows();
-        safeUpdateWorkspaces();
-        windowListChanged();
-    }
-
-    // ===== Workspace update =====
-    function safeUpdateWorkspaces() {
-        try {
-            workspaces.clear();
-            workspaceCache = {};
-
-            if (!Hyprland.workspaces || !Hyprland.workspaces.values) {
-                // Graceful degradation
-                return;
+        for (const monitor of monitorsData) {
+          if (monitor.name) {
+            scales[monitor.name] = {
+              "name": monitor.name,
+              "scale": monitor.scale || 1.0,
+              "width": monitor.width || 0,
+              "height": monitor.height || 0,
+              "refresh_rate": monitor.refreshRate || 0,
+              "x": monitor.x || 0,
+              "y": monitor.y || 0,
+              "active_workspace": monitor.activeWorkspace ? monitor.activeWorkspace.id : -1,
+              "vrr": monitor.vrr || false,
+              "focused": monitor.focused || false
             }
+          }
+        }
 
-            const hlWorkspaces = Hyprland.workspaces.values;
-            const occupiedIds = getOccupiedWorkspaceIds();
+        // Notify CompositorService
+        if (CompositorService && CompositorService.onDisplayScalesUpdated) {
+          CompositorService.onDisplayScalesUpdated(scales)
+        }
+      } catch (e) {
+        QsCommons.Logger.e("HyprlandService", "Failed to parse monitors:", e)
+      } finally {
+        accumulatedOutput = ""
+      }
+    }
+  }
 
-            for (var i = 0; i < hlWorkspaces.length; i++) {
-                const ws = hlWorkspaces[i];
-                if (!ws || ws.id < 1)
-                    // Skip invalid workspaces
+  // === Update Functions ===
+  function safeUpdate() {
+    safeUpdateWindows()
+    safeUpdateWorkspaces()
+    windowListChanged()
+  }
 
-                    continue;
-                const wsData = {
-                    "id": i                                                // Array index
-                    ,
-                    "idx": ws.id                                           // Hyprland workspace ID
-                    ,
-                    "name": ws.name || ""                                  // Workspace name
-                    ,
-                    "output": (ws.monitor && ws.monitor.name) ? ws.monitor.name : ""  // Monitor name (critical for per-monitor filtering!)
-                    ,
-                    "isActive": ws.active === true                         // Active on this monitor
-                    ,
-                    "isFocused": ws.focused === true                       // Currently focused
-                    ,
-                    "isUrgent": ws.urgent === true                         // Has urgent window
-                    ,
-                    "isOccupied": occupiedIds[ws.id] === true               // Has windows (boolean)
-                };
+  function safeUpdateWorkspaces() {
+    try {
+      workspaces.clear()
+      workspaceCache = {}
 
-                workspaceCache[ws.id] = wsData;  // Cache for fast lookups
-                workspaces.append(wsData);       // Add to ListModel
-            }
+      if (!Hyprland.workspaces || !Hyprland.workspaces.values) {
+        return
+      }
+
+      const hlWorkspaces = Hyprland.workspaces.values
+      const occupiedIds = getOccupiedWorkspaceIds()
+
+      for (var i = 0; i < hlWorkspaces.length; i++) {
+        const ws = hlWorkspaces[i]
+        if (!ws || ws.id < 1) continue
+
+        const wsData = {
+          "id": ws.id,
+          "idx": ws.id,
+          "name": ws.name || "",
+          "output": (ws.monitor && ws.monitor.name) ? ws.monitor.name : "",
+          "isActive": ws.active === true,
+          "isFocused": ws.focused === true,
+          "isUrgent": ws.urgent === true,
+          "isOccupied": occupiedIds[ws.id] === true
+        }
+
+        workspaceCache[ws.id] = wsData
+        workspaces.append(wsData)
+      }
+    } catch (e) {
+      QsCommons.Logger.e("HyprlandService", "Error updating workspaces:", e)
+    }
+  }
+
+  function getOccupiedWorkspaceIds() {
+    const occupiedIds = {}
+
+    try {
+      if (!Hyprland.toplevels || !Hyprland.toplevels.values) {
+        return occupiedIds
+      }
+
+      const hlToplevels = Hyprland.toplevels.values
+      for (var i = 0; i < hlToplevels.length; i++) {
+        const toplevel = hlToplevels[i]
+        if (!toplevel) continue
+
+        try {
+          const wsId = toplevel.workspace ? toplevel.workspace.id : null
+          if (wsId !== null && wsId !== undefined) {
+            occupiedIds[wsId] = true
+          }
         } catch (e) {
-            Logger.error("HyprlandService", "Error updating workspaces:", e);
+          // Ignore individual toplevel errors
         }
+      }
+    } catch (e) {
+      // Return empty if we can't determine occupancy
     }
 
-    // ===== Get occupied workspace IDs =====
-    function getOccupiedWorkspaceIds() {
-        const occupiedIds = {};
+    return occupiedIds
+  }
 
-        try {
-            if (!Hyprland.toplevels || !Hyprland.toplevels.values) {
-                return occupiedIds;
-            }
+  function safeUpdateWindows() {
+    try {
+      const windowsList = []
+      windowCache = {}
 
-            const hlToplevels = Hyprland.toplevels.values;
-            for (var i = 0; i < hlToplevels.length; i++) {
-                const toplevel = hlToplevels[i];
-                if (!toplevel)
-                    continue;
-                try {
-                    const wsId = toplevel.workspace ? toplevel.workspace.id : null;
-                    if (wsId !== null && wsId !== undefined) {
-                        occupiedIds[wsId] = true;  // Just mark as occupied (boolean)
-                    }
-                } catch (e)
-                // Ignore individual toplevel errors
-                {}
-            }
-        } catch (e)
-        // Return empty if we can't determine occupancy
-        {}
+      if (!Hyprland.toplevels || !Hyprland.toplevels.values) {
+        windows = []
+        focusedWindowIndex = -1
+        return
+      }
 
-        return occupiedIds;
-    }
+      const hlToplevels = Hyprland.toplevels.values
+      let newFocusedIndex = -1
 
-    // ===== Window update =====
-    function safeUpdateWindows() {
-        try {
-            const windowsList = [];
-            windowCache = {};
+      for (var i = 0; i < hlToplevels.length; i++) {
+        const toplevel = hlToplevels[i]
+        if (!toplevel) continue
 
-            if (!Hyprland.toplevels || !Hyprland.toplevels.values) {
-                windows = [];
-                focusedWindowIndex = -1;
-                return;
-            }
+        const windowData = extractWindowData(toplevel)
+        if (windowData) {
+          windowsList.push(windowData)
+          windowCache[windowData.id] = windowData
 
-            const hlToplevels = Hyprland.toplevels.values;
-            let newFocusedIndex = -1;
-
-            for (var i = 0; i < hlToplevels.length; i++) {
-                const toplevel = hlToplevels[i];
-                if (!toplevel)
-                    continue;
-                const windowData = extractWindowData(toplevel);
-                if (windowData) {
-                    windowsList.push(windowData);
-                    windowCache[windowData.id] = windowData;
-
-                    if (windowData.isFocused) {
-                        newFocusedIndex = windowsList.length - 1;
-                    }
-                }
-            }
-
-            windows = windowsList;
-
-            if (newFocusedIndex !== focusedWindowIndex) {
-                focusedWindowIndex = newFocusedIndex;
-                activeWindowChanged();
-            }
-        } catch (e) {
-            Logger.error("HyprlandService", "Error updating windows:", e);
+          if (windowData.isFocused) {
+            newFocusedIndex = windowsList.length - 1
+          }
         }
+      }
+
+      windows = windowsList
+
+      if (newFocusedIndex !== focusedWindowIndex) {
+        focusedWindowIndex = newFocusedIndex
+        activeWindowChanged()
+      }
+    } catch (e) {
+      QsCommons.Logger.e("HyprlandService", "Error updating windows:", e)
     }
+  }
 
-    // ===== Extract window data =====
-    function extractWindowData(toplevel) {
-        if (!toplevel)
-            return null;
+  function extractWindowData(toplevel) {
+    if (!toplevel) return null
 
-        try {
-            const windowId = safeGetProperty(toplevel, "address", "");
-            if (!windowId)
-                return null;
+    try {
+      const windowId = safeGetProperty(toplevel, "address", "")
+      if (!windowId) return null
 
-            const appId = extractAppId(toplevel);
-            const title = safeGetProperty(toplevel, "title", "");
-            const wsId = toplevel.workspace ? toplevel.workspace.id : null;
-            const focused = toplevel.activated === true;
+      const appId = getAppId(toplevel)
+      const title = getAppTitle(toplevel)
+      const wsId = toplevel.workspace ? toplevel.workspace.id : null
+      const focused = toplevel.activated === true
+      const output = toplevel.monitor?.name || ""
 
-            return {
-                "id": windowId,
-                "title": title,
-                "appId": appId,
-                "workspaceId": wsId,
-                "isFocused": focused
-            };
-        } catch (e) {
-            return null;
-        }
+      return {
+        "id": windowId,
+        "title": title,
+        "appId": appId,
+        "workspaceId": wsId || -1,
+        "isFocused": focused,
+        "output": output
+      }
+    } catch (e) {
+      return null
     }
+  }
 
-    // ===== Extract app ID from various sources =====
-    function extractAppId(toplevel) {
-        if (!toplevel)
-            return "";
+  function getAppTitle(toplevel) {
+    try {
+      var title = toplevel.wayland.title
+      if (title) return title
+    } catch (e) {}
 
-        // Try different properties that might contain the app ID
-        var appId = safeGetProperty(toplevel, "class", "");
-        if (appId)
-            return appId;
+    return safeGetProperty(toplevel, "title", "")
+  }
 
-        appId = safeGetProperty(toplevel, "initialClass", "");
-        if (appId)
-            return appId;
+  function getAppId(toplevel) {
+    if (!toplevel) return ""
 
-        appId = safeGetProperty(toplevel, "appId", "");
-        if (appId)
-            return appId;
+    var appId = ""
 
-        return "";
+    // Try wayland.appId first (most reliable)
+    try {
+      appId = toplevel.wayland.appId
+      if (appId) return appId
+    } catch (e) {}
+
+    // Fallback to other properties
+    appId = safeGetProperty(toplevel, "class", "")
+    if (appId) return appId
+
+    appId = safeGetProperty(toplevel, "initialClass", "")
+    if (appId) return appId
+
+    appId = safeGetProperty(toplevel, "appId", "")
+    if (appId) return appId
+
+    return ""
+  }
+
+  function safeGetProperty(obj, prop, defaultValue) {
+    try {
+      const value = obj[prop]
+      if (value !== undefined && value !== null) {
+        return String(value)
+      }
+    } catch (e) {}
+    return defaultValue
+  }
+
+  // === Hyprland Event Connections ===
+  Connections {
+    target: Hyprland.workspaces
+    enabled: initialized
+    function onValuesChanged() {
+      safeUpdateWorkspaces()
+      workspaceChanged()
     }
+  }
 
-    // ===== Getter =====
-    function safeGetProperty(obj, prop, defaultValue) {
-        try {
-            const value = obj[prop];
-            if (value !== undefined && value !== null) {
-                return String(value);
-            }
-        } catch (e)
-        // Property access failed
-        {}
-        return defaultValue;
+  Connections {
+    target: Hyprland.toplevels
+    enabled: initialized
+    function onValuesChanged() {
+      updateTimer.restart()
     }
+  }
 
-    // ===== Connections to Hyprland =====
-    Connections {
-        target: Hyprland.workspaces
-        enabled: initialized
-        function onValuesChanged() {
-            safeUpdateWorkspaces();
-            workspaceChanged();
-        }
-    }
+  Connections {
+    target: Hyprland
+    enabled: initialized
+    function onRawEvent(event) {
+      Hyprland.refreshWorkspaces()
+      safeUpdateWorkspaces()
+      workspaceChanged()
+      updateTimer.restart()
 
-    Connections {
-        target: Hyprland.toplevels
-        enabled: initialized
-        function onValuesChanged() {
-            updateTimer.restart();  // Debounced window updates
-        }
+      // Re-query displays on monitor events
+      const monitorsEvents = [
+        "configreloaded",
+        "monitoradded",
+        "monitorremoved",
+        "monitoraddedv2",
+        "monitorremovedv2"
+      ]
+      if (monitorsEvents.includes(event.name)) {
+        Qt.callLater(queryDisplayScales)
+      }
     }
+  }
 
-    Connections {
-        target: Hyprland
-        enabled: initialized
-        function onRawEvent(event) {
-            safeUpdateWorkspaces();
-            workspaceChanged();
-            updateTimer.restart();
-        }
+  // === Public Functions (Backend Interface) ===
+  function switchToWorkspace(workspace) {
+    try {
+      Hyprland.dispatch(`workspace ${workspace.idx}`)
+    } catch (e) {
+      QsCommons.Logger.e("HyprlandService", "Failed to switch workspace:", e)
     }
+  }
 
-    // ===== Public API =====
-    function switchToWorkspace(workspaceId) {
-        try {
-            Hyprland.dispatch(`workspace ${workspaceId}`);
-        } catch (e) {
-            Logger.error("HyprlandService", "Failed to switch workspace:", e);
-        }
+  function focusWindow(window) {
+    try {
+      Hyprland.dispatch(`focuswindow address:0x${window.id.toString()}`)
+    } catch (e) {
+      QsCommons.Logger.e("HyprlandService", "Failed to focus window:", e)
     }
+  }
 
-    function focusWindow(windowId) {
-        try {
-            Hyprland.dispatch(`focuswindow address:${windowId}`);
-        } catch (e) {
-            Logger.error("HyprlandService", "Failed to focus window:", e);
-        }
+  function closeWindow(window) {
+    try {
+      Hyprland.dispatch(`closewindow address:0x${window.id}`)
+    } catch (e) {
+      QsCommons.Logger.e("HyprlandService", "Failed to close window:", e)
     }
+  }
 
-    function closeWindow(windowId) {
-        try {
-            Hyprland.dispatch(`closewindow address:${windowId}`);
-        } catch (e) {
-            Logger.error("HyprlandService", "Failed to close window:", e);
-        }
+  function logout() {
+    try {
+      Quickshell.execDetached(["hyprctl", "dispatch", "exit"])
+    } catch (e) {
+      QsCommons.Logger.e("HyprlandService", "Failed to logout:", e)
     }
-
-    function logout() {
-        try {
-            Quickshell.execDetached(["hyprctl", "dispatch", "exit"]);
-        } catch (e) {
-            Logger.error("HyprlandService", "Failed to logout:", e);
-        }
-    }
+  }
 }

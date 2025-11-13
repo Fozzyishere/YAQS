@@ -1,0 +1,41 @@
+{
+  "mPrimary": "{{colors.primary.default.hex}}",
+  "mOnPrimary": "{{colors.on_primary.default.hex}}",
+  "mPrimaryContainer": "{{colors.primary_container.default.hex}}",
+  "mOnPrimaryContainer": "{{colors.on_primary_container.default.hex}}",
+  
+  "mSecondary": "{{colors.secondary.default.hex}}",
+  "mOnSecondary": "{{colors.on_secondary.default.hex}}",
+  "mSecondaryContainer": "{{colors.secondary_container.default.hex}}",
+  "mOnSecondaryContainer": "{{colors.on_secondary_container.default.hex}}",
+  
+  "mTertiary": "{{colors.tertiary.default.hex}}",
+  "mOnTertiary": "{{colors.on_tertiary.default.hex}}",
+  "mTertiaryContainer": "{{colors.tertiary_container.default.hex}}",
+  "mOnTertiaryContainer": "{{colors.on_tertiary_container.default.hex}}",
+  
+  "mError": "{{colors.error.default.hex}}",
+  "mOnError": "{{colors.on_error.default.hex}}",
+  "mErrorContainer": "{{colors.error_container.default.hex}}",
+  "mOnErrorContainer": "{{colors.on_error_container.default.hex}}",
+  
+  "mBackground": "{{colors.background.default.hex}}",
+  "mOnBackground": "{{colors.on_background.default.hex}}",
+  
+  "mSurface": "{{colors.surface.default.hex}}",
+  "mOnSurface": "{{colors.on_surface.default.hex}}",
+  "mSurfaceVariant": "{{colors.surface_variant.default.hex}}",
+  "mOnSurfaceVariant": "{{colors.on_surface_variant.default.hex}}",
+  
+  "mSurfaceContainerLowest": "{{colors.surface_container_lowest.default.hex}}",
+  "mSurfaceContainerLow": "{{colors.surface_container_low.default.hex}}",
+  "mSurfaceContainer": "{{colors.surface_container.default.hex}}",
+  "mSurfaceContainerHigh": "{{colors.surface_container_high.default.hex}}",
+  "mSurfaceContainerHighest": "{{colors.surface_container_highest.default.hex}}",
+  
+  "mOutline": "{{colors.outline.default.hex}}",
+  "mOutlineVariant": "{{colors.outline_variant.default.hex}}",
+  "mShadow": "{{colors.shadow.default.hex}}",
+  "mScrim": "{{colors.scrim.default.hex}}"
+}
+

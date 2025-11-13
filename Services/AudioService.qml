@@ -2,196 +2,203 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.Pipewire
-import qs.Commons
+import "../Commons" as QsCommons
 
 Singleton {
-    id: root
+  id: root
 
-    // ===== Properties =====
-    readonly property int volume: _volume        // Volume percentage (0-100)
-    readonly property bool muted: _muted         // Mute state
-    readonly property bool isReady: _isReady     // Audio sink ready
+  // === Public Properties ===
+  
+  // Filtered node lists - reduces all PipeWire nodes to sinks and sources
+  // Use reduce to filter out application streams
+  readonly property var nodes: Pipewire.nodes.values.reduce((acc, node) => {
+    if (!node.isStream) {
+      if (node.isSink) {
+        acc.sinks.push(node)
+      } else if (node.audio) {
+        acc.sources.push(node)
+      }
+    }
+    return acc
+  }, {
+    "sources": [],
+    "sinks": []
+  })
 
-    // ===== Private state =====
-    property int _volume: 0
-    property bool _muted: false
-    property bool _isReady: false
-    property bool initialized: false
+  // Default audio devices from PipeWire
+  readonly property PwNode sink: Pipewire.defaultAudioSink
+  readonly property PwNode source: Pipewire.defaultAudioSource
+  readonly property list<PwNode> sinks: nodes.sinks
+  readonly property list<PwNode> sources: nodes.sources
 
-    // ===== Audio sink reference =====
-    readonly property var sink: Pipewire.defaultAudioSink
+  // Volume [0..1] is readonly from outside
+  // Use alias with private backing property
+  // This prevents binding issues during device transitions and allows explicit NaN handling
+  readonly property alias volume: root._volume
+  property real _volume: sink?.audio?.volume ?? 0
 
-    PwObjectTracker {
-        objects: [root.sink]
+  readonly property alias muted: root._muted
+  property bool _muted: !!sink?.audio?.muted
+
+  // Input volume [0..1] is readonly from outside
+  readonly property alias inputVolume: root._inputVolume
+  property real _inputVolume: source?.audio?.volume ?? 0
+
+  readonly property alias inputMuted: root._inputMuted
+  property bool _inputMuted: !!source?.audio?.muted
+
+  // Volume step from settings (converted from percentage to 0-1 range)
+  readonly property real stepVolume: QsCommons.Settings.data.audio.volumeStep / 100.0
+
+  // === PwObjectTracker ===
+  // PwObjectTracker is required to bind nodes and make audio properties valid
+  // Without this, accessing node.audio properties will fail
+  PwObjectTracker {
+    objects: [...root.sinks, ...root.sources]
+  }
+
+  // === Connections ===
+  // Explicitly handle volume changes with NaN checks
+  // PipeWire can emit NaN during device hotplug/removal
+  Connections {
+    target: sink?.audio ? sink.audio : null
+
+    function onVolumeChanged() {
+      var vol = (sink?.audio.volume ?? 0)
+      if (isNaN(vol)) {
+        return
+      }
+      root._volume = vol
     }
 
-    // ===== Initialization =====
-    function init() {
-        if (initialized) {
-            Logger.warn("AudioService", "Already initialized");
-            return;
-        }
+    function onMutedChanged() {
+      root._muted = (sink?.audio.muted ?? true)
+      QsCommons.Logger.i("AudioService", "OnMuteChanged:", root._muted)
+      // TODO: Enable when ToastService is available
+      // ToastService.showNotice("Audio Output", root._muted ? "Muted" : "Unmuted")
+    }
+  }
 
-        Logger.log("AudioService", "Initializing...");
-        updateAudio();
-        initialized = true;
-        Logger.log("AudioService", "Initialization complete");
+  Connections {
+    target: source?.audio ? source.audio : null
+
+    function onVolumeChanged() {
+      var vol = (source?.audio.volume ?? 0)
+      if (isNaN(vol)) {
+        return
+      }
+      root._inputVolume = vol
     }
 
-    // ===== Watch for sink changes =====
-    Connections {
-        target: Pipewire
-        function onDefaultAudioSinkChanged() {
-            Logger.log("AudioService", "Default audio sink changed");
-            root.updateAudio();
-        }
+    function onMutedChanged() {
+      root._inputMuted = (source?.audio.muted ?? true)
+      QsCommons.Logger.i("AudioService", "OnInputMuteChanged:", root._inputMuted)
+      // TODO: Enable when ToastService is available
+      // ToastService.showNotice("Audio Input", root._inputMuted ? "Muted" : "Unmuted")
     }
+  }
 
-    // ===== Watch for audio property changes =====
-    Connections {
-        target: root.sink !== null ? root.sink.audio : null
-        enabled: root.sink !== null
+  // === Functions ===
+  
+  // Output (Sink) Volume Control
+  function increaseVolume() {
+    setVolume(volume + stepVolume)
+  }
 
-        function onVolumeChanged() {
-            root.safeUpdateVolume();
-        }
+  function decreaseVolume() {
+    setVolume(volume - stepVolume)
+  }
 
-        function onMutedChanged() {
-            root.safeUpdateMuted();
-        }
+  function setVolume(newVolume: real) {
+    if (sink?.ready && sink?.audio) {
+      // Unmute when setting volume
+      sink.audio.muted = false
+      // Clamp to max (1.0 or 1.5 with overdrive setting)
+      // PwNodeAudio.volume is read-write, range [0.0 - 1.5+]
+      sink.audio.volume = Math.max(0, Math.min(
+        QsCommons.Settings.data.audio.volumeOverdrive ? 1.5 : 1.0,
+        newVolume
+      ))
+    } else {
+      QsCommons.Logger.w("AudioService", "No sink available")
     }
+  }
 
-    // ===== Update audio state =====
-    function updateAudio() {
-        try {
-            if (!sink || !sink.audio) {
-                _isReady = false;
-                _volume = 0;
-                _muted = false;
-                Logger.warn("AudioService", "No audio sink available");
-                return;
-            }
-
-            _isReady = true;
-            safeUpdateVolume();
-            safeUpdateMuted();
-            Logger.log("AudioService", "Audio ready - Volume:", _volume, "Muted:", _muted);
-        } catch (e) {
-            Logger.error("AudioService", "Failed to update audio:", e);
-            Logger.callStack();
-            _isReady = false;
-        }
+  function setOutputMuted(muted: bool) {
+    if (sink?.ready && sink?.audio) {
+      sink.audio.muted = muted
+    } else {
+      QsCommons.Logger.w("AudioService", "No sink available")
     }
+  }
 
-    // ===== Safe volume update =====
-    function safeUpdateVolume() {
-        if (!sink || !sink.audio) {
-            _volume = 0;
-            volumeChanged();
-            return;
-        }
+  // Input (Source) Volume Control
+  function increaseInputVolume() {
+    setInputVolume(inputVolume + stepVolume)
+  }
 
-        try {
-            const vol = sink.audio.volume;
-            if (typeof vol === "number" && !isNaN(vol)) {
-                _volume = Math.round(Math.max(0, Math.min(1, vol)) * 100);
-                volumeChanged();
-            }
-        } catch (e) {
-            Logger.error("AudioService", "Failed to read volume:", e);
-        }
+  function decreaseInputVolume() {
+    setInputVolume(inputVolume - stepVolume)
+  }
+
+  function setInputVolume(newVolume: real) {
+    if (source?.ready && source?.audio) {
+      // Unmute when setting volume
+      source.audio.muted = false
+      // Clamp to max (1.0 or 1.5 with overdrive setting)
+      source.audio.volume = Math.max(0, Math.min(
+        QsCommons.Settings.data.audio.volumeOverdrive ? 1.5 : 1.0,
+        newVolume
+      ))
+    } else {
+      QsCommons.Logger.w("AudioService", "No source available")
     }
+  }
 
-    // ===== Safe mute update =====
-    function safeUpdateMuted() {
-        if (!sink || !sink.audio) {
-            _muted = false;
-            mutedChanged();
-            return;
-        }
-
-        try {
-            const mute = sink.audio.muted;
-            if (typeof mute === "boolean") {
-                _muted = mute;
-                mutedChanged();
-            }
-        } catch (e) {
-            Logger.error("AudioService", "Failed to read mute state:", e);
-        }
+  function setInputMuted(muted: bool) {
+    if (source?.ready && source?.audio) {
+      source.audio.muted = muted
+    } else {
+      QsCommons.Logger.w("AudioService", "No source available")
     }
+  }
 
-    // ===== Public API: Toggle mute =====
-    function toggleMute() {
-        if (!sink || !sink.audio) {
-            Logger.warn("AudioService", "Cannot toggle mute: no sink available");
-            return;
-        }
+  // Device Switching
+  // Immediately update internal state when switching devices
+  // This ensures UI reflects new device state without waiting for signals
+  function setAudioSink(newSink: PwNode): void {
+    Pipewire.preferredDefaultAudioSink = newSink
+    // Immediately update internal state to match new device
+    root._volume = newSink?.audio?.volume ?? 0
+    root._muted = !!newSink?.audio?.muted
+  }
 
-        try {
-            const newMuted = !sink.audio.muted;
-            sink.audio.muted = newMuted;
-            Logger.log("AudioService", `Mute toggled: ${newMuted}`);
-        } catch (e) {
-            Logger.error("AudioService", "Failed to toggle mute:", e);
-        }
+  function setAudioSource(newSource: PwNode): void {
+    Pipewire.preferredDefaultAudioSource = newSource
+    // Immediately update internal state to match new device
+    root._inputVolume = newSource?.audio?.volume ?? 0
+    root._inputMuted = !!newSource?.audio?.muted
+  }
+
+  // === Initialization ===
+  Component.onCompleted: {
+    QsCommons.Logger.d("AudioService", "Initialized")
+    QsCommons.Logger.d("AudioService", "Pipewire.nodes.values.length:", Pipewire.nodes.values.length)
+    QsCommons.Logger.d("AudioService", "Pipewire.defaultAudioSink:", Pipewire.defaultAudioSink)
+    QsCommons.Logger.d("AudioService", "Pipewire.defaultAudioSource:", Pipewire.defaultAudioSource)
+    
+    // Log all nodes for debugging
+    const allNodes = Pipewire.nodes.values
+    QsCommons.Logger.d("AudioService", "All PipeWire nodes:")
+    for (var i = 0; i < allNodes.length; i++) {
+      const node = allNodes[i]
+      QsCommons.Logger.d("AudioService", "  Node", i + ":", 
+               "name=" + node.name,
+               "isStream=" + node.isStream,
+               "isSink=" + node.isSink,
+               "hasAudio=" + !!node.audio)
     }
-
-    // ===== Public API: Set volume =====
-    function setVolume(percent) {
-        if (!sink || !sink.audio) {
-            Logger.warn("AudioService", "Cannot set volume: no sink available");
-            return;
-        }
-
-        try {
-            // Clamp to 0-100%
-            const clampedPercent = Math.max(0, Math.min(100, percent));
-            sink.audio.volume = clampedPercent / 100.0;
-            Logger.log("AudioService", `Volume set: ${clampedPercent}%`);
-        } catch (e) {
-            Logger.error("AudioService", "Failed to set volume:", e);
-        }
-    }
-
-    // ===== Public API: Increase volume =====
-    function increaseVolume(step = 5) {
-        setVolume(_volume + step);
-    }
-
-    // ===== Public API: Decrease volume =====
-    function decreaseVolume(step = 5) {
-        setVolume(_volume - step);
-    }
-
-    // ===== Helper: Get icon based on state =====
-    function getIcon() {
-        if (!isReady) {
-            return "󰝟";  // volume-off (Nerd Font)
-        }
-
-        if (muted) {
-            return "󰝟";  // volume-mute (Nerd Font)
-        }
-
-        // Icon based on volume level
-        if (volume === 0) return "󰕿";     // volume-zero
-        if (volume < 33) return "󰖀";      // volume-low
-        if (volume < 66) return "󰕾";      // volume-medium
-        return "󰕾";                        // volume-high
-    }
-
-    // ===== Helper: Get color based on state =====
-    function getColor() {
-        if (!isReady) {
-            return Color.mOutlineVariant;
-        }
-
-        if (muted) {
-            return Color.mOutlineVariant;  // Dimmed when muted
-        }
-
-        return Color.mPrimary;  // Primary color when active
-    }
+  }
 }

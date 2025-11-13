@@ -3,356 +3,264 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import qs.Commons
+import "../Commons" as QsCommons
 
 Singleton {
-    id: root
+  id: root
 
-    // ===== Public Properties =====
-    property int brightness: 50                 // Current brightness (0-100)
-    property int maxBrightness: 100             // Maximum brightness value
-    property bool isAvailable: false            // Brightness control available
-    property bool initialized: false
+  // === Properties ===
+  readonly property list<Monitor> monitors: variants.instances
+  property int initializedMonitors: 0
+  property bool allMonitorsInitialized: false
 
-    // ===== Private Properties =====
-    property string _backend: ""                // brightnessctl or light
-    property string _backlightDevice: ""        // /sys/class/backlight/...
-    property string _brightnessPath: ""         // brightness file path
-    property string _maxBrightnessPath: ""      // max_brightness file path
-    property bool _isPolling: false             // Polling active
-    property int _queuedBrightness: -1          // Debounced value (-1 = none)
+  // === Signals ===
+  signal monitorBrightnessChanged(var monitor, real newBrightness)
+  signal monitorsInitialized()
 
-    // ===== Initialization =====
-    function init() {
-        if (initialized) {
-            Logger.warn("BrightnessService", "Already initialized");
-            return;
+  // === Public API ===
+  function getMonitorForScreen(screen: ShellScreen): var {
+    return monitors.find(m => m.modelData === screen)
+  }
+
+  function getAvailableMethods(): list<string> {
+    // Currently only internal backlight support
+    // Can't get ddcutil to work so this will be done later when i actually need it
+    if (monitors.some(m => m.isAvailable)) {
+      return ["internal"]
+    }
+    return []
+  }
+
+  // Global helpers for IPC and shortcuts
+  function increaseBrightness(): void {
+    monitors.forEach(m => m.increaseBrightness())
+  }
+
+  function decreaseBrightness(): void {
+    monitors.forEach(m => m.decreaseBrightness())
+  }
+
+  // === Initialization ===
+  Component.onCompleted: {
+    QsCommons.Logger.i("BrightnessService", "Service started")
+  }
+
+  onInitializedMonitorsChanged: {
+    if (initializedMonitors === monitors.length && !allMonitorsInitialized) {
+      allMonitorsInitialized = true
+      monitorsInitialized()
+      QsCommons.Logger.d("BrightnessService", "All monitors initialized")
+    }
+  }
+
+  // === Variants Pattern ===
+  Variants {
+    id: variants
+    model: Quickshell.screens
+    Monitor {}
+  }
+
+  // === Monitor Component ===
+  component Monitor: QtObject {
+    id: monitor
+
+    // === Required Properties ===
+    required property ShellScreen modelData
+
+    // === State Properties ===
+    property real brightness: 0.0
+    property real queuedBrightness: NaN
+    property bool isAvailable: false
+
+    // Internal backlight properties
+    property string backlightDevice: ""
+    property string brightnessPath: ""
+    property string maxBrightnessPath: ""
+    property int maxBrightness: 100
+    readonly property string method: "internal"  // Future: "ddcutil" or "apple"
+
+    // === Signals ===
+    signal brightnessUpdated(real newBrightness)
+
+    // === Step Size ===
+    readonly property real stepSize: QsCommons.Settings.data.brightness.step / 100.0
+
+    // === Debounce Timer ===
+    readonly property Timer timer: Timer {
+      interval: 100
+      onTriggered: {
+        if (!isNaN(monitor.queuedBrightness)) {
+          monitor.setBrightness(monitor.queuedBrightness)
+          monitor.queuedBrightness = NaN
         }
-
-        Logger.log("BrightnessService", "Initializing...");
-        detectBackend();
-        initialized = true;
-        // Note: "Initialization complete" logged after backend detection
+      }
     }
 
-    // ===== Backend Detection =====
-    function detectBackend() {
-        try {
-            // Try brightnessctl first
-            brightnessctlCheckProcess.running = true;
-        } catch (e) {
-            Logger.error("BrightnessService", "Failed to detect backend:", e);
-            Logger.callStack();
-            isAvailable = false;
-        }
-    }
+    // === Initialization Process ===
+    readonly property Process initProc: Process {
+      stdout: StdioCollector {
+        onStreamFinished: {
+          var dataText = text.trim()
+          if (dataText === "") {
+            QsCommons.Logger.d("BrightnessService", "No backlight device found for", monitor.modelData.name)
+            // Mark as initialized even if no backlight found
+            root.initializedMonitors++
+            return
+          }
 
-    Process {
-        id: brightnessctlCheckProcess
-        running: false
-        command: ["sh", "-c", "which brightnessctl >/dev/null 2>&1 && echo 'found' || echo 'not found'"]
+          // Parse internal backlight response: device_path, current_brightness, max_brightness
+          var lines = dataText.split("\n")
+          if (lines.length >= 3) {
+            monitor.backlightDevice = lines[0]
+            monitor.brightnessPath = monitor.backlightDevice + "/brightness"
+            monitor.maxBrightnessPath = monitor.backlightDevice + "/max_brightness"
 
-        stdout: StdioCollector {
-            onStreamFinished: {
-                if (text.trim() === "found") {
-                    root._backend = "brightnessctl";
-                    root.isAvailable = true;
-                    Logger.log("BrightnessService", "Using backend: brightnessctl");
-                    initBrightness();
-                    startPolling();
-                    return;
-                }
-
-                // Try light as fallback
-                lightCheckProcess.running = true;
+            var current = parseInt(lines[1])
+            var max = parseInt(lines[2])
+            if (!isNaN(current) && !isNaN(max) && max > 0) {
+              monitor.maxBrightness = max
+              monitor.brightness = current / max
+              monitor.isAvailable = true
+              QsCommons.Logger.i("BrightnessService", "Detected internal backlight for", monitor.modelData.name + ":", current + "/" + max, "(" + Math.round(monitor.brightness * 100) + "%)")
+              QsCommons.Logger.d("BrightnessService", "Using device:", monitor.backlightDevice)
+              
+              // Emit initial signals
+              monitor.brightnessUpdated(monitor.brightness)
+              root.monitorBrightnessChanged(monitor, monitor.brightness)
+            } else {
+              QsCommons.Logger.d("BrightnessService", "No backlight for", monitor.modelData.name)
             }
+          } else {
+            QsCommons.Logger.d("BrightnessService", "No backlight for", monitor.modelData.name)
+          }
+          
+          // Mark this monitor as initialized (whether backlight found or not)
+          root.initializedMonitors++
         }
+      }
     }
 
-    Process {
-        id: lightCheckProcess
-        running: false
-        command: ["sh", "-c", "which light >/dev/null 2>&1 && echo 'found' || echo 'not found'"]
+    // === Refresh Process (FileView callback) ===
+    readonly property Process refreshProc: Process {
+      stdout: StdioCollector {
+        onStreamFinished: {
+          var dataText = text.trim()
+          if (dataText === "") {
+            return
+          }
 
-        stdout: StdioCollector {
-            onStreamFinished: {
-                if (text.trim() === "found") {
-                    root._backend = "light";
-                    root.isAvailable = true;
-                    Logger.log("BrightnessService", "Using backend: light");
-                    initBrightness();
-                    startPolling();
-                    return;
-                }
-
-                Logger.warn("BrightnessService", "No brightness control tool found (tried: brightnessctl, light)");
-                root.isAvailable = false;
+          // Internal backlight only - 2 lines: current, max
+          var lines = dataText.split("\n")
+          if (lines.length >= 2) {
+            var current = parseInt(lines[0].trim())
+            var max = parseInt(lines[1].trim())
+            if (!isNaN(current) && !isNaN(max) && max > 0) {
+              var newBrightness = current / max
+              // Only update if difference > 1% (avoid feedback loops)
+              if (Math.abs(newBrightness - monitor.brightness) > 0.01) {
+                monitor.brightness = newBrightness
+                monitor.brightnessUpdated(monitor.brightness)
+                root.monitorBrightnessChanged(monitor, monitor.brightness)
+                QsCommons.Logger.d("BrightnessService", "Refreshed brightness for", monitor.modelData.name + ":", Math.round(newBrightness * 100) + "%")
+              }
             }
+          }
         }
+      }
     }
 
-    // ===== Initialize Brightness =====
-    function initBrightness() {
-        if (!isAvailable) return;
-
-        if (_backend === "brightnessctl") {
-            initBrightnessctlProcess.running = true;
-        } else if (_backend === "light") {
-            initLightProcess.running = true;
-        }
+    // === FileView Watcher (internal backlight only) ===
+    readonly property FileView brightnessWatcher: FileView {
+      path: (monitor.isAvailable && monitor.brightnessPath !== "") ? monitor.brightnessPath : ""
+      watchChanges: path !== ""
+      onFileChanged: {
+        // When brightness file changes (e.g., keyboard brightness keys), refresh from system
+        Qt.callLater(() => {
+          monitor.refreshBrightnessFromSystem()
+        })
+      }
     }
 
-    // Brightnessctl: get device path, current, and max brightness
-    Process {
-        id: initBrightnessctlProcess
-        running: false
-        command: ["sh", "-c", `
-            # Get device path
-            device=$(brightnessctl --list | grep -o 'Device.*backlight' | head -1 | awk '{print "/sys/class/backlight/" $2}' | tr -d "'")
-            if [ -z "$device" ]; then
-                # Fallback: find first backlight device
-                device=$(find /sys/class/backlight -maxdepth 1 -type d | grep -v "^/sys/class/backlight$" | head -1)
-            fi
-
-            # Get current and max brightness
-            current=$(brightnessctl get)
-            max=$(brightnessctl max)
-
-            echo "$device"
-            echo "$current"
-            echo "$max"
-        `]
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const lines = text.trim().split("\n");
-                if (lines.length < 3) {
-                    Logger.error("BrightnessService", "Failed to get brightness info");
-                    return;
-                }
-
-                handleBrightnessInit(lines[0], parseInt(lines[1]), parseInt(lines[2]));
-            }
-        }
-
-        stderr: StdioCollector {
-            onStreamFinished: {
-                if (text.trim()) {
-                    Logger.error("BrightnessService", "brightnessctl init error:", text.trim());
-                }
-            }
-        }
+    // === Functions ===
+    
+    function setBrightnessDebounced(value: real): void {
+      monitor.queuedBrightness = value
+      timer.start()
     }
 
-    // Light: get current brightness directly (returns percentage)
-    Process {
-        id: initLightProcess
-        running: false
-        command: ["light", "-G"]
+    function increaseBrightness(): void {
+      if (!monitor.isAvailable) {
+        QsCommons.Logger.d("BrightnessService", "Brightness not available for", monitor.modelData.name)
+        return
+      }
 
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const value = parseFloat(text.trim());
-                if (isNaN(value)) {
-                    Logger.error("BrightnessService", "Failed to parse light output");
-                    return;
-                }
-
-                root.brightness = Math.round(value);
-                root.maxBrightness = 100;  // light always uses percentage
-                Logger.log("BrightnessService", "Initial brightness:", root.brightness + "%");
-                brightnessChanged();
-            }
-        }
-
-        stderr: StdioCollector {
-            onStreamFinished: {
-                if (text.trim()) {
-                    Logger.error("BrightnessService", "light init error:", text.trim());
-                }
-            }
-        }
+      const value = !isNaN(monitor.queuedBrightness) ? 
+                    monitor.queuedBrightness : monitor.brightness
+      setBrightnessDebounced(Math.min(1.0, value + stepSize))
     }
 
-    function handleBrightnessInit(devicePath, current, max) {
-        if (!devicePath || isNaN(current) || isNaN(max) || max === 0) {
-            Logger.error("BrightnessService", "Invalid brightness data");
-            return;
-        }
+    function decreaseBrightness(): void {
+      if (!monitor.isAvailable) {
+        QsCommons.Logger.d("BrightnessService", "Brightness not available for", monitor.modelData.name)
+        return
+      }
 
-        root._backlightDevice = devicePath;
-        root._brightnessPath = devicePath + "/brightness";
-        root._maxBrightnessPath = devicePath + "/max_brightness";
-        root.maxBrightness = max;
-        root.brightness = Math.round((current / max) * 100);
-
-        Logger.log("BrightnessService", "Using backlight device:", devicePath);
-        Logger.log("BrightnessService", "Initial brightness:", current + "/" + max, "=", root.brightness + "%");
-
-        // Start file watching
-        brightnessWatcher.path = root._brightnessPath;
-
-        brightnessChanged();
+      const value = !isNaN(monitor.queuedBrightness) ? 
+                    monitor.queuedBrightness : monitor.brightness
+      setBrightnessDebounced(Math.max(0, value - stepSize))
     }
 
-    // ===== File Watcher (for hardware key detection) =====
-    FileView {
-        id: brightnessWatcher
-        path: ""  // Set when backend detected
-        watchChanges: true
+    function setBrightness(value: real): void {
+      if (!monitor.isAvailable) {
+        QsCommons.Logger.w("BrightnessService", "Brightness not available for", monitor.modelData.name)
+        return
+      }
 
-        onFileChanged: {
-            // Hardware brightness key pressed - update our value
-            if (_backend === "brightnessctl") {
-                updateBrightnessFromSystem();
-            }
-        }
+      value = Math.max(0, Math.min(1, value))
+      var rounded = Math.round(value * 100)
+
+      if (timer.running) {
+        monitor.queuedBrightness = value
+        return
+      }
+
+      // Update internal value and trigger UI feedback
+      monitor.brightness = value
+      monitor.brightnessUpdated(value)
+      root.monitorBrightnessChanged(monitor, monitor.brightness)
+
+      // Apply to system - currently only internal backlight
+      Quickshell.execDetached(["brightnessctl", "s", rounded + "%"])
     }
 
-    // ===== Polling Timer (for hardware key detection) =====
-    function startPolling() {
-        if (_backend === "light") {
-            // light doesn't have file watching, use polling
-            _isPolling = true;
-            pollTimer.start();
-        }
+    function refreshBrightnessFromSystem(): void {
+      if (!monitor.isAvailable) {
+        return
+      }
+
+      // Currently only internal backlight
+      refreshProc.command = ["sh", "-c", 
+        "cat " + monitor.brightnessPath + " && cat " + monitor.maxBrightnessPath]
+      refreshProc.running = true
     }
 
-    Timer {
-        id: pollTimer
-        interval: Settings.data.brightness?.pollInterval ?? 500
-        running: false
-        repeat: true
-
-        onTriggered: {
-            if (root._isPolling && root._backend === "light") {
-                updateBrightnessFromSystem();
-            }
-        }
+    function initBrightness(): void {
+      // Currently only checks for internal backlight
+      // Future: Will check isDdc, isAppleDisplay properties
+      
+      initProc.command = ["sh", "-c", 
+        "for dev in /sys/class/backlight/*; do " +
+        "  if [ -f \"$dev/brightness\" ] && [ -f \"$dev/max_brightness\" ]; then " +
+        "    echo \"$dev\"; " +
+        "    cat \"$dev/brightness\"; " +
+        "    cat \"$dev/max_brightness\"; " +
+        "    break; " +
+        "  fi; " +
+        "done"]
+      initProc.running = true
     }
 
-    // ===== Update from System (detect hardware changes) =====
-    function updateBrightnessFromSystem() {
-        if (!isAvailable) return;
-
-        if (_backend === "brightnessctl") {
-            updateBrightnessctlProcess.running = true;
-        } else if (_backend === "light") {
-            updateLightProcess.running = true;
-        }
-    }
-
-    Process {
-        id: updateBrightnessctlProcess
-        running: false
-        command: ["brightnessctl", "get"]
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const current = parseInt(text.trim());
-                if (isNaN(current) || root.maxBrightness === 0) return;
-
-                const newBrightness = Math.round((current / root.maxBrightness) * 100);
-
-                // Only update if changed significantly (avoid noise)
-                if (Math.abs(newBrightness - root.brightness) > 1) {
-                    root.brightness = newBrightness;
-                    brightnessChanged();
-                }
-            }
-        }
-    }
-
-    Process {
-        id: updateLightProcess
-        running: false
-        command: ["light", "-G"]
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const newBrightness = Math.round(parseFloat(text.trim()));
-                if (isNaN(newBrightness)) return;
-
-                if (Math.abs(newBrightness - root.brightness) > 1) {
-                    root.brightness = newBrightness;
-                    brightnessChanged();
-                }
-            }
-        }
-    }
-
-    // ===== Set Brightness =====
-    function setBrightness(percent) {
-        if (!isAvailable) return;
-
-        const clamped = Math.max(0, Math.min(100, Math.round(percent)));
-
-        if (_debounceTimer.running) {
-            _queuedBrightness = clamped;
-            return;
-        }
-
-        applyBrightness(clamped);
-        _debounceTimer.start();
-    }
-
-    function applyBrightness(percent) {
-        root.brightness = percent;
-        brightnessChanged();
-
-        if (_backend === "brightnessctl") {
-            Quickshell.execDetached(["brightnessctl", "set", percent + "%"]);
-        } else if (_backend === "light") {
-            Quickshell.execDetached(["light", "-S", percent.toString()]);
-        }
-
-        Logger.log("BrightnessService", "Set brightness:", percent + "%");
-    }
-
-    Timer {
-        id: _debounceTimer
-        interval: 100
-        repeat: false
-
-        onTriggered: {
-            if (root._queuedBrightness >= 0) {
-                applyBrightness(root._queuedBrightness);
-                root._queuedBrightness = -1;
-            }
-        }
-    }
-
-    // ===== Increase/Decrease Methods =====
-    function increaseBrightness(step) {
-        if (!isAvailable) return;
-
-        const targetStep = step || (Settings.data.brightness?.step ?? 5);
-        const targetValue = _queuedBrightness >= 0 ? _queuedBrightness : brightness;
-        setBrightness(targetValue + targetStep);
-    }
-
-    function decreaseBrightness(step) {
-        if (!isAvailable) return;
-
-        const targetStep = step || (Settings.data.brightness?.step ?? 5);
-        const targetValue = _queuedBrightness >= 0 ? _queuedBrightness : brightness;
-        setBrightness(targetValue - targetStep);
-    }
-
-    // ===== Helper Functions =====
-
-    // Get icon based on brightness level
-    function getIcon() {
-        if (!isAvailable) return "󰃞";  // brightness-alert
-
-        if (brightness >= 80) return "󰃠";  // brightness-high
-        if (brightness >= 50) return "󰃟";  // brightness-medium
-        if (brightness >= 20) return "󰃝";  // brightness-low
-        return "󰃞";  // brightness-minimum
-    }
-
-    // Get color based on availability
-    function getColor() {
-        return isAvailable ? Color.mTertiary : Color.mOutlineVariant;
-    }
+    // Trigger initialization when component is ready
+    Component.onCompleted: initBrightness()
+  }
 }
