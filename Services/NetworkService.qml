@@ -47,13 +47,13 @@ Singleton {
     }
   }
 
-  // Update Settings-driven Wi-Fi toggle logging (toasts deferred until ToastService exists)
+  // Update Settings-driven Wi-Fi toggle
   Connections {
     target: QsCommons.Settings.data.network
     function onWifiEnabledChanged() {
       const enabled = QsCommons.Settings.data.network.wifiEnabled
       QsCommons.Logger.i("NetworkService", enabled ? "Wi-Fi enabled" : "Wi-Fi disabled")
-      // TODO: When ToastService is available, surface a user-visible toast here.
+      QsServices.NotificationService.showNotice("Wi-Fi", enabled ? "Enabled" : "Disabled")
     }
   }
 
@@ -505,7 +505,7 @@ Singleton {
         root.connecting = false
         root.connectingTo = ""
         QsCommons.Logger.i("NetworkService", `Connected to network: '${connectProcess.ssid}'`)
-        // TODO: When ToastService is available, show a toast ("Connected to ${connectProcess.ssid}")
+        QsServices.NotificationService.showNotice("Connected", `Connected to ${connectProcess.ssid}`)
 
         delayedScanTimer.interval = 5000
         delayedScanTimer.restart()
@@ -544,7 +544,7 @@ Singleton {
     stdout: StdioCollector {
       onStreamFinished: {
         QsCommons.Logger.i("NetworkService", `Disconnected from network: '${disconnectProcess.ssid}'`)
-        // TODO: When ToastService is available, show a toast ("Disconnected from ${disconnectProcess.ssid}")
+        QsServices.NotificationService.showNotice("Disconnected", `Disconnected from ${disconnectProcess.ssid}`)
 
         root.updateNetworkStatus(disconnectProcess.ssid, false)
         root.disconnectingFrom = ""

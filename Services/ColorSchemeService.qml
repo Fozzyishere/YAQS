@@ -28,10 +28,12 @@ Singleton {
         applyScheme(QsCommons.Settings.data.colorSchemes.predefinedScheme)
       }
       
-      // TODO: Uncomment when ToastService available
-      // const enabled = !!QsCommons.Settings.data.colorSchemes.darkMode
-      // const label = enabled ? "Dark mode" : "Light mode"
-      // ToastService.showNotice(label, "Enabled")
+      const enabled = !!QsCommons.Settings.data.colorSchemes.darkMode
+    onDarkModeChanged: {
+      const label = darkMode ? "Dark Mode" : "Light Mode";
+      QsCommons.Logger.i("ColorScheme", label);
+      QsServices.NotificationService.showNotice(label, "Enabled");
+    }
     }
   }
 

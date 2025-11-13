@@ -211,6 +211,9 @@ Singleton {
       property int lowUrgencyDuration: 3
       property int normalUrgencyDuration: 5
       property int criticalUrgencyDuration: 10
+      property string location: "top_right"  // "top", "top_right", "top_left", "bottom", "bottom_right", "bottom_left"
+      property bool overlayLayer: false      // Use Overlay layer (above everything) vs Top layer
+      property list<string> monitors: []     // Empty = all monitors
     }
 
     // calendar

@@ -102,9 +102,8 @@ Singleton {
         
         // Show warning if feature enabled but tool missing
         if (QsCommons.Settings.data.appLauncher?.enableClipboardHistory) {
-          // TODO: Enable when ToastService is available
-          // ToastService.showWarning("Clipboard history unavailable", 
-          //   "Install cliphist to enable clipboard history")
+          QsServices.NotificationService.showWarning("Clipboard history unavailable", 
+            "Install cliphist to enable clipboard history")
           QsCommons.Logger.w("Clipboard", 
             "Clipboard history enabled but cliphist not installed")
         }

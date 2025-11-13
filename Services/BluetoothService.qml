@@ -86,12 +86,13 @@ Singleton {
       
       QsCommons.Logger.d("BluetoothService", "Bluetooth enabled:", adapter.enabled)
       
-      if (adapter.enabled) {
-        // TODO: Uncomment when ToastService available
-        // ToastService.showNotice("Bluetooth", "Bluetooth enabled")
-        discoveryTimer.running = true
-      } else {
-        // ToastService.showNotice("Bluetooth", "Bluetooth disabled")
+      const newState = adapter.enabled
+      if (Settings.data.bluetooth.enabled !== newState) {
+        Settings.data.bluetooth.enabled = newState
+        QsServices.NotificationService.showNotice(
+          "Bluetooth", 
+          newState ? "Bluetooth enabled" : "Bluetooth disabled"
+        )
       }
     }
   }

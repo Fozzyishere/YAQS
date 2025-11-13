@@ -57,6 +57,16 @@
     "tooltipsEnabled": true,
     "panelsOverlayLayer": true
   },
+  "notifications": {
+    "doNotDisturb": false,
+    "respectExpireTimeout": true,
+    "lowUrgencyDuration": 3,
+    "normalUrgencyDuration": 5,
+    "criticalUrgencyDuration": 10,
+    "location": "top_right",
+    "overlayLayer": false,
+    "monitors": []
+  },
   "wallpaper": {
     "directory": "~/Pictures/Wallpapers",
     "defaultWallpaper": "",

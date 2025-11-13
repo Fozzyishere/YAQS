@@ -17,6 +17,30 @@ Singleton {
     property int maxHistory: 100
     property string historyFile: Quickshell.env("YAQS_NOTIF_HISTORY_FILE") || (QsCommons.Settings.cacheDir + "notifications.json")
     property string stateFile: QsCommons.Settings.cacheDir + "notifications-state.json"
+    
+    // === Utility Functions for Internal Notifications ===
+    // These functions allow YAQS services to send notifications through the D-Bus system
+    function sendNotification(summary, body, urgency) {
+        const urgencyLevel = urgency === "critical" ? 2 : (urgency === "low" ? 0 : 1)
+        Quickshell.execDetached(["notify-send", 
+                                 "-a", "YAQS",
+                                 "-u", urgency || "normal",
+                                 summary,
+                                 body || ""])
+    }
+    
+    function showNotice(summary, body) {
+        sendNotification(summary, body, "normal")
+    }
+    
+    function showWarning(summary, body) {
+        sendNotification(summary, body, "normal")
+    }
+    
+    function showError(summary, body) {
+        sendNotification(summary, body, "critical")
+    }
+    
     // === State ===
     property real lastSeenTs: 0
     // === Models ===
@@ -44,6 +68,7 @@ Singleton {
 
     // === Main Handler ===
     function handleNotification(notification) {
+        QsCommons.Logger.d("Notifications", "Received notification:", notification.summary);
         const data = createData(notification);
         addToHistory(data);
         if (QsCommons.Settings.data.notifications && QsCommons.Settings.data.notifications.doNotDisturb)
@@ -75,6 +100,7 @@ Singleton {
             "pauseTime": 0
         };
         activeList.insert(0, data);
+        QsCommons.Logger.d("Notifications", "Added to active list (count:", activeList.count + ")");
         while (activeList.count > maxVisible) {
             const last = activeList.get(activeList.count - 1);
             if (activeMap[last.id])
@@ -577,15 +603,13 @@ Singleton {
     }
 
     Connections {
-        // TODO: Enable when ToastService is available
-        // ToastService.showNotice(
-        //   enabled ? "Do Not Disturb Enabled" : "Do Not Disturb Disabled",
-        //   enabled ? "Notifications will be silenced" : "Notifications will be shown"
-        // )
-
         function onDoNotDisturbChanged() {
             const enabled = QsCommons.Settings.data.notifications.doNotDisturb;
             QsCommons.Logger.i("Notifications", "Do Not Disturb:", enabled ? "enabled" : "disabled");
+            root.showNotice(
+                enabled ? "Do Not Disturb Enabled" : "Do Not Disturb Disabled",
+                enabled ? "Notifications will be silenced" : "Notifications will be shown"
+            );
         }
 
         target: QsCommons.Settings.data.notifications
