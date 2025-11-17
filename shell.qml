@@ -44,6 +44,9 @@ ShellRoot {
         
         // Initialize location service (for weather and dark mode)
         QsServices.LocationService.init()
+        
+        // Initialize widget registries
+        QsServices.BarWidgetRegistry.init()
 
         // Force early initialization of device services
         var _ = QsServices.BrightnessService.monitors
