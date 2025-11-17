@@ -75,5 +75,13 @@
     "randomEnabled": false,
     "randomIntervalSec": 300,
     "monitors": []
+  },
+  "location": {
+    "name": "Tokyo",
+    "weatherEnabled": true,
+    "useFahrenheit": false,
+    "use12hourFormat": false,
+    "showWeekNumberInCalendar": false,
+    "showCalendarEvents": true
   }
 }

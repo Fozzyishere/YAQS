@@ -41,6 +41,9 @@ ShellRoot {
         QsServices.AppThemeService.init()
         QsServices.DarkModeService.init()
         QsServices.FontService.init()
+        
+        // Initialize location service (for weather and dark mode)
+        QsServices.LocationService.init()
 
         // Force early initialization of device services
         var _ = QsServices.BrightnessService.monitors

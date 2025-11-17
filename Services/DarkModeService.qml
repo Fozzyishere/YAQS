@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import "../Commons" as QsCommons
+import "../Services" as QsServices
 
 Singleton {
   id: root
@@ -26,15 +27,12 @@ Singleton {
 
     // Location mode
     if (QsCommons.Settings.data.colorSchemes.schedulingMode === "location") {
-      QsCommons.Logger.w("DarkMode", "Location-based scheduling requires LocationService (Phase 2.6)")
-      QsCommons.Logger.w("DarkMode", "Falling back to manual mode for now")
-      // TODO: add when LocationService is available
-      // if (QsServices.LocationService.data.weather) {
-      //   const changes = collectWeatherChanges(QsServices.LocationService.data.weather)
-      //   initComplete = true
-      //   applyCurrentMode(changes)
-      //   scheduleNextMode(changes)
-      // }
+      if (QsServices.LocationService.data.weather !== null) {
+        const changes = collectWeatherChanges(QsServices.LocationService.data.weather)
+        initComplete = true
+        applyCurrentMode(changes)
+        scheduleNextMode(changes)
+      }
     }
   }
 
@@ -58,13 +56,13 @@ Singleton {
         root.scheduleNextMode(changes)
       }
       
-      // TODO: Location mode rescheduling
-      // if (QsCommons.Settings.data.colorSchemes.schedulingMode === "location") {
-      //   if (QsServices.LocationService.data.weather !== null) {
-      //     const changes = root.collectWeatherChanges(QsServices.LocationService.data.weather)
-      //     root.scheduleNextMode(changes)
-      //   }
-      // }
+      // Location mode rescheduling
+      if (QsCommons.Settings.data.colorSchemes.schedulingMode === "location") {
+        if (QsServices.LocationService.data.weather !== null) {
+          const changes = root.collectWeatherChanges(QsServices.LocationService.data.weather)
+          root.scheduleNextMode(changes)
+        }
+      }
     }
   }
 
@@ -104,7 +102,24 @@ Singleton {
 
   // === Reactivity: Location Mode Weather Updates ===
   
-  // TODO: wait til LocationService is available
+  Connections {
+    target: QsServices.LocationService.data
+    enabled: QsCommons.Settings.data.colorSchemes.schedulingMode === "location"
+    
+    function onWeatherChanged() {
+      if (QsServices.LocationService.data.weather !== null) {
+        QsCommons.Logger.d("DarkMode", "Weather data updated, recalculating schedule")
+        const changes = root.collectWeatherChanges(QsServices.LocationService.data.weather)
+        
+        if (!root.initComplete) {
+          root.initComplete = true
+          root.applyCurrentMode(changes)
+        }
+        
+        root.scheduleNextMode(changes)
+      }
+    }
+  }
 
   // === Core Functions ===
 
@@ -184,34 +199,32 @@ Singleton {
   //     "sunset": ["2025-11-11T17:45:00Z", "2025-11-12T17:44:00Z", ...]
   //   }
   // }
-  // 
-  // TODO: Uncomment when LocationService available
-  // function collectWeatherChanges(weather) {
-  //   const changes = []
-  //
-  //   // Handle edge case: if sun hasn't risen yet today
-  //   if (Date.now() < Date.parse(weather.daily.sunrise[0])) {
-  //     changes.push({
-  //       "time": Date.now() - 1,
-  //       "darkMode": true
-  //     })
-  //   }
-  //
-  //   // Build transitions from API data
-  //   for (var i = 0; i < weather.daily.sunrise.length; i++) {
-  //     changes.push({
-  //       "time": Date.parse(weather.daily.sunrise[i]),
-  //       "darkMode": false
-  //     })
-  //     changes.push({
-  //       "time": Date.parse(weather.daily.sunset[i]),
-  //       "darkMode": true
-  //     })
-  //   }
-  //
-  //   QsCommons.Logger.d("DarkMode", "Collected " + changes.length + " weather-based transitions")
-  //   return changes
-  // }
+  function collectWeatherChanges(weather) {
+    const changes = []
+
+    // Handle edge case: if sun hasn't risen yet today
+    if (Date.now() < Date.parse(weather.daily.sunrise[0])) {
+      changes.push({
+        "time": Date.now() - 1,
+        "darkMode": true
+      })
+    }
+
+    // Build transitions from API data (7 days)
+    for (var i = 0; i < weather.daily.sunrise.length; i++) {
+      changes.push({
+        "time": Date.parse(weather.daily.sunrise[i]),
+        "darkMode": false
+      })
+      changes.push({
+        "time": Date.parse(weather.daily.sunset[i]),
+        "darkMode": true
+      })
+    }
+
+    QsCommons.Logger.d("DarkMode", "Collected " + changes.length + " weather-based transitions")
+    return changes
+  }
 
   // Apply the correct mode based on current time
   // Finds the most recent transition before now and applies that mode

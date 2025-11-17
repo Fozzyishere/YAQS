@@ -241,6 +241,16 @@ Singleton {
       // property string transition: "none"  // Insert transition effects heere
       // property int transitionDuration: 1000  // milliseconds
     }
+
+    // location (weather and geolocation)
+    property JsonObject location: JsonObject {
+      property string name: Settings.defaultLocation
+      property bool weatherEnabled: true
+      property bool useFahrenheit: false
+      property bool use12hourFormat: false
+      property bool showWeekNumberInCalendar: false
+      property bool showCalendarEvents: true
+    }
   }
 
   // -----------------------------------------------------
