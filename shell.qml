@@ -47,6 +47,7 @@ ShellRoot {
         
         // Initialize widget registries
         QsServices.BarWidgetRegistry.init()
+        QsServices.ControlCenterWidgetRegistry.init()
 
         // Force early initialization of device services
         var _ = QsServices.BrightnessService.monitors
