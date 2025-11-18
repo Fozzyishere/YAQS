@@ -24,11 +24,11 @@ Singleton {
   property int fontWeightBold: 700
 
   // Radii
-  property int radiusXXS: Math.round(4 * Settings.data.general.radiusRatio)
-  property int radiusXS: Math.round(8 * Settings.data.general.radiusRatio)
-  property int radiusS: Math.round(12 * Settings.data.general.radiusRatio)
-  property int radiusM: Math.round(16 * Settings.data.general.radiusRatio)
-  property int radiusL: Math.round(20 * Settings.data.general.radiusRatio)
+  property int radiusXXS: Math.round(1 * Settings.data.general.radiusRatio)
+  property int radiusXS: Math.round(2 * Settings.data.general.radiusRatio)
+  property int radiusS: Math.round(3 * Settings.data.general.radiusRatio)
+  property int radiusM: Math.round(4 * Settings.data.general.radiusRatio)
+  property int radiusL: Math.round(5 * Settings.data.general.radiusRatio)
 
   // Border
   property int borderS: Math.max(1, Math.round(1 * uiScaleRatio))
