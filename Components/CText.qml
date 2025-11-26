@@ -2,19 +2,21 @@ import QtQuick
 import QtQuick.Layouts
 import "../Commons" as QsCommons
 
+// Base text component with font scaling and eliding.
 Text {
   id: root
 
   // === Public Properties ===
   property string family: QsCommons.Settings.data.ui.fontDefault
   property real pointSize: QsCommons.Style.fontSizeM
-  property bool applyUiScale: true
-  property real fontScale: {
-    const fontScale = (root.family === QsCommons.Settings.data.ui.fontDefault ? QsCommons.Settings.data.ui.fontDefaultScale : QsCommons.Settings.data.ui.fontFixedScale)
-    if (applyUiScale) {
-      return fontScale * QsCommons.Style.uiScaleRatio
-    }
-    return fontScale
+  property bool shouldApplyUiScale: true
+
+  // === Readonly Properties ===
+  readonly property real fontScale: {
+    const scale = (root.family === QsCommons.Settings.data.ui.fontDefault
+      ? QsCommons.Settings.data.ui.fontDefaultScale
+      : QsCommons.Settings.data.ui.fontFixedScale)
+    return shouldApplyUiScale ? scale * QsCommons.Style.uiScaleRatio : scale
   }
 
   // === Appearance ===

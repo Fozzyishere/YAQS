@@ -7,68 +7,73 @@ import Quickshell.Io
 Singleton {
   id: root
 
-  // Font size
-  property real fontSizeXXS: 8
-  property real fontSizeXS: 9
-  property real fontSizeS: 10
-  property real fontSizeM: 11
-  property real fontSizeL: 13
-  property real fontSizeXL: 16
-  property real fontSizeXXL: 18
-  property real fontSizeXXXL: 24
+  // === Typography ===
+  property real fontSizeXXS: 8    // Extra small (legacy compatibility)
+  property real fontSizeXS: 10    // Caption, metadata
+  property real fontSizeS: 12     // Secondary text, labels
+  property real fontSizeM: 14     // Body text (default)
+  property real fontSizeL: 16     // Emphasis, subheadings
+  property real fontSizeXL: 20    // Section headings
+  property real fontSizeXXL: 24   // Panel titles
+  property real fontSizeXXXL: 32  // Hero text, large displays
 
-  // Font weight
-  property int fontWeightRegular: 400
-  property int fontWeightMedium: 500
-  property int fontWeightSemiBold: 600
-  property int fontWeightBold: 700
+  property int fontWeightRegular: 400  // Body text
+  property int fontWeightMedium: 500   // Subtle emphasis, labels
+  property int fontWeightSemiBold: 600 // Strong emphasis
+  property int fontWeightBold: 700     // Headings, important labels
 
-  // Radii
-  property int radiusXXS: Math.round(1 * Settings.data.general.radiusRatio)
-  property int radiusXS: Math.round(2 * Settings.data.general.radiusRatio)
-  property int radiusS: Math.round(3 * Settings.data.general.radiusRatio)
-  property int radiusM: Math.round(4 * Settings.data.general.radiusRatio)
-  property int radiusL: Math.round(5 * Settings.data.general.radiusRatio)
+  // === Border Radii ===
+  // radiusRatio allows user customization (deffault is 1.0)
+  property int radiusXS: Math.round(8 * Settings.data.general.radiusRatio)   // Small chips, icon buttons (non-pill)
+  property int radiusS: Math.round(12 * Settings.data.general.radiusRatio)   // Standard buttons, inputs, list items
+  property int radiusM: Math.round(16 * Settings.data.general.radiusRatio)   // Cards, containers, tooltips
+  property int radiusL: Math.round(20 * Settings.data.general.radiusRatio)   // Large panels, dialogs
+  property int radiusXL: Math.round(28 * Settings.data.general.radiusRatio)  // Extra large containers (rare)
 
-  // Border
-  property int borderS: Math.max(1, Math.round(1 * uiScaleRatio))
-  property int borderM: Math.max(1, Math.round(2 * uiScaleRatio))
-  property int borderL: Math.max(1, Math.round(3 * uiScaleRatio))
+  // === Borders (Minimal) ===
+  property int borderS: Math.max(1, Math.round(1 * uiScaleRatio))  // Subtle definition
+  property int borderM: Math.max(1, Math.round(2 * uiScaleRatio))  // Emphasis (focused states)
+  property int borderL: Math.max(1, Math.round(3 * uiScaleRatio))  // Strong accent
 
-  // Margins (for margins and spacing)
-  property int marginXXS: Math.round(2 * uiScaleRatio)
-  property int marginXS: Math.round(4 * uiScaleRatio)
-  property int marginS: Math.round(6 * uiScaleRatio)
-  property int marginM: Math.round(9 * uiScaleRatio)
-  property int marginL: Math.round(13 * uiScaleRatio)
-  property int marginXL: Math.round(18 * uiScaleRatio)
+  // === Spacing ===
+  property int marginXXS: Math.round(4 * uiScaleRatio)   // Icon gaps
+  property int marginXS: Math.round(8 * uiScaleRatio)    // List items
+  property int marginS: Math.round(12 * uiScaleRatio)    // Button padding
+  property int marginM: Math.round(16 * uiScaleRatio)    // Card padding
+  property int marginL: Math.round(20 * uiScaleRatio)    // Panel padding
+  property int marginXL: Math.round(24 * uiScaleRatio)   // Section gaps
+  property int marginXXL: Math.round(32 * uiScaleRatio)  // Screen edges
 
-  // Opacity
-  property real opacityNone: 0.0
-  property real opacityLight: 0.25
-  property real opacityMedium: 0.5
-  property real opacityHeavy: 0.75
-  property real opacityAlmost: 0.95
-  property real opacityFull: 1.0
+  // === Opacity ===
+  property real opacityDisabled: 0.38  // Disabled state
+  property real opacityMedium: 0.60    // Dimmed elements
+  property real opacityHigh: 0.87      // High emphasis
+  property real opacityFull: 1.0       // Solid elements
+  property real opacityHover: 0.08     // Hover state layer
+  property real opacityFocus: 0.12     // Focus/pressed state layer
+  property real opacityDragged: 0.16   // Dragged state layer
+  property real opacityScrim: 0.32     // Scrim
 
-  // Animation duration (ms)
-  property int animationFast: Settings.data.general.animationDisabled ? 0 : Math.round(150 / Settings.data.general.animationSpeed)
-  property int animationNormal: Settings.data.general.animationDisabled ? 0 : Math.round(300 / Settings.data.general.animationSpeed)
-  property int animationSlow: Settings.data.general.animationDisabled ? 0 : Math.round(450 / Settings.data.general.animationSpeed)
+  // === Animation ===
+  property int animationFast: Settings.data.general.animationDisabled ? 0 : Math.round(100 / Settings.data.general.animationSpeed)
+  property int animationNormal: Settings.data.general.animationDisabled ? 0 : Math.round(200 / Settings.data.general.animationSpeed)
+  property int animationMedium: Settings.data.general.animationDisabled ? 0 : Math.round(300 / Settings.data.general.animationSpeed)
+  property int animationSlow: Settings.data.general.animationDisabled ? 0 : Math.round(500 / Settings.data.general.animationSpeed)
   property int animationSlowest: Settings.data.general.animationDisabled ? 0 : Math.round(750 / Settings.data.general.animationSpeed)
 
-  // Delays
+  // === Delays ===
   property int tooltipDelay: 300
   property int tooltipDelayLong: 1200
   property int pillDelay: 500
 
-  // Widgets base size
-  property real baseWidgetSize: 33
+  // === Widget Sizes ===
+  property real baseWidgetSize: 40   
   property real sliderWidth: 200
+  property real inputHeight: 56   
 
   property real uiScaleRatio: Settings.data.general.scaleRatio
 
-  // Bar Dimensions
+  // === Bar Dimensions ===
   property real barHeight: {
     switch (Settings.data.bar.density) {
       case "mini":

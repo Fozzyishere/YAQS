@@ -9,20 +9,18 @@ Rectangle {
 
   // === Public Properties ===
   property real baseSize: QsCommons.Style.baseWidgetSize
-  property bool applyUiScale: true
+  property bool shouldApplyUiScale: true
   property string icon
   property string tooltipText
   property string tooltipDirection: "auto"
   property string density: ""
-  property bool enabled: true
-  property bool allowClickWhenDisabled: false
-  property bool hovering: false
-  property color colorBg: QsCommons.Color.mSurfaceVariant
-  property color colorFg: QsCommons.Color.mPrimary
-  property color colorBgHover: QsCommons.Color.mTertiary
-  property color colorFgHover: QsCommons.Color.mOnTertiary
-  property color colorBorder: QsCommons.Color.mOutline
-  property color colorBorderHover: QsCommons.Color.mOutline
+  property bool isEnabled: true
+  property bool shouldAllowClickWhenDisabled: false
+  property color colorBg: QsCommons.Color.transparent
+  property color colorFg: QsCommons.Color.mOnSurfaceVariant
+  property color colorBgHover: Qt.alpha(QsCommons.Color.mOnSurfaceVariant, QsCommons.Style.opacityHover)
+  property color colorFgHover: QsCommons.Color.mOnSurfaceVariant
+  property bool hasBorder: false
 
   // === Signals ===
   signal entered
@@ -31,23 +29,24 @@ Rectangle {
   signal rightClicked
   signal middleClicked
 
+  // === Private State ===
+  property bool _isHovering: false
+
   // === Dimensions ===
-  implicitWidth: applyUiScale ? Math.round(baseSize * QsCommons.Style.uiScaleRatio) : Math.round(baseSize)
-  implicitHeight: applyUiScale ? Math.round(baseSize * QsCommons.Style.uiScaleRatio) : Math.round(baseSize)
+  implicitWidth: shouldApplyUiScale ? Math.round(baseSize * QsCommons.Style.uiScaleRatio) : Math.round(baseSize)
+  implicitHeight: shouldApplyUiScale ? Math.round(baseSize * QsCommons.Style.uiScaleRatio) : Math.round(baseSize)
 
   // === Appearance ===
-  opacity: root.enabled ? QsCommons.Style.opacityFull : QsCommons.Style.opacityMedium
-  color: root.enabled && root.hovering ? colorBgHover : colorBg
-
-  radius: QsCommons.Style.radiusXS
-
-  border.color: root.enabled && root.hovering ? colorBorderHover : colorBorder
-  border.width: QsCommons.Style.borderS
+  opacity: root.isEnabled ? QsCommons.Style.opacityFull : QsCommons.Style.opacityDisabled
+  color: root.isEnabled && root._isHovering ? colorBgHover : colorBg
+  radius: width / 2
+  border.width: hasBorder ? QsCommons.Style.borderS : 0
+  border.color: hasBorder ? QsCommons.Color.mOutline : "transparent"
 
   Behavior on color {
     ColorAnimation {
-      duration: QsCommons.Style.animationNormal
-      easing.type: Easing.InOutQuad
+      duration: QsCommons.Style.animationFast
+      easing.type: Easing.OutCubic
     }
   }
 
@@ -59,48 +58,51 @@ Rectangle {
       case "compact":
         return Math.max(1, root.width * 0.65)
       default:
-        return Math.max(1, root.width * 0.48)
+        return Math.max(1, root.width * 0.55)
       }
     }
-    applyUiScale: root.applyUiScale
-    color: root.enabled && root.hovering ? colorFgHover : colorFg
-    x: (root.width - width) / 2  // Center horizontally
-    y: (root.height - height) / 2 + (height - contentHeight) / 2  // Center vertically (font metrics aware)
+    shouldApplyUiScale: false
+    color: root.isEnabled ? colorFg : QsCommons.Color.mOnSurfaceVariant
+    x: (root.width - width) / 2
+    y: (root.height - height) / 2 + (height - contentHeight) / 2
 
     Behavior on color {
       ColorAnimation {
         duration: QsCommons.Style.animationFast
-        easing.type: Easing.InOutQuad
+        easing.type: Easing.OutCubic
       }
     }
   }
 
-  // === Mouse Interaction ===
   MouseArea {
-    enabled: true  // Always enabled for hover/tooltip even when button disabled
+    id: mouseArea
+    enabled: true
     anchors.fill: parent
-    cursorShape: root.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+    cursorShape: root.isEnabled ? Qt.PointingHandCursor : Qt.ArrowCursor
     acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
     hoverEnabled: true
+
     onEntered: {
-      hovering = root.enabled ? true : false
+      root._isHovering = root.isEnabled
       if (tooltipText) {
-        QsServices.TooltipService.show(Screen, parent, tooltipText, tooltipDirection)
+        QsServices.TooltipService.show(Screen, root, tooltipText, tooltipDirection)
       }
       root.entered()
     }
+
     onExited: {
-      hovering = false
+      root._isHovering = false
       if (tooltipText) {
         QsServices.TooltipService.hide()
       }
       root.exited()
     }
+
     onClicked: function (mouse) {
       if (tooltipText) {
         QsServices.TooltipService.hide()
       }
-      if (!root.enabled && !allowClickWhenDisabled) {
+      if (!root.isEnabled && !shouldAllowClickWhenDisabled) {
         return
       }
       if (mouse.button === Qt.LeftButton) {
@@ -109,6 +111,13 @@ Rectangle {
         root.rightClicked()
       } else if (mouse.button === Qt.MiddleButton) {
         root.middleClicked()
+      }
+    }
+
+    onCanceled: {
+      root._isHovering = false
+      if (tooltipText) {
+        QsServices.TooltipService.hide()
       }
     }
   }

@@ -13,12 +13,12 @@ Rectangle {
   property string tooltipText
   property color backgroundColor: QsCommons.Color.mPrimary
   property color textColor: QsCommons.Color.mOnPrimary
-  property color hoverColor: QsCommons.Color.mTertiary
-  property bool enabled: true
+  property bool isEnabled: true
   property real fontSize: QsCommons.Style.fontSizeM
-  property int fontWeight: QsCommons.Style.fontWeightBold
+  property int fontWeight: QsCommons.Style.fontWeightMedium
   property real iconSize: QsCommons.Style.fontSizeL
-  property bool outlined: false
+  property bool isOutlined: false
+  property bool isTonal: false
   property int horizontalAlignment: Qt.AlignHCenter
 
   // === Signals ===
@@ -29,32 +29,35 @@ Rectangle {
   signal exited
 
   // === Private State ===
-  property bool hovered: false
+  property bool _isHovered: false
 
   // === Dimensions ===
-  implicitWidth: contentRow.implicitWidth + (QsCommons.Style.marginM * 2)
-  implicitHeight: Math.max(QsCommons.Style.baseWidgetSize, contentRow.implicitHeight + (QsCommons.Style.marginM))
+  implicitWidth: contentRow.implicitWidth + (QsCommons.Style.marginS * 2)
+  implicitHeight: Math.max(QsCommons.Style.baseWidgetSize, contentRow.implicitHeight + (QsCommons.Style.marginS))
 
   // === Appearance ===
   radius: QsCommons.Style.radiusS
+
   color: {
-    if (!enabled)
-      return outlined ? QsCommons.Color.transparent : Qt.lighter(QsCommons.Color.mSurfaceVariant, 1.2)
-    if (hovered)
-      return hoverColor
-    return outlined ? QsCommons.Color.transparent : backgroundColor
+    if (!isEnabled) {
+      return isOutlined ? QsCommons.Color.transparent : Qt.alpha(QsCommons.Color.mOnSurface, 0.12)
+    }
+    if (isTonal) {
+      return _isHovered ? Qt.lighter(QsCommons.Color.mSecondaryContainer, 1.08) : QsCommons.Color.mSecondaryContainer
+    }
+    if (isOutlined) {
+      return _isHovered ? Qt.alpha(QsCommons.Color.mPrimary, QsCommons.Style.opacityHover) : QsCommons.Color.transparent
+    }
+    return _isHovered ? Qt.lighter(backgroundColor, 1.08) : backgroundColor
   }
 
-  border.width: QsCommons.Style.borderS
+  border.width: isOutlined ? QsCommons.Style.borderS : 0
   border.color: {
-    if (!enabled)
-      return QsCommons.Color.mOutline
-    if (hovered)
-      return backgroundColor
-    return outlined ? backgroundColor : QsCommons.Color.mOutline
+    if (!isEnabled) return QsCommons.Color.mOutline
+    return isOutlined ? QsCommons.Color.mOutline : "transparent"
   }
 
-  opacity: enabled ? 1.0 : 0.6
+  opacity: isEnabled ? QsCommons.Style.opacityFull : QsCommons.Style.opacityDisabled
 
   Behavior on color {
     ColorAnimation {
@@ -80,19 +83,14 @@ Rectangle {
     spacing: QsCommons.Style.marginXS
 
     CIcon {
-      // Icon component (optional)
       Layout.alignment: Qt.AlignVCenter
       visible: root.icon !== ""
       icon: root.icon
       pointSize: root.iconSize
       color: {
-        if (!root.enabled)
-          return QsCommons.Color.mOnSurfaceVariant
-        if (root.outlined) {
-          if (root.hovered)
-            return root.textColor
-          return root.backgroundColor
-        }
+        if (!root.isEnabled) return QsCommons.Color.mOnSurfaceVariant
+        if (root.isTonal) return QsCommons.Color.mOnSecondaryContainer
+        if (root.isOutlined) return QsCommons.Color.mPrimary
         return root.textColor
       }
 
@@ -105,20 +103,15 @@ Rectangle {
     }
 
     CText {
-      // Text component
       Layout.alignment: Qt.AlignVCenter
       visible: root.text !== ""
       text: root.text
       pointSize: root.fontSize
       font.weight: root.fontWeight
       color: {
-        if (!root.enabled)
-          return QsCommons.Color.mOnSurfaceVariant
-        if (root.outlined) {
-          if (root.hovered)
-            return root.textColor
-          return root.backgroundColor
-        }
+        if (!root.isEnabled) return QsCommons.Color.mOnSurfaceVariant
+        if (root.isTonal) return QsCommons.Color.mOnSecondaryContainer
+        if (root.isOutlined) return QsCommons.Color.mPrimary
         return root.textColor
       }
 
@@ -131,44 +124,45 @@ Rectangle {
     }
   }
 
-  // === Mouse Interaction ===
   MouseArea {
     id: mouseArea
     anchors.fill: parent
-    enabled: root.enabled
+    enabled: root.isEnabled
     hoverEnabled: true
     acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-    cursorShape: root.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+    cursorShape: root.isEnabled ? Qt.PointingHandCursor : Qt.ArrowCursor
 
     onEntered: {
-      root.hovered = true
+      root._isHovered = true
       root.entered()
       if (tooltipText) {
         QsServices.TooltipService.show(Screen, root, root.tooltipText)
       }
     }
+
     onExited: {
-      root.hovered = false
+      root._isHovered = false
       root.exited()
       if (tooltipText) {
         QsServices.TooltipService.hide()
       }
     }
+
     onPressed: mouse => {
-                 if (tooltipText) {
-                   QsServices.TooltipService.hide()
-                 }
-                 if (mouse.button === Qt.LeftButton) {
-                   root.clicked()
-                 } else if (mouse.button == Qt.RightButton) {
-                   root.rightClicked()
-                 } else if (mouse.button == Qt.MiddleButton) {
-                   root.middleClicked()
-                 }
-               }
+      if (tooltipText) {
+        QsServices.TooltipService.hide()
+      }
+      if (mouse.button === Qt.LeftButton) {
+        root.clicked()
+      } else if (mouse.button === Qt.RightButton) {
+        root.rightClicked()
+      } else if (mouse.button === Qt.MiddleButton) {
+        root.middleClicked()
+      }
+    }
 
     onCanceled: {
-      root.hovered = false
+      root._isHovered = false
       if (tooltipText) {
         QsServices.TooltipService.hide()
       }

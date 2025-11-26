@@ -2,13 +2,14 @@ import QtQuick
 import QtQuick.Layouts
 import "../Commons" as QsCommons
 
+// Icon component using Tabler Icons font family.
 Text {
   id: root
 
   // === Public Properties ===
   property string icon: QsCommons.Icons.defaultIcon
   property real pointSize: QsCommons.Style.fontSizeL
-  property bool applyUiScale: true
+  property bool shouldApplyUiScale: true
 
   // === Appearance ===
   visible: (icon !== undefined) && (icon !== "")
@@ -24,7 +25,7 @@ Text {
     return QsCommons.Icons.get(icon)
   }
   font.family: QsCommons.Icons.fontFamily
-  font.pointSize: applyUiScale ? root.pointSize * QsCommons.Style.uiScaleRatio : root.pointSize
+  font.pointSize: shouldApplyUiScale ? root.pointSize * QsCommons.Style.uiScaleRatio : root.pointSize
   color: QsCommons.Color.mOnSurface
   verticalAlignment: Text.AlignVCenter
 }
