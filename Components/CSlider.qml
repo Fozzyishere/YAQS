@@ -6,16 +6,25 @@ import "../Services" as QsServices
 Slider {
   id: root
 
+  // === Public Properties ===
   property var cutoutColor: QsCommons.Color.mSurface
   property bool snapAlways: true
-  property real heightRatio: 0.7
   property string tooltipText
   property string tooltipDirection: "auto"
   property bool hovering: false
 
-  readonly property real knobDiameter: Math.round((QsCommons.Style.baseWidgetSize * heightRatio * QsCommons.Style.uiScaleRatio) / 2) * 2
-  readonly property real trackHeight: Math.round((knobDiameter * 0.4 * QsCommons.Style.uiScaleRatio) / 2) * 2
-  readonly property real cutoutExtra: Math.round((QsCommons.Style.baseWidgetSize * 0.1 * QsCommons.Style.uiScaleRatio) / 2) * 2
+  // === Sizing ===
+  // baseSize controls overall slider scale. Components derive dimensions locally.
+  property real baseSize: QsCommons.Style.baseWidgetSize * QsCommons.Style.uiScaleRatio
+
+  // heightRatio allows adjusting the slider height relative to baseSize
+  property real heightRatio: 0.7
+
+  // Local dimension calculations (self-contained)
+  readonly property real knobDiameter: Math.round((baseSize * heightRatio) / 2) * 2
+  readonly property real trackHeight: Math.round((knobDiameter * 0.4) / 2) * 2
+  readonly property real cutoutExtra: Math.round((baseSize * 0.1) / 2) * 2
+  readonly property real defaultWidth: Math.round(200 * QsCommons.Style.uiScaleRatio)
 
   padding: cutoutExtra / 2
 
@@ -25,15 +34,14 @@ Slider {
   background: Rectangle {
     x: root.leftPadding
     y: root.topPadding + root.availableHeight / 2 - height / 2
-    implicitWidth: QsCommons.Style.sliderWidth
+    implicitWidth: root.defaultWidth
     implicitHeight: trackHeight
     width: root.availableWidth
     height: implicitHeight
     radius: height / 2
     
-    color: Qt.alpha(QsCommons.Color.mSurface, 0.5)
-    border.color: Qt.alpha(QsCommons.Color.mOutline, 0.5)
-    border.width: QsCommons.Style.borderS
+    color: QsCommons.Color.mSurfaceVariant
+    border.width: QsCommons.Style.borderNone
 
     // === Active Track ===
     Item {
@@ -117,11 +125,10 @@ Slider {
       id: knob
       implicitWidth: knobDiameter
       implicitHeight: knobDiameter
-      radius: QsCommons.Style.radiusXS
+      radius: QsCommons.Style.radiusRound
       
-      color: root.pressed ? QsCommons.Color.mTertiary : QsCommons.Color.mSurface
-      border.color: QsCommons.Color.mPrimary
-      border.width: QsCommons.Style.borderL  // 3px emphasis border
+      color: root.pressed ? QsCommons.Color.mTertiary : QsCommons.Color.mPrimary
+      border.width: QsCommons.Style.borderNone
       anchors.centerIn: parent
 
       Behavior on color {

@@ -11,10 +11,16 @@ Item {
   property color handleHoverColor: handleColor
   property color handlePressedColor: handleColor
   property color trackColor: QsCommons.Color.transparent
-  property real handleWidth: 6 * QsCommons.Style.uiScaleRatio
-  property real handleRadius: QsCommons.Style.radiusXS  // YAQS CHANGE: 2px (was radiusM = 8px)
   property int verticalPolicy: ScrollBar.AsNeeded
   property int horizontalPolicy: ScrollBar.AsNeeded
+
+  // === Sizing ===
+  // Local dimension calculations (self-contained)
+  // Scrollbar dimensions are scaled for DPI but NOT configurable via baseSize
+  // as they should remain consistent across scroll contexts
+  readonly property real handleWidth: Math.round(6 * QsCommons.Style.uiScaleRatio)
+  readonly property real handleRadius: QsCommons.Style.radiusXS
+  readonly property real defaultSize: Math.round(200 * QsCommons.Style.uiScaleRatio)
 
   // === Forwarded ListView Properties ===
   property alias model: listView.model
@@ -101,8 +107,8 @@ Item {
   }
 
   // Set reasonable implicit sizes for Layout usage
-  implicitWidth: 200 * QsCommons.Style.uiScaleRatio
-  implicitHeight: 200 * QsCommons.Style.uiScaleRatio
+  implicitWidth: defaultSize
+  implicitHeight: defaultSize
 
   // === Internal ListView ===
   ListView {

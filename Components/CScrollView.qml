@@ -11,13 +11,18 @@ T.ScrollView {
   property color handleHoverColor: handleColor
   property color handlePressedColor: handleColor
   property color trackColor: QsCommons.Color.transparent
-  property real handleWidth: 6 * QsCommons.Style.uiScaleRatio
-  property real handleRadius: QsCommons.Style.radiusXS
   property int verticalPolicy: ScrollBar.AsNeeded
   property int horizontalPolicy: ScrollBar.AsNeeded
   property bool preventHorizontalScroll: horizontalPolicy === ScrollBar.AlwaysOff
   property int boundsBehavior: Flickable.StopAtBounds
   property int flickableDirection: Flickable.VerticalFlick
+
+  // === Sizing ===
+  // Local dimension calculations (self-contained)
+  // Scrollbar dimensions are scaled for DPI but NOT configurable via baseSize
+  // as they should remain consistent across scroll contexts
+  readonly property real handleWidth: Math.round(6 * QsCommons.Style.uiScaleRatio)
+  readonly property real handleRadius: QsCommons.Style.radiusXS
 
   implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset, contentWidth + leftPadding + rightPadding)
   implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset, contentHeight + topPadding + bottomPadding)

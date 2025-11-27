@@ -8,22 +8,30 @@ import "../Components" as QsComponents
 RowLayout {
   id: root
 
-  property real minimumWidth: 280 * QsCommons.Style.uiScaleRatio
-  property real popupHeight: 180 * QsCommons.Style.uiScaleRatio
-
+  // === Public Properties ===
   property string label: ""
   property string description: ""
   property var model
   property string currentKey: ""
   property string placeholder: ""
 
-  readonly property real preferredHeight: QsCommons.Style.baseWidgetSize * 1.1 * QsCommons.Style.uiScaleRatio
+  // === Sizing ===
+  // baseSize controls overall combobox scale
+  property real baseSize: QsCommons.Style.baseWidgetSize * 1.4 * QsCommons.Style.uiScaleRatio
 
+  // Local dimensions
+  readonly property real preferredHeight: Math.round(baseSize)
+  readonly property real minimumWidth: Math.round(280 * QsCommons.Style.uiScaleRatio)
+  readonly property real popupHeight: Math.round(180 * QsCommons.Style.uiScaleRatio)
+  readonly property real popupGap: Math.round(4 * QsCommons.Style.uiScaleRatio)
+
+  // === Signals ===
   signal selected(string key)
 
   spacing: QsCommons.Style.marginL
   Layout.fillWidth: true
 
+  // === Helper Functions ===
   function itemCount() {
     if (!root.model)
       return 0
@@ -73,23 +81,31 @@ RowLayout {
     }
 
     background: Rectangle {
-      implicitWidth: QsCommons.Style.baseWidgetSize * 3.75
-      implicitHeight: preferredHeight
-      color: QsCommons.Color.mSurface
-      border.color: combo.activeFocus ? QsCommons.Color.mSecondary : QsCommons.Color.mOutline
-      border.width: QsCommons.Style.borderS
-      radius: QsCommons.Style.radiusM
+      implicitWidth: root.minimumWidth
+      implicitHeight: root.preferredHeight
+      radius: QsCommons.Style.radiusS
+      
+      color: QsCommons.Color.mSurfaceContainer
+      // Focus state shows border, otherwise transparent/minimal
+      border.color: combo.activeFocus ? QsCommons.Color.mPrimary : QsCommons.Color.transparent
+      border.width: combo.activeFocus ? QsCommons.Style.borderM : 0
 
       Behavior on border.color {
         ColorAnimation {
           duration: QsCommons.Style.animationFast
         }
       }
+      
+      Behavior on border.width {
+        NumberAnimation {
+          duration: QsCommons.Style.animationFast
+        }
+      }
     }
 
     contentItem: QsComponents.CText {
-      leftPadding: QsCommons.Style.marginM
-      rightPadding: combo.indicator.width + QsCommons.Style.marginM
+      leftPadding: QsCommons.Style.marginS
+      rightPadding: combo.indicator.width + QsCommons.Style.marginS
       
       pointSize: QsCommons.Style.fontSizeM
       verticalAlignment: Text.AlignVCenter
@@ -99,17 +115,17 @@ RowLayout {
     }
 
     indicator: QsComponents.CIcon {
-      x: combo.width - width - QsCommons.Style.marginM
+      x: combo.width - width - QsCommons.Style.marginS
       y: combo.topPadding + (combo.availableHeight - height) / 2
       icon: "caret-down"
       pointSize: QsCommons.Style.fontSizeL
     }
 
     popup: Popup {
-      y: combo.height
-      implicitWidth: combo.width - QsCommons.Style.marginM
-      implicitHeight: Math.min(root.popupHeight, contentItem.implicitHeight + QsCommons.Style.marginM * 2)
-      padding: QsCommons.Style.marginM
+      y: combo.height + root.popupGap
+      implicitWidth: combo.width
+      implicitHeight: Math.min(root.popupHeight, contentItem.implicitHeight + QsCommons.Style.marginXS * 2)
+      padding: QsCommons.Style.marginXS
 
       onOpened: {
         QsServices.PanelService.willOpenPopup(root)
@@ -152,9 +168,10 @@ RowLayout {
           }
 
           background: Rectangle {
-            width: parentComboBox ? parentComboBox.width - QsCommons.Style.marginM * 3 : 0
-            color: highlighted ? QsCommons.Color.mTertiary : QsCommons.Color.transparent
-            radius: QsCommons.Style.radiusS
+            width: parentComboBox ? parentComboBox.width - QsCommons.Style.marginXS * 2 : 0
+            // List items show 8% state layer on hover
+            color: highlighted ? Qt.alpha(QsCommons.Color.mOnSurface, QsCommons.Style.opacityHover) : QsCommons.Color.transparent
+            radius: 0
             
             Behavior on color {
               ColorAnimation {
@@ -169,24 +186,19 @@ RowLayout {
               return item && item.name ? item.name : ""
             }
             pointSize: QsCommons.Style.fontSizeM
-            color: highlighted ? QsCommons.Color.mOnTertiary : QsCommons.Color.mOnSurface
+            color: QsCommons.Color.mOnSurface
             verticalAlignment: Text.AlignVCenter
             elide: Text.ElideRight
-            
-            Behavior on color {
-              ColorAnimation {
-                duration: QsCommons.Style.animationFast
-              }
-            }
+            leftPadding: QsCommons.Style.marginM
           }
         }
       }
 
       background: Rectangle {
-        color: QsCommons.Color.mSurfaceVariant
-        border.color: QsCommons.Color.mOutline
-        border.width: QsCommons.Style.borderS
         radius: QsCommons.Style.radiusM
+        color: QsCommons.Color.mSurfaceContainer
+        // Popup uses elevation, not border
+        border.width: QsCommons.Style.borderNone
       }
     }
 

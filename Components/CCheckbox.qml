@@ -7,15 +7,24 @@ import "../Components" as QsComponents
 RowLayout {
   id: root
 
-  // Public API
+  // === Public Properties ===
   property string label: ""
   property string description: ""
   property bool checked: false
   property bool hovering: false
   property color activeColor: QsCommons.Color.mPrimary
   property color activeOnColor: QsCommons.Color.mOnPrimary
-  property int baseSize: QsCommons.Style.baseWidgetSize * 0.7
 
+  // === Sizing ===
+  // baseSize controls overall checkbox scale
+  property real baseSize: QsCommons.Style.baseWidgetSize * 0.45 * QsCommons.Style.uiScaleRatio
+
+  // Local dimensions
+  readonly property real boxSize: Math.round(baseSize)
+  readonly property real boxRadius: Math.round(baseSize * 0.11)
+  readonly property real iconSize: Math.round(baseSize * 0.67)
+
+  // === Signals ===
   signal toggled(bool checked)
   signal entered
   signal exited
@@ -36,13 +45,15 @@ RowLayout {
   Rectangle {
     id: box
 
-    implicitWidth: Math.round(root.baseSize)
-    implicitHeight: Math.round(root.baseSize)
-    radius: QsCommons.Style.radiusXS
+    // Checkbox dimensions (derived from baseSize)
+    implicitWidth: root.boxSize
+    implicitHeight: root.boxSize
+    radius: root.boxRadius
     
-    color: root.checked ? root.activeColor : QsCommons.Color.mSurface
+    color: root.checked ? root.activeColor : QsCommons.Color.transparent
+    // Border on unchecked state only
     border.color: QsCommons.Color.mOutline
-    border.width: QsCommons.Style.borderS
+    border.width: root.checked ? QsCommons.Style.borderNone : QsCommons.Style.borderM
 
     Behavior on color {
       ColorAnimation {
@@ -50,8 +61,8 @@ RowLayout {
       }
     }
 
-    Behavior on border.color {
-      ColorAnimation {
+    Behavior on border.width {
+      NumberAnimation {
         duration: QsCommons.Style.animationFast
       }
     }
@@ -59,11 +70,11 @@ RowLayout {
     QsComponents.CIcon {
       visible: root.checked
       anchors.centerIn: parent
-      anchors.horizontalCenterOffset: -1
       icon: "check"
       color: root.activeOnColor
-      pointSize: Math.max(QsCommons.Style.fontSizeXS, root.baseSize * 0.5)
-    }
+      pointSize: root.iconSize
+      shouldApplyUiScale: false  // Already scaled via baseSize
+    } 
 
     MouseArea {
       anchors.fill: parent

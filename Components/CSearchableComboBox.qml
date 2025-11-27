@@ -9,9 +9,7 @@ import "../Helpers/FuzzySort.js" as Fuzzysort
 RowLayout {
   id: root
 
-  property real minimumWidth: 280 * QsCommons.Style.uiScaleRatio
-  property real popupHeight: 180 * QsCommons.Style.uiScaleRatio
-
+  // === Public Properties ===
   property string label: ""
   property string description: ""
   property ListModel model: ListModel {}
@@ -20,17 +18,27 @@ RowLayout {
   property string searchPlaceholder: "Search..."
   property Component delegate: null
 
-  readonly property real preferredHeight: QsCommons.Style.baseWidgetSize * 1.1
+  // === Sizing ===
+  // baseSize controls overall combobox scale
+  property real baseSize: QsCommons.Style.baseWidgetSize * 1.4 * QsCommons.Style.uiScaleRatio
 
+  // Local dimensions
+  readonly property real preferredHeight: Math.round(baseSize)
+  readonly property real minimumWidth: Math.round(280 * QsCommons.Style.uiScaleRatio)
+  readonly property real popupHeight: Math.round(180 * QsCommons.Style.uiScaleRatio)
+  readonly property real popupGap: Math.round(4 * QsCommons.Style.uiScaleRatio)
+
+  // === Signals ===
   signal selected(string key)
 
   spacing: QsCommons.Style.marginL
   Layout.fillWidth: true
 
-  // Filtered model for search results
+  // === Internal State ===
   property ListModel filteredModel: ListModel {}
   property string searchText: ""
 
+  // === Helper Functions ===
   function findIndexByKey(key) {
     for (var i = 0; i < root.model.count; i++) {
       if (root.model.get(i).key === key) {
@@ -121,23 +129,30 @@ RowLayout {
     }
 
     background: Rectangle {
-      implicitWidth: QsCommons.Style.baseWidgetSize * 3.75 * QsCommons.Style.uiScaleRatio
-      implicitHeight: preferredHeight
-      color: QsCommons.Color.mSurface
-      border.color: combo.activeFocus ? QsCommons.Color.mSecondary : QsCommons.Color.mOutline
-      border.width: QsCommons.Style.borderS
-      radius: QsCommons.Style.radiusM
+      implicitWidth: root.minimumWidth
+      implicitHeight: root.preferredHeight
+      radius: QsCommons.Style.radiusS
+      
+      color: QsCommons.Color.mSurfaceContainer
+      border.color: combo.activeFocus ? QsCommons.Color.mPrimary : QsCommons.Color.transparent
+      border.width: combo.activeFocus ? QsCommons.Style.borderM : 0
 
       Behavior on border.color {
         ColorAnimation {
           duration: QsCommons.Style.animationFast
         }
       }
+      
+      Behavior on border.width {
+        NumberAnimation {
+          duration: QsCommons.Style.animationFast
+        }
+      }
     }
 
     contentItem: QsComponents.CText {
-      leftPadding: QsCommons.Style.marginM
-      rightPadding: combo.indicator.width + QsCommons.Style.marginM
+      leftPadding: QsCommons.Style.marginS
+      rightPadding: combo.indicator.width + QsCommons.Style.marginS
       
       pointSize: QsCommons.Style.fontSizeM
       verticalAlignment: Text.AlignVCenter
@@ -147,17 +162,17 @@ RowLayout {
     }
 
     indicator: QsComponents.CIcon {
-      x: combo.width - width - QsCommons.Style.marginM
+      x: combo.width - width - QsCommons.Style.marginS
       y: combo.topPadding + (combo.availableHeight - height) / 2
       icon: "caret-down"
       pointSize: QsCommons.Style.fontSizeL
     }
 
     popup: Popup {
-      y: combo.height
+      y: combo.height + root.popupGap
       width: combo.width
-      height: root.popupHeight + 60
-      padding: QsCommons.Style.marginM
+      height: root.popupHeight + root.preferredHeight
+      padding: QsCommons.Style.marginXS
 
       onOpened: {
         QsServices.PanelService.willOpenPopup(root)
@@ -215,21 +230,16 @@ RowLayout {
               contentItem: QsComponents.CText {
                 text: name
                 pointSize: QsCommons.Style.fontSizeM
-                color: highlighted ? QsCommons.Color.mOnTertiary : QsCommons.Color.mOnSurface
+                color: QsCommons.Color.mOnSurface
                 verticalAlignment: Text.AlignVCenter
                 elide: Text.ElideRight
-                
-                Behavior on color {
-                  ColorAnimation {
-                    duration: QsCommons.Style.animationFast
-                  }
-                }
+                leftPadding: QsCommons.Style.marginM
               }
 
               background: Rectangle {
                 width: listView.width
-                color: highlighted ? QsCommons.Color.mTertiary : QsCommons.Color.transparent
-                radius: QsCommons.Style.radiusS
+                color: highlighted ? Qt.alpha(QsCommons.Color.mOnSurface, QsCommons.Style.opacityHover) : QsCommons.Color.transparent
+                radius: 0
                 
                 Behavior on color {
                   ColorAnimation {
@@ -243,10 +253,9 @@ RowLayout {
       }
 
       background: Rectangle {
-        color: QsCommons.Color.mSurfaceVariant
-        border.color: QsCommons.Color.mOutline
-        border.width: QsCommons.Style.borderS
         radius: QsCommons.Style.radiusM
+        color: QsCommons.Color.mSurfaceContainer
+        border.width: QsCommons.Style.borderNone
       }
     }
 

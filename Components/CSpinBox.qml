@@ -7,6 +7,7 @@ import "../Components" as QsComponents
 RowLayout {
   id: root
 
+  // === Public Properties ===
   property int value: 0
   property int from: 0
   property int to: 100
@@ -14,6 +15,16 @@ RowLayout {
   property string suffix: ""
   property string label: ""
   property string description: ""
+
+  // === Sizing ===
+  // baseSize controls overall spinbox scale. Components derive dimensions locally.
+  // Default: Style.baseWidgetSize * 1.2 gives ~48px height at default scale
+  property real baseSize: QsCommons.Style.baseWidgetSize * 1.2 * QsCommons.Style.uiScaleRatio
+
+  // Local dimension calculations (self-contained)
+  readonly property real inputHeight: Math.round(baseSize)                           // ~48px at default
+  readonly property real inputWidth: Math.round(150 * QsCommons.Style.uiScaleRatio)  // Default width
+  readonly property real buttonSize: Math.round(baseSize * 0.7)                      // Button size
 
   spacing: QsCommons.Style.marginM
 
@@ -24,13 +35,13 @@ RowLayout {
   }
 
   Rectangle {
-    implicitWidth: 150 * QsCommons.Style.uiScaleRatio
-    implicitHeight: QsCommons.Style.baseWidgetSize * 1.1
+    implicitWidth: root.inputWidth
+    implicitHeight: root.inputHeight
     radius: QsCommons.Style.radiusS
 
-    color: QsCommons.Color.mSurfaceVariant
-    border.color: QsCommons.Color.mOutline
-    border.width: QsCommons.Style.borderS
+    color: QsCommons.Color.mSurfaceContainer
+    // MD3: No border by default
+    border.width: QsCommons.Style.borderNone
 
     Row {
       anchors.fill: parent
@@ -40,7 +51,8 @@ RowLayout {
 
       QsComponents.CIconButton {
         icon: "minus"
-        baseSize: parent.height * 0.7
+        baseSize: root.buttonSize
+        shouldApplyUiScale: false  // Already scaled via root.baseSize
         anchors.verticalCenter: parent.verticalCenter
         enabled: root.value > root.from
         
@@ -50,7 +62,7 @@ RowLayout {
       }
 
       Text {
-        width: parent.width - (parent.height * 0.7 * 2)
+        width: parent.width - (root.buttonSize * 2)
         height: parent.height
         text: root.value + root.suffix
         color: QsCommons.Color.mOnSurface
@@ -63,7 +75,8 @@ RowLayout {
 
       QsComponents.CIconButton {
         icon: "plus"
-        baseSize: parent.height * 0.7
+        baseSize: root.buttonSize
+        shouldApplyUiScale: false  // Already scaled via root.baseSize
         anchors.verticalCenter: parent.verticalCenter
         enabled: root.value < root.to
         
