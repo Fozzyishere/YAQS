@@ -6,10 +6,12 @@ Rectangle {
   
   // === Properties ===
   property string orientation: "horizontal"
+  // mOutlineVariant for subtle dividers (default), mOutline for emphasis
+  property color dividerColor: QsCommons.Color.mOutlineVariant
   
   // Gradient for subtle fade on ends
-  width: parent ? parent.width : 100
-  height: QsCommons.Style.borderS
+  width: orientation === "horizontal" ? (parent ? parent.width : 100) : QsCommons.Style.borderS
+  height: orientation === "horizontal" ? QsCommons.Style.borderS : (parent ? parent.height : 100)
   
   gradient: Gradient {
     orientation: root.orientation === "horizontal" ? Gradient.Horizontal : Gradient.Vertical
@@ -19,11 +21,11 @@ Rectangle {
     }
     GradientStop {
       position: 0.1
-      color: QsCommons.Color.mOutline
+      color: root.dividerColor
     }
     GradientStop {
       position: 0.9
-      color: QsCommons.Color.mOutline
+      color: root.dividerColor
     }
     GradientStop {
       position: 1.0

@@ -8,18 +8,17 @@ Item {
 
   // === Public Properties ===
   property color handleColor: Qt.alpha(QsCommons.Color.mTertiary, 0.8)
-  property color handleHoverColor: handleColor
-  property color handlePressedColor: handleColor
+  property color handleHoverColor: QsCommons.Color.mPrimary
+  property color handlePressedColor: QsCommons.Color.mPrimary
   property color trackColor: QsCommons.Color.transparent
   property int verticalPolicy: ScrollBar.AsNeeded
   property int horizontalPolicy: ScrollBar.AsNeeded
 
   // === Sizing ===
-  // Local dimension calculations (self-contained)
-  // Scrollbar dimensions are scaled for DPI but NOT configurable via baseSize
-  // as they should remain consistent across scroll contexts
-  readonly property real handleWidth: Math.round(6 * QsCommons.Style.uiScaleRatio)
-  readonly property real handleRadius: QsCommons.Style.radiusXS
+  // Pill-shaped scrollbars that expand on hover (4px → 8px)
+  // Self-contained sizing per styling architecture
+  readonly property real handleWidthNormal: Math.round(4 * QsCommons.Style.uiScaleRatio)
+  readonly property real handleWidthExpanded: Math.round(8 * QsCommons.Style.uiScaleRatio)
   readonly property real defaultSize: Math.round(200 * QsCommons.Style.uiScaleRatio)
 
   // === Forwarded ListView Properties ===
@@ -60,6 +59,9 @@ Item {
   property alias dragging: listView.dragging
   property alias horizontalVelocity: listView.horizontalVelocity
   property alias verticalVelocity: listView.verticalVelocity
+  property alias header: listView.header
+  property alias footer: listView.footer
+  property alias highlight: listView.highlight
 
   // === Forwarded ListView Methods ===
   function positionViewAtIndex(index, mode) {
@@ -121,19 +123,19 @@ Item {
     // Enable flickable for smooth scrolling
     boundsBehavior: Flickable.DragAndOvershootBounds
     
-    //TODO: Hack since flick animation in qtquick is weird. Will fix later
-    // Control overscroll rebound speed (3x faster)
-    flickDeceleration: 15000  // Default is 5000, 3x faster = 15000. 
+    // Control overscroll rebound speed (3x faster for snappy feel)
+    flickDeceleration: 15000  // Default is 5000
     rebound: Transition {
       NumberAnimation {
         properties: "x,y"
-        duration: 50  // Default is 150ms, 3x faster = 50ms
+        duration: 50  // Default is 150ms
         easing.type: Easing.OutBounce
       }
     }
 
     // === Scrollbars ===
     ScrollBar.vertical: ScrollBar {
+      id: verticalScrollBar
       parent: listView
       x: listView.mirrored ? 0 : listView.width - width
       y: 0
@@ -142,11 +144,31 @@ Item {
       policy: root.verticalPolicy
 
       contentItem: Rectangle {
-        implicitWidth: root.handleWidth
+        id: verticalHandle
+        
+        // Expand on hover (4px → 8px)
+        implicitWidth: verticalScrollBar.hovered || verticalScrollBar.pressed 
+          ? root.handleWidthExpanded 
+          : root.handleWidthNormal
         implicitHeight: 100
-        radius: root.handleRadius
-        color: parent.pressed ? root.handlePressedColor : parent.hovered ? root.handleHoverColor : root.handleColor
-        opacity: parent.policy === ScrollBar.AlwaysOn || parent.active ? 1.0 : 0.0
+        
+        radius: implicitWidth / 2
+        
+        // Color changes on interaction
+        color: verticalScrollBar.pressed 
+          ? root.handlePressedColor 
+          : verticalScrollBar.hovered 
+            ? root.handleHoverColor 
+            : root.handleColor
+        
+        opacity: verticalScrollBar.policy === ScrollBar.AlwaysOn || verticalScrollBar.active ? 1.0 : 0.0
+
+        Behavior on implicitWidth {
+          NumberAnimation {
+            duration: QsCommons.Style.animationFast
+            easing.type: Easing.OutCubic
+          }
+        }
 
         Behavior on opacity {
           NumberAnimation {
@@ -162,11 +184,11 @@ Item {
       }
 
       background: Rectangle {
-        implicitWidth: root.handleWidth
+        implicitWidth: root.handleWidthExpanded
         implicitHeight: 100
         color: root.trackColor
-        opacity: parent.policy === ScrollBar.AlwaysOn || parent.active ? 0.3 : 0.0
-        radius: root.handleRadius / 2
+        opacity: verticalScrollBar.policy === ScrollBar.AlwaysOn || verticalScrollBar.active ? 0.2 : 0.0
+        radius: implicitWidth / 2  // Pill-shaped track
 
         Behavior on opacity {
           NumberAnimation {
@@ -186,11 +208,32 @@ Item {
       policy: root.horizontalPolicy
 
       contentItem: Rectangle {
+        id: horizontalHandle
+        
+        // Expand on hover (4px → 8px)
         implicitWidth: 100
-        implicitHeight: root.handleWidth
-        radius: root.handleRadius
-        color: parent.pressed ? root.handlePressedColor : parent.hovered ? root.handleHoverColor : root.handleColor
-        opacity: parent.policy === ScrollBar.AlwaysOn || parent.active ? 1.0 : 0.0
+        implicitHeight: horizontalScrollBar.hovered || horizontalScrollBar.pressed 
+          ? root.handleWidthExpanded 
+          : root.handleWidthNormal
+        
+        // Pill-shaped (fully rounded)
+        radius: implicitHeight / 2
+        
+        // Color changes on interaction
+        color: horizontalScrollBar.pressed 
+          ? root.handlePressedColor 
+          : horizontalScrollBar.hovered 
+            ? root.handleHoverColor 
+            : root.handleColor
+        
+        opacity: horizontalScrollBar.policy === ScrollBar.AlwaysOn || horizontalScrollBar.active ? 1.0 : 0.0
+
+        Behavior on implicitHeight {
+          NumberAnimation {
+            duration: QsCommons.Style.animationFast
+            easing.type: Easing.OutCubic
+          }
+        }
 
         Behavior on opacity {
           NumberAnimation {
@@ -207,10 +250,10 @@ Item {
 
       background: Rectangle {
         implicitWidth: 100
-        implicitHeight: root.handleWidth
+        implicitHeight: root.handleWidthExpanded
         color: root.trackColor
-        opacity: parent.policy === ScrollBar.AlwaysOn || parent.active ? 0.3 : 0.0
-        radius: root.handleRadius / 2
+        opacity: horizontalScrollBar.policy === ScrollBar.AlwaysOn || horizontalScrollBar.active ? 0.2 : 0.0
+        radius: implicitHeight / 2  // Pill-shaped track
 
         Behavior on opacity {
           NumberAnimation {

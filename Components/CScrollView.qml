@@ -8,8 +8,8 @@ T.ScrollView {
 
   // === Public Properties ===
   property color handleColor: Qt.alpha(QsCommons.Color.mTertiary, 0.8)
-  property color handleHoverColor: handleColor
-  property color handlePressedColor: handleColor
+  property color handleHoverColor: QsCommons.Color.mPrimary
+  property color handlePressedColor: QsCommons.Color.mPrimary
   property color trackColor: QsCommons.Color.transparent
   property int verticalPolicy: ScrollBar.AsNeeded
   property int horizontalPolicy: ScrollBar.AsNeeded
@@ -18,11 +18,8 @@ T.ScrollView {
   property int flickableDirection: Flickable.VerticalFlick
 
   // === Sizing ===
-  // Local dimension calculations (self-contained)
-  // Scrollbar dimensions are scaled for DPI but NOT configurable via baseSize
-  // as they should remain consistent across scroll contexts
-  readonly property real handleWidth: Math.round(6 * QsCommons.Style.uiScaleRatio)
-  readonly property real handleRadius: QsCommons.Style.radiusXS
+  readonly property real handleWidthNormal: Math.round(4 * QsCommons.Style.uiScaleRatio)
+  readonly property real handleWidthExpanded: Math.round(8 * QsCommons.Style.uiScaleRatio)
 
   implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset, contentWidth + leftPadding + rightPadding)
   implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset, contentHeight + topPadding + bottomPadding)
@@ -32,28 +29,25 @@ T.ScrollView {
     configureFlickable()
   }
 
+  // === Rebound Transition (defined as component for cleaner code) ===
+  Transition {
+    id: fastReboundTransition
+    NumberAnimation {
+      properties: "x,y"
+      duration: 50  // 3x faster than default 150ms
+      easing.type: Easing.OutBounce
+    }
+  }
+
   // === Functions ===
   function configureFlickable() {
-    // Find the internal Flickable (it's usually the first child)
+    // Find the internal Flickable (ScrollView doesn't expose it directly)
     for (var i = 0; i < children.length; i++) {
       var child = children[i]
       if (child.toString().indexOf("Flickable") !== -1) {
-        // Configure the flickable to prevent horizontal scrolling
         child.boundsBehavior = root.boundsBehavior
-        
-        // TODO: Hack, will fix later
-        // Configure faster rebound animation (3x faster)
-        child.flickDeceleration = 15000  // Default is 5000, 3x faster = 15000
-        child.rebound = Qt.createQmlObject('
-          import QtQuick 2.0
-          Transition {
-            NumberAnimation {
-              properties: "x,y"
-              duration: 50
-              easing.type: Easing.OutBounce
-            }
-          }
-        ', child)
+        child.flickDeceleration = 15000  // 3x faster than default 5000
+        child.rebound = fastReboundTransition
 
         if (root.preventHorizontalScroll) {
           child.flickableDirection = Flickable.VerticalFlick
@@ -74,6 +68,7 @@ T.ScrollView {
 
   // === Scrollbars ===
   ScrollBar.vertical: ScrollBar {
+    id: verticalScrollBar
     parent: root
     x: root.mirrored ? 0 : root.width - width
     y: root.topPadding
@@ -82,11 +77,31 @@ T.ScrollView {
     policy: root.verticalPolicy
 
     contentItem: Rectangle {
-      implicitWidth: root.handleWidth
+      id: verticalHandle
+      
+      // Expand on hover (4px → 8px)
+      implicitWidth: verticalScrollBar.hovered || verticalScrollBar.pressed 
+        ? root.handleWidthExpanded 
+        : root.handleWidthNormal
       implicitHeight: 100
-      radius: root.handleRadius
-      color: parent.pressed ? root.handlePressedColor : parent.hovered ? root.handleHoverColor : root.handleColor
-      opacity: parent.policy === ScrollBar.AlwaysOn || parent.active ? 1.0 : 0.0
+      
+      radius: implicitWidth / 2
+      
+      // Color changes on interaction
+      color: verticalScrollBar.pressed 
+        ? root.handlePressedColor 
+        : verticalScrollBar.hovered 
+          ? root.handleHoverColor 
+          : root.handleColor
+      
+      opacity: verticalScrollBar.policy === ScrollBar.AlwaysOn || verticalScrollBar.active ? 1.0 : 0.0
+
+      Behavior on implicitWidth {
+        NumberAnimation {
+          duration: QsCommons.Style.animationFast
+          easing.type: Easing.OutCubic
+        }
+      }
 
       Behavior on opacity {
         NumberAnimation {
@@ -102,11 +117,11 @@ T.ScrollView {
     }
 
     background: Rectangle {
-      implicitWidth: root.handleWidth
+      implicitWidth: root.handleWidthExpanded
       implicitHeight: 100
       color: root.trackColor
-      opacity: parent.policy === ScrollBar.AlwaysOn || parent.active ? 0.3 : 0.0
-      radius: root.handleRadius / 2
+      opacity: verticalScrollBar.policy === ScrollBar.AlwaysOn || verticalScrollBar.active ? 0.2 : 0.0
+      radius: implicitWidth / 2  // Pill-shaped track
 
       Behavior on opacity {
         NumberAnimation {
@@ -117,6 +132,7 @@ T.ScrollView {
   }
 
   ScrollBar.horizontal: ScrollBar {
+    id: horizontalScrollBar
     parent: root
     x: root.leftPadding
     y: root.height - height
@@ -125,11 +141,31 @@ T.ScrollView {
     policy: root.horizontalPolicy
 
     contentItem: Rectangle {
+      id: horizontalHandle
+      
+      // Expand on hover (4px → 8px)
       implicitWidth: 100
-      implicitHeight: root.handleWidth
-      radius: root.handleRadius
-      color: parent.pressed ? root.handlePressedColor : parent.hovered ? root.handleHoverColor : root.handleColor
-      opacity: parent.policy === ScrollBar.AlwaysOn || parent.active ? 1.0 : 0.0
+      implicitHeight: horizontalScrollBar.hovered || horizontalScrollBar.pressed 
+        ? root.handleWidthExpanded 
+        : root.handleWidthNormal
+      
+      radius: implicitHeight / 2
+      
+      // Color changes on interaction
+      color: horizontalScrollBar.pressed 
+        ? root.handlePressedColor 
+        : horizontalScrollBar.hovered 
+          ? root.handleHoverColor 
+          : root.handleColor
+      
+      opacity: horizontalScrollBar.policy === ScrollBar.AlwaysOn || horizontalScrollBar.active ? 1.0 : 0.0
+
+      Behavior on implicitHeight {
+        NumberAnimation {
+          duration: QsCommons.Style.animationFast
+          easing.type: Easing.OutCubic
+        }
+      }
 
       Behavior on opacity {
         NumberAnimation {
@@ -146,10 +182,10 @@ T.ScrollView {
 
     background: Rectangle {
       implicitWidth: 100
-      implicitHeight: root.handleWidth
+      implicitHeight: root.handleWidthExpanded
       color: root.trackColor
-      opacity: parent.policy === ScrollBar.AlwaysOn || parent.active ? 0.3 : 0.0
-      radius: root.handleRadius / 2
+      opacity: horizontalScrollBar.policy === ScrollBar.AlwaysOn || horizontalScrollBar.active ? 0.2 : 0.0
+      radius: implicitHeight / 2  // Pill-shaped track
 
       Behavior on opacity {
         NumberAnimation {

@@ -26,21 +26,15 @@ ColumnLayout {
     Layout.fillWidth: true
     Layout.preferredHeight: headerContent.implicitHeight + (QsCommons.Style.marginS * 2) 
 
-    color: root.expanded ? QsCommons.Color.mSecondary : QsCommons.Color.mSurfaceVariant
-    radius: QsCommons.Style.radiusM 
+    // Use mSurfaceContainer variants for elevation hierarchy
+    color: root.expanded ? QsCommons.Color.mPrimaryContainer : QsCommons.Color.mSurfaceContainer
+    radius: QsCommons.Style.radiusM  // 16px (MD3)
 
-    border.color: root.expanded ? QsCommons.Color.mOnSecondary : QsCommons.Color.mOutline
-    border.width: QsCommons.Style.borderS
+    // No explicit borders - rely on color contrast
+    border.width: 0
 
     // Smooth color transitions
     Behavior on color {
-      ColorAnimation {
-        duration: QsCommons.Style.animationNormal
-        easing.type: Easing.OutCubic
-      }
-    }
-
-    Behavior on border.color {
       ColorAnimation {
         duration: QsCommons.Style.animationNormal
         easing.type: Easing.OutCubic
@@ -58,11 +52,11 @@ ColumnLayout {
         root.toggled(root.expanded)
       }
 
-      // Hover effect overlay
+      // 8% state layer for hover
       Rectangle {
         anchors.fill: parent
-        color: headerArea.containsMouse ? QsCommons.Color.mOnSurface : QsCommons.Color.transparent
-        opacity: headerArea.containsMouse ? 0.08 : 0
+        color: QsCommons.Color.mOnSurface
+        opacity: headerArea.containsMouse ? QsCommons.Style.opacityHover : 0
         radius: headerContainer.radius
 
         Behavior on opacity {
@@ -76,7 +70,7 @@ ColumnLayout {
     RowLayout {
       id: headerContent
       anchors.fill: parent
-      anchors.margins: QsCommons.Style.marginS 
+      anchors.margins: QsCommons.Style.marginS
       spacing: QsCommons.Style.marginM
 
       // Expand/collapse icon with rotation animation
@@ -84,7 +78,7 @@ ColumnLayout {
         id: chevronIcon
         icon: "chevron-right"
         pointSize: QsCommons.Style.fontSizeL
-        color: root.expanded ? QsCommons.Color.mOnSecondary : QsCommons.Color.mOnSurfaceVariant
+        color: root.expanded ? QsCommons.Color.mOnPrimaryContainer : QsCommons.Color.mOnSurfaceVariant
         Layout.alignment: Qt.AlignVCenter
 
         rotation: root.expanded ? 90 : 0
@@ -112,7 +106,7 @@ ColumnLayout {
           text: root.label
           pointSize: QsCommons.Style.fontSizeL
           font.weight: QsCommons.Style.fontWeightSemiBold
-          color: root.expanded ? QsCommons.Color.mOnSecondary : QsCommons.Color.mOnSurface
+          color: root.expanded ? QsCommons.Color.mOnPrimaryContainer : QsCommons.Color.mOnSurface
           wrapMode: Text.WordWrap
 
           Behavior on color {
@@ -126,11 +120,11 @@ ColumnLayout {
           text: root.description
           pointSize: QsCommons.Style.fontSizeS
           font.weight: QsCommons.Style.fontWeightRegular
-          color: root.expanded ? QsCommons.Color.mOnSecondary : QsCommons.Color.mOnSurfaceVariant
+          color: root.expanded ? QsCommons.Color.mOnPrimaryContainer : QsCommons.Color.mOnSurfaceVariant
           Layout.fillWidth: true
           wrapMode: Text.WordWrap
           visible: root.description !== ""
-          opacity: 0.87
+          opacity: QsCommons.Style.opacityHigh
 
           Behavior on color {
             ColorAnimation {
@@ -142,17 +136,20 @@ ColumnLayout {
     }
   }
 
-  // === Collapsible Content ===
+  // === Collapsible Content (MD3 v2.0: No borders, use elevation) ===
   Rectangle {
     id: contentContainer
     Layout.fillWidth: true
-    Layout.topMargin: QsCommons.Style.marginS
+    Layout.topMargin: QsCommons.Style.marginXS
 
     clip: true  // Clip content during collapse animation
-    color: QsCommons.Color.mSurface
-    radius: QsCommons.Style.radiusM
-    border.color: QsCommons.Color.mOutline
-    border.width: QsCommons.Style.borderS
+    
+    // Use mSurfaceContainerLow for lower elevation than header
+    color: QsCommons.Color.mSurfaceContainerLow
+    radius: QsCommons.Style.radiusM  // 16px (MD3)
+    
+    // No explicit borders
+    border.width: 0
 
     // Start with 0 height, will be animated
     Layout.preferredHeight: 0
