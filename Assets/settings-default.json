@@ -68,13 +68,16 @@
     "monitors": []
   },
   "wallpaper": {
+    "enabled": true,
     "directory": "~/Pictures/Wallpapers",
     "defaultWallpaper": "",
-    "fillMode": "crop",
+    "fillMode": "fill",
     "enableMultiMonitorDirectories": false,
     "randomEnabled": false,
     "randomIntervalSec": 300,
-    "monitors": []
+    "monitors": [],
+    "transitionType": "fade",
+    "transitionDuration": 500
   },
   "location": {
     "name": "Tokyo",

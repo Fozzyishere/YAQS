@@ -227,19 +227,59 @@ Singleton {
       property bool showEventIndicators: true   // Show event dots on calendar dates (for future UI)
     }
 
-    // wallpaper
+    // Wallpaper
+
+    // Manages desktop wallpaper display and rotation across monitors.
+    // To change wallpaper, edit the "monitors" array with your screen name and wallpaper path.
+    // Example settings.json:
+    //   "wallpaper": {
+    //     "enabled": true,
+    //     "monitors": [
+    //       { "name": "DP-1", "wallpaper": "/home/user/Pictures/wallpaper.jpg" },
+    //       { "name": "HDMI-A-1", "wallpaper": "/home/user/Pictures/other.png" }
+    //     ]
+    //   }
+    // Run `quickshell -l` or check compositor output to find your screen names.
     property JsonObject wallpaper: JsonObject {
+      // Master toggle - when false, no wallpaper panels are created
+      property bool enabled: true
+
+      // Directory to scan for wallpaper images (used by random rotation and future UI picker)
+      // Supports ~ expansion: "~/Pictures/Wallpapers" → "/home/user/Pictures/Wallpapers"
       property string directory: Settings.defaultWallpapersDirectory
+
+      // Fallback wallpaper when a monitor has no wallpaper set in the monitors array
       property string defaultWallpaper: Quickshell.shellDir + "/Assets/Wallpaper/dark.jpeg"
-      property string fillMode: "crop"  // "center", "crop", "fit", "stretch"
+
+      // How the wallpaper image fills the screen:
+      //   "crop"    - Fill screen, crop edges (default, no letterboxing)
+      //   "fit"     - Fit entire image, may show background color bars
+      //   "stretch" - Stretch to fill (distorts aspect ratio)
+      //   "center"  - Center at original size (may not cover screen)
+      property string fillMode: "center"
+
+      // When true, each monitor can have its own wallpaper directory.
+      // When false, all monitors share the main "directory" setting.
       property bool enableMultiMonitorDirectories: false
+
+      // Automatic wallpaper rotation - picks random wallpaper from directory
       property bool randomEnabled: false
-      property int randomIntervalSec: 300  // 5 minutes (300 seconds)
-      property list<var> monitors: []  // [{name: string, directory: string, wallpaper: string}]
-      
-      // TODO: Add transition settings when implementing animated wallpaper changes
-      // property string transition: "none"  // Insert transition effects heere
-      // property int transitionDuration: 1000  // milliseconds
+      property int randomIntervalSec: 300  // Rotation interval in seconds (300 = 5 minutes)
+
+      // Per-monitor wallpaper configuration. This is where selected wallpapers are stored.
+      // Each object: { "name": "SCREEN_NAME", "directory": "optional/path", "wallpaper": "/full/path/to/image.jpg" }
+      // The "name" must match your monitor's name (e.g., "DP-1", "eDP-1", "HDMI-A-1")
+      // The "directory" is optional and only used when enableMultiMonitorDirectories is true
+      // The "wallpaper" is the full path to the currently selected wallpaper for that monitor
+      property list<var> monitors: []
+
+      // Transition animation when changing wallpapers:
+      //   "none" - Instant switch (no animation)
+      //   "fade" - Crossfade between old and new wallpaper
+      property string transitionType: "fade"
+
+      // Duration of fade transition in milliseconds (ignored when transitionType is "none")
+      property int transitionDuration: 500
     }
 
     // location (weather and geolocation)

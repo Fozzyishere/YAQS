@@ -4,6 +4,7 @@ import Quickshell.Io
 import "Commons" as QsCommons
 import "Services" as QsServices
 import "Modules/Toast" as Toast
+import "Modules/Background" as Background
 
 ShellRoot {
   id: shellRoot
@@ -64,6 +65,9 @@ ShellRoot {
       }
     }
   }
+
+  // === Background Module ===
+  Background.Background {}
 
   // === Toast Overlay ===
   // Displays transient notifications across all screens

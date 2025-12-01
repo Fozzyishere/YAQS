@@ -73,6 +73,11 @@ Singleton {
     function onRandomIntervalSecChanged() {
       root.restartRandomWallpaperTimer()
     }
+
+    // Watch for changes to the monitors array (e.g., when settings.json is edited externally)
+    function onMonitorsChanged() {
+      root._syncWallpapersFromSettings()
+    }
   }
 
   // ========================================
@@ -189,6 +194,26 @@ Singleton {
       // If no screenName specified, change for all screens
       for (var i = 0; i < Quickshell.screens.length; i++) {
         _setWallpaper(Quickshell.screens[i].name, path)
+      }
+    }
+  }
+
+  // Sync wallpapers from settings (called when monitors array changes externally)
+  function _syncWallpapersFromSettings() {
+    var monitors = QsCommons.Settings.data.wallpaper.monitors || []
+    
+    // Check each monitor in settings for changes
+    for (var i = 0; i < monitors.length; i++) {
+      var monitor = monitors[i]
+      if (monitor.name && monitor.wallpaper) {
+        var cachedPath = currentWallpapers[monitor.name] || ""
+        
+        // If wallpaper path changed, update cache and emit signal
+        if (cachedPath !== monitor.wallpaper) {
+          QsCommons.Logger.d("Wallpaper", "External change detected for " + monitor.name + ": " + monitor.wallpaper)
+          currentWallpapers[monitor.name] = monitor.wallpaper
+          root.wallpaperChanged(monitor.name, monitor.wallpaper)
+        }
       }
     }
   }
