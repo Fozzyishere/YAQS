@@ -1,34 +1,28 @@
 {
   "settingsVersion": 1,
-  "setupCompleted": false,
   "general": {
-    "avatarImage": "",
     "scaleRatio": 1,
     "radiusRatio": 1,
     "animationSpeed": 1,
-    "animationDisabled": false,
-    "language": "en"
+    "animationDisabled": false
   },
   "bar": {
     "position": "top",
-    "backgroundOpacity": 1,
     "monitors": [],
     "density": "default",
     "floating": false,
     "marginVertical": 0.25,
-    "marginHorizontal": 0.25,
-    "widgets": {
-      "left": [],
-      "center": [],
-      "right": []
-    }
+    "marginHorizontal": 0.25
   },
   "colorSchemes": {
     "useWallpaperColors": false,
     "predefinedScheme": "Gruvbox",
     "darkMode": true,
     "generateTemplatesForPredefined": false,
-    "matugenSchemeType": "scheme-fruit-salad"
+    "matugenSchemeType": "scheme-fruit-salad",
+    "schedulingMode": "manual",
+    "manualSunrise": "06:00",
+    "manualSunset": "18:00"
   },
   "templates": {
     "gtk": false,
@@ -57,6 +51,21 @@
     "tooltipsEnabled": true,
     "panelsOverlayLayer": true
   },
+  "audio": {
+    "volumeStep": 5,
+    "volumeOverdrive": false,
+    "mprisBlacklist": [],
+    "preferredPlayer": ""
+  },
+  "brightness": {
+    "step": 5
+  },
+  "network": {
+    "wifiEnabled": true
+  },
+  "appLauncher": {
+    "enableClipboardHistory": false
+  },
   "notifications": {
     "doNotDisturb": false,
     "respectExpireTimeout": true,
@@ -66,6 +75,19 @@
     "location": "top_right",
     "overlayLayer": false,
     "monitors": []
+  },
+  "osd": {
+    "enabled": true,
+    "location": "bottom",
+    "monitors": [],
+    "overlayLayer": false,
+    "autoHideMs": 2000
+  },
+  "calendar": {
+    "enabled": true,
+    "autoRefresh": true,
+    "daysAhead": 31,
+    "daysBehind": 14
   },
   "wallpaper": {
     "enabled": true,
@@ -81,24 +103,6 @@
   },
   "location": {
     "name": "Tokyo",
-    "weatherEnabled": true,
-    "useFahrenheit": false,
-    "use12hourFormat": false,
-    "showWeekNumberInCalendar": false,
-    "showCalendarEvents": true
-  },
-  "audio": {
-    "volumeStep": 5,
-    "volumeOverdrive": false
-  },
-  "brightness": {
-    "step": 5
-  },
-  "osd": {
-    "enabled": true,
-    "location": "top_right",
-    "monitors": [],
-    "overlayLayer": false,
-    "autoHideMs": 2000
+    "weatherEnabled": true
   }
 }

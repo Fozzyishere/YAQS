@@ -26,8 +26,6 @@ Singleton {
   property string settingsFile: Quickshell.env("YAQS_SETTINGS_FILE") || (configDir + "settings.json")
 
   property string defaultLocation: "Tokyo"
-  property string defaultAvatar: Quickshell.env("HOME") + "/.face"
-  property string defaultVideosDirectory: Quickshell.env("HOME") + "/Videos"
   property string defaultWallpapersDirectory: Quickshell.env("HOME") + "/Pictures/Wallpapers"
 
   // Signal emitted when settings are loaded
@@ -46,9 +44,6 @@ Singleton {
 
     // Mark directories as created and trigger file loading
     directoriesCreated = true
-
-    // Patch-in the local default, resolved to user's home
-    adapter.general.avatarImage = defaultAvatar
 
     // Set the adapter to the settingsFileView to trigger the real settings load
     settingsFileView.adapter = adapter
@@ -105,35 +100,23 @@ Singleton {
     id: adapter
 
     property int settingsVersion: root.settingsVersion
-    property bool setupCompleted: false
 
     // general
     property JsonObject general: JsonObject {
-      property string avatarImage: ""
       property real scaleRatio: 1.0
       property real radiusRatio: 1.0
       property real animationSpeed: 1.0
       property bool animationDisabled: false
-      property string language: "en"
     }
 
     // bar
     property JsonObject bar: JsonObject {
       property string position: "top" // "top", "bottom", "left", or "right"
-      property real backgroundOpacity: 1.0
       property list<string> monitors: []
       property string density: "default" // "compact", "default", "comfortable"
       property bool floating: false
       property real marginVertical: 0.25
       property real marginHorizontal: 0.25
-
-      // Widget configuration for modular bar system
-      property JsonObject widgets
-      widgets: JsonObject {
-        property list<var> left: []
-        property list<var> center: []
-        property list<var> right: []
-      }
     }
 
     // colorSchemes
@@ -229,11 +212,8 @@ Singleton {
     property JsonObject calendar: JsonObject {
       property bool enabled: true
       property bool autoRefresh: true
-      property int refreshInterval: 300000      // 5 minutes in milliseconds
-      property int daysAhead: 31                // Days to load ahead
-      property int daysBehind: 14               // Days to load behind
-      property bool showInControlCenter: true   // Show calendar in control center
-      property bool showEventIndicators: true   // Show event dots on calendar dates (for future UI)
+      property int daysAhead: 31    // Days to load ahead
+      property int daysBehind: 14   // Days to load behind
     }
 
     // Wallpaper
@@ -295,10 +275,6 @@ Singleton {
     property JsonObject location: JsonObject {
       property string name: Settings.defaultLocation
       property bool weatherEnabled: true
-      property bool useFahrenheit: false
-      property bool use12hourFormat: false
-      property bool showWeekNumberInCalendar: false
-      property bool showCalendarEvents: true
     }
   }
 
