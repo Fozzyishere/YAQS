@@ -4,6 +4,7 @@ import Quickshell.Io
 import "Commons" as QsCommons
 import "Services" as QsServices
 import "Modules/Toast" as Toast
+import "Modules/OSD" as OSD
 import "Modules/Background" as Background
 
 ShellRoot {
@@ -72,4 +73,8 @@ ShellRoot {
   // === Toast Overlay ===
   // Displays transient notifications across all screens
   Toast.ToastOverlay {}
+
+  // === OSD Overlay ===
+  // Displays volume/brightness/microphone feedback across all screens
+  OSD.OSD {}
 }

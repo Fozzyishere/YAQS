@@ -216,6 +216,15 @@ Singleton {
       property list<string> monitors: []     // Empty = all monitors
     }
 
+    // osd (on-screen display for volume/brightness)
+    property JsonObject osd: JsonObject {
+      property bool enabled: true
+      property string location: "bottom"  // "top", "top_right", "top_left", "bottom", "bottom_right", "bottom_left", "left", "right"
+      property list<string> monitors: []     // Empty = all monitors
+      property bool overlayLayer: false      // Use Overlay layer vs Top layer
+      property int autoHideMs: 2000          // Auto-hide delay in milliseconds
+    }
+
     // calendar
     property JsonObject calendar: JsonObject {
       property bool enabled: true

@@ -86,5 +86,19 @@
     "use12hourFormat": false,
     "showWeekNumberInCalendar": false,
     "showCalendarEvents": true
+  },
+  "audio": {
+    "volumeStep": 5,
+    "volumeOverdrive": false
+  },
+  "brightness": {
+    "step": 5
+  },
+  "osd": {
+    "enabled": true,
+    "location": "top_right",
+    "monitors": [],
+    "overlayLayer": false,
+    "autoHideMs": 2000
   }
 }

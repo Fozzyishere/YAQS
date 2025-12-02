@@ -74,9 +74,8 @@ Singleton {
     }
 
     function onMutedChanged() {
-        root._muted = (sink?.audio.muted ?? true);
-        QsCommons.Logger.i("AudioService", "OnMuteChanged:", root._muted);
-        QsServices.NotificationService.showNotice("Audio Output", root._muted ? "Muted" : "Unmuted");
+        root._muted = (sink?.audio.muted ?? true)
+        QsCommons.Logger.d("AudioService", "OnMuteChanged:", root._muted)
     }
   }
 
@@ -92,9 +91,8 @@ Singleton {
     }
 
     function onInputMutedChanged() {
-        root._inputMuted = (source?.audio.muted ?? true);
-        QsCommons.Logger.i("AudioService", "OnInputMutedChanged:", root._inputMuted);
-        QsServices.NotificationService.showNotice("Audio Input", root._inputMuted ? "Muted" : "Unmuted");
+        root._inputMuted = (source?.audio.muted ?? true)
+        QsCommons.Logger.d("AudioService", "OnInputMutedChanged:", root._inputMuted)
     }
   }
 
