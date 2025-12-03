@@ -191,24 +191,111 @@ Variants {
         border.width: Math.max(2, QsCommons.Style.borderM)
         visible: false
         opacity: 0
-        scale: 0.85
+        scale: 0.92
 
+        // === Slide Animation Properties ===
+        // Slide distance based on UI scale
+        property real slideOffset: 30 * QsCommons.Style.uiScaleRatio
+
+        // === Slide Direction ===
+        // Calculate initial slide offset based on OSD location:
+        // - Top positions: slide down from above (negative Y -> 0)
+        // - Bottom positions: slide up from below (positive Y -> 0)
+        // - Left position: slide in from left (negative X -> 0)
+        // - Right position: slide in from right (positive X -> 0)
+        function getInitialSlideX() {
+          // Only pure left/right positions slide horizontally
+          if (panel.location === "left") return -slideOffset
+          if (panel.location === "right") return slideOffset
+          return 0
+        }
+
+        function getInitialSlideY() {
+          // Top positions slide from above, bottom positions slide from below
+          if (panel.isTop) return -slideOffset
+          if (panel.isBottom) return slideOffset
+          return 0
+        }
+
+        // === Slide Transform ===
+        transform: Translate {
+          id: slideTransform
+          x: osdItem.getInitialSlideX()
+          y: osdItem.getInitialSlideY()
+        }
+
+        // === OSD Item Anchoring ===
+        // Horizontal positioning based on location:
+        // - Centered positions (top, bottom): use horizontalCenter
+        // - Left positions (top_left, bottom_left): anchor to left
+        // - Right positions (top_right, bottom_right): anchor to right
+        // - Vertical mode (left, right): no horizontal anchor needed (fills width)
         anchors.horizontalCenter: (!panel.verticalMode && panel.isCentered) 
           ? parent.horizontalCenter : undefined
+        anchors.left: (!panel.verticalMode && panel.isLeft && !panel.isCentered) 
+          ? parent.left : undefined
+        anchors.right: (!panel.verticalMode && panel.isRight && !panel.isCentered) 
+          ? parent.right : undefined
+        // Vertical positioning for vertical mode (left/right edge positions)
         anchors.verticalCenter: panel.verticalMode ? parent.verticalCenter : undefined
 
         // === Animations ===
         Behavior on opacity {
           NumberAnimation {
             duration: QsCommons.Style.animationNormal
-            easing.type: Easing.InOutQuad
+            easing.type: Easing.OutCubic
           }
         }
 
         Behavior on scale {
           NumberAnimation {
+            duration: QsCommons.Style.animationSlow
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.2
+          }
+        }
+
+        // === Slide-In Animation ===
+        ParallelAnimation {
+          id: slideInAnimation
+
+          NumberAnimation {
+            target: slideTransform
+            property: "x"
+            to: 0
+            duration: QsCommons.Style.animationSlow
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.0
+          }
+
+          NumberAnimation {
+            target: slideTransform
+            property: "y"
+            to: 0
+            duration: QsCommons.Style.animationSlow
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.0
+          }
+        }
+
+        // === Slide-Out Animation ===
+        ParallelAnimation {
+          id: slideOutAnimation
+
+          NumberAnimation {
+            target: slideTransform
+            property: "x"
+            to: osdItem.getInitialSlideX()
             duration: QsCommons.Style.animationNormal
-            easing.type: Easing.InOutQuad
+            easing.type: Easing.InCubic
+          }
+
+          NumberAnimation {
+            target: slideTransform
+            property: "y"
+            to: osdItem.getInitialSlideY()
+            duration: QsCommons.Style.animationNormal
+            easing.type: Easing.InCubic
           }
         }
 
@@ -221,9 +308,13 @@ Variants {
 
         Timer {
           id: visibilityTimer
-          interval: QsCommons.Style.animationNormal + 50
+          // Use animationSlow to match the longest hide animation duration
+          interval: QsCommons.Style.animationSlow + 50
           onTriggered: {
             osdItem.visible = false
+            // Reset slide offset for next show
+            slideTransform.x = osdItem.getInitialSlideX()
+            slideTransform.y = osdItem.getInitialSlideY()
             root.currentOSDType = ""
             root.active = false
           }
@@ -388,10 +479,12 @@ Variants {
         function show() {
           hideTimer.stop()
           visibilityTimer.stop()
+          slideOutAnimation.stop()
           visible = true
           Qt.callLater(() => {
             opacity = 1
             scale = 1.0
+            slideInAnimation.start()
           })
           hideTimer.start()
         }
@@ -399,16 +492,23 @@ Variants {
         function hide() {
           hideTimer.stop()
           visibilityTimer.stop()
+          slideInAnimation.stop()
           opacity = 0
-          scale = 0.85
+          scale = 0.92
+          slideOutAnimation.start()
           visibilityTimer.start()
         }
 
         function hideImmediately() {
           hideTimer.stop()
           visibilityTimer.stop()
+          slideInAnimation.stop()
+          slideOutAnimation.stop()
           opacity = 0
-          scale = 0.85
+          scale = 0.92
+          // Reset slide offset immediately
+          slideTransform.x = getInitialSlideX()
+          slideTransform.y = getInitialSlideY()
           visible = false
           root.currentOSDType = ""
           root.active = false
