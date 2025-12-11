@@ -22,7 +22,7 @@ Text {
   // === Appearance ===
   font.family: root.family
   font.weight: QsCommons.Style.fontWeightMedium
-  font.pointSize: root.pointSize * fontScale
+  font.pointSize: Math.max(1, root.pointSize * fontScale)
   color: QsCommons.Color.mOnSurface
   elide: Text.ElideRight
   wrapMode: Text.NoWrap

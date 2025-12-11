@@ -68,9 +68,20 @@ Singleton {
 
     // === Main Handler ===
     function handleNotification(notification) {
+        // Skip re-processing notifications from last generation
+        if (notification.lastGeneration) {
+            QsCommons.Logger.d("Notifications", "Skipping lastGeneration notification:", notification.summary);
+            return;
+        }
+        
         QsCommons.Logger.d("Notifications", "Received notification:", notification.summary);
         const data = createData(notification);
-        addToHistory(data);
+        
+        // Per freedesktop spec: transient notifications skip persistence
+        if (!notification.transient) {
+            addToHistory(data);
+        }
+        
         if (QsCommons.Settings.data.notifications && QsCommons.Settings.data.notifications.doNotDisturb)
             return ;
 
@@ -138,7 +149,11 @@ Singleton {
                     "text": a.text || "Action",
                     "identifier": a.identifier || ""
                 });
-            }))
+            })),
+            "hasInlineReply": n.hasInlineReply ?? false,
+            "inlineReplyPlaceholder": n.inlineReplyPlaceholder ?? "",
+            "transient": n.transient ?? false,
+            "resident": n.resident ?? false
         };
     }
 
@@ -450,10 +465,26 @@ Singleton {
         for (const action of n.actions) {
             if (action.identifier === actionId && action.invoke) {
                 action.invoke();
+                // resident notifications persist after action
+                if (!n.resident) {
+                    animateAndRemove(id);
+                }
                 return true;
             }
         }
         return false;
+    }
+
+    // Send inline reply for notifications that support it
+    function sendInlineReply(id, replyText) {
+        const n = activeMap[id];
+        if (n && n.hasInlineReply) {
+            n.sendInlineReply(replyText);
+            // typically dismiss after sending reply unless resident
+            if (!n.resident) {
+                animateAndRemove(id);
+            }
+        }
     }
 
     function removeFromHistory(notificationId) {
@@ -539,6 +570,7 @@ Singleton {
         keepOnReload: false
         imageSupported: true
         actionsSupported: true
+        inlineReplySupported: true  // Enable inline reply support
         onNotification: (notification) => {
             return handleNotification(notification);
         }

@@ -25,7 +25,7 @@ Text {
     return QsCommons.Icons.get(icon)
   }
   font.family: QsCommons.Icons.fontFamily
-  font.pointSize: shouldApplyUiScale ? root.pointSize * QsCommons.Style.uiScaleRatio : root.pointSize
+  font.pointSize: Math.max(1, shouldApplyUiScale ? root.pointSize * QsCommons.Style.uiScaleRatio : root.pointSize)
   color: QsCommons.Color.mOnSurface
   verticalAlignment: Text.AlignVCenter
 }

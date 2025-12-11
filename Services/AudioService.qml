@@ -90,7 +90,7 @@ Singleton {
       root._inputVolume = vol
     }
 
-    function onInputMutedChanged() {
+    function onMutedChanged() {
         root._inputMuted = (source?.audio.muted ?? true)
         QsCommons.Logger.d("AudioService", "OnInputMutedChanged:", root._inputMuted)
     }

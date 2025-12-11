@@ -6,6 +6,7 @@ import "Services" as QsServices
 import "Modules/Toast" as Toast
 import "Modules/OSD" as OSD
 import "Modules/Background" as Background
+import "Modules/Notification" as Notification
 
 ShellRoot {
   id: shellRoot
@@ -69,6 +70,10 @@ ShellRoot {
 
   // === Background Module ===
   Background.Background {}
+
+  // === Notification Overlay ===
+  // Displays active notification cards with swipe-to-dismiss
+  Notification.Notification {}
 
   // === Toast Overlay ===
   // Displays transient notifications across all screens
