@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import "../../Commons" as QsCommons
@@ -10,33 +9,110 @@ Item {
 
   required property ShellScreen screen
 
-  // === Toast List Model Reference ===
-  property ListModel toastModel: QsServices.ToastService.toastList
+  // === Local Queue (bounded to prevent memory issues) ===
+  property var messageQueue: []
+  property int maxQueueSize: 10
+  property bool isShowingToast: false
 
-  // === Loader Active State ===
-  // Active when there are toasts OR delay timer is running (for exit animations)
-  property bool hasToasts: toastModel.count > 0
-
-  // Keep loader active briefly after last toast to allow animations to complete
-  Timer {
-    id: delayTimer
-    interval: QsCommons.Style.animationSlow + 100
-    repeat: false
-  }
-
+  // === ToastService Connection ===
   Connections {
-    target: toastModel
-    function onCountChanged() {
-      if (toastModel.count === 0 && windowLoader.active) {
-        delayTimer.restart()
-      }
+    target: QsServices.ToastService
+
+    function onNotify(message, description, type, duration) {
+      root.enqueueToast({
+        "message": message,
+        "description": description,
+        "type": type,
+        "duration": duration
+      })
     }
   }
 
-  // === Loader Pattern (Memory Efficient) ===
+  // === Cleanup on Destruction ===
+  Component.onDestruction: {
+    messageQueue = []
+    isShowingToast = false
+    hideTimer.stop()
+    quickSwitchTimer.stop()
+  }
+
+  // === Queue Logic ===
+  function enqueueToast(toastData) {
+    QsCommons.Logger.i("ToastScreen", "Queuing", toastData.type + ":", toastData.message)
+
+    // Bounded queue to prevent unbounded memory growth
+    if (messageQueue.length >= maxQueueSize) {
+      QsCommons.Logger.i("ToastScreen", "Queue full, dropping oldest toast")
+      messageQueue.shift()
+    }
+
+    // Replace mode: clear queue and show new toast immediately
+    messageQueue = []
+    messageQueue.push(toastData)
+
+    if (isShowingToast) {
+      // Hide current toast immediately
+      if (windowLoader.item) {
+        hideTimer.stop()
+        windowLoader.item.hideToast()
+      }
+      isShowingToast = false
+      quickSwitchTimer.restart()
+    } else {
+      processQueue()
+    }
+  }
+
+  Timer {
+    id: quickSwitchTimer
+    interval: 50  // Brief delay for smooth transition
+    onTriggered: root.processQueue()
+  }
+
+  function processQueue() {
+    if (messageQueue.length === 0 || isShowingToast) return
+
+    var data = messageQueue.shift()
+    isShowingToast = true
+
+    // Store toast data for when loader is ready
+    windowLoader.pendingToast = data
+
+    // Activate the loader
+    windowLoader.active = true
+  }
+
+  function onToastHidden() {
+    isShowingToast = false
+
+    // Deactivate loader to free memory
+    windowLoader.active = false
+
+    // Small delay before processing next toast
+    hideTimer.restart()
+  }
+
+  Timer {
+    id: hideTimer
+    interval: 200
+    onTriggered: root.processQueue()
+  }
+
+  // === Loader Pattern ===
   Loader {
     id: windowLoader
-    active: root.hasToasts || delayTimer.running
+    active: false
+
+    // Store pending toast data
+    property var pendingToast: null
+
+    onStatusChanged: {
+      if (status === Loader.Ready && pendingToast !== null) {
+        item.showToast(pendingToast.message, pendingToast.description,
+                       pendingToast.type, pendingToast.duration)
+        pendingToast = null
+      }
+    }
 
     sourceComponent: PanelWindow {
       id: panel
@@ -60,7 +136,7 @@ Item {
         if (!anchors.top) return 0
         var base = QsCommons.Style.marginM
         if (QsCommons.Settings.data.bar.position === "top") {
-          var floatExtra = QsCommons.Settings.data.bar.floating 
+          var floatExtra = QsCommons.Settings.data.bar.floating
             ? QsCommons.Settings.data.bar.marginVertical * QsCommons.Style.marginXL : 0
           return QsCommons.Style.barHeight + base + floatExtra
         }
@@ -71,7 +147,7 @@ Item {
         if (!anchors.bottom) return 0
         var base = QsCommons.Style.marginM
         if (QsCommons.Settings.data.bar.position === "bottom") {
-          var floatExtra = QsCommons.Settings.data.bar.floating 
+          var floatExtra = QsCommons.Settings.data.bar.floating
             ? QsCommons.Settings.data.bar.marginVertical * QsCommons.Style.marginXL : 0
           return QsCommons.Style.barHeight + base + floatExtra
         }
@@ -82,7 +158,7 @@ Item {
         if (!anchors.left) return 0
         var base = QsCommons.Style.marginM
         if (QsCommons.Settings.data.bar.position === "left") {
-          var floatExtra = QsCommons.Settings.data.bar.floating 
+          var floatExtra = QsCommons.Settings.data.bar.floating
             ? QsCommons.Settings.data.bar.marginHorizontal * QsCommons.Style.marginXL : 0
           return QsCommons.Style.barHeight + base + floatExtra
         }
@@ -93,7 +169,7 @@ Item {
         if (!anchors.right) return 0
         var base = QsCommons.Style.marginM
         if (QsCommons.Settings.data.bar.position === "right") {
-          var floatExtra = QsCommons.Settings.data.bar.floating 
+          var floatExtra = QsCommons.Settings.data.bar.floating
             ? QsCommons.Settings.data.bar.marginHorizontal * QsCommons.Style.marginXL : 0
           return QsCommons.Style.barHeight + base + floatExtra
         }
@@ -101,57 +177,27 @@ Item {
       }
 
       implicitWidth: Math.round(420 * QsCommons.Style.uiScaleRatio)
-      implicitHeight: toastStack.implicitHeight
+      implicitHeight: toastItem.height
       color: QsCommons.Color.transparent
 
       // === Layer Shell Configuration ===
-      WlrLayershell.layer: QsCommons.Settings.data.notifications?.overlayLayer 
+      WlrLayershell.layer: QsCommons.Settings.data.notifications?.overlayLayer
         ? WlrLayer.Overlay : WlrLayer.Top
       WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
       exclusionMode: PanelWindow.ExclusionMode.Ignore
 
-      // === Toast Stack Container ===
-      ColumnLayout {
-        id: toastStack
-        anchors.top: panel.isTop ? parent.top : undefined
-        anchors.bottom: panel.isBottom ? parent.bottom : undefined
-        anchors.left: panel.isLeft ? parent.left : undefined
-        anchors.right: panel.isRight ? parent.right : undefined
-        anchors.horizontalCenter: panel.isCentered ? parent.horizontalCenter : undefined
-        spacing: QsCommons.Style.marginS
-        width: parent.width
+      function showToast(message, description, type, duration) {
+        toastItem.show(message, description, type, duration)
+      }
 
-        // Animate height changes smoothly
-        Behavior on implicitHeight {
-          enabled: !QsCommons.Settings.data.general?.animationDisabled
-          NumberAnimation {
-            duration: QsCommons.Style.animationNormal
-            easing.type: Easing.OutCubic
-          }
-        }
+      function hideToast() {
+        toastItem.hideImmediately()
+      }
 
-        // === Stacked Toasts (oldest at top, newest at bottom) ===
-        Repeater {
-          model: root.toastModel
-
-          delegate: SimpleToast {
-            required property int index
-            required property string toastId
-            required property string message
-            required property string description
-            required property string type
-
-            Layout.fillWidth: true
-            Layout.preferredHeight: implicitHeight
-
-            toastIndex: index
-            toastMessage: message
-            toastDescription: description
-            toastType: type
-
-            onDismissRequested: QsServices.ToastService.dismissToast(toastId)
-          }
-        }
+      SimpleToast {
+        id: toastItem
+        anchors.horizontalCenter: parent.horizontalCenter
+        onHidden: root.onToastHidden()
       }
     }
   }
